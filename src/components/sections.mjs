@@ -39,7 +39,13 @@ export const hero = (c) => {
           <a class="link-arrow" href="${h.secondary.href}">${h.secondary.label}</a>
         </div>
         <div class="hero-proof">
-          <span class="quote-stars" style="margin:0" aria-label="4,9 de 5 estrelas">${icon.star().repeat(5)}</span>
+          ${
+            c.key === "voce"
+              ? `<span class="quote-stars" style="margin:0" aria-label="4,9 de 5 estrelas">${icon.star().repeat(5)}</span>`
+              : `<span class="icon-tile" style="width:34px;height:34px;border-radius:10px" aria-hidden="true">${
+                  c.key === "nutri" ? icon.clipboard() : icon.building()
+                }</span>`
+          }
           <p class="hero-proof-text">${proof}</p>
         </div>
       </div>
