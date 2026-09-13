@@ -27,15 +27,15 @@ export const hero = (c) => {
   const h = c.hero;
   const proof = h.proof.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   return `
-<section class="hero hero-nu" id="topo">
+<section class="hero hero-nu hero-${c.key}" id="topo">
   <div class="container">
-    <div style="margin-bottom:clamp(1.75rem,1rem+2vw,2.75rem)">${audienceSwitch(c.key)}</div>
+    <div style="margin-bottom:clamp(1.75rem,1rem+2vw,2.75rem)">${audienceSwitch(c.key, c.key === "academia")}</div>
     <div class="hero-grid">
       <div class="hero-copy">
         <h1 class="display-1">${renderTitle(h.title)}</h1>
         <p class="lead">${h.lead}</p>
         <div class="hero-cta">
-          <a class="btn btn-primary btn-lg" href="${h.primary.href}">${h.primary.label}</a>
+          <a class="btn ${c.key === "academia" ? "btn-light" : "btn-primary"} btn-lg" href="${h.primary.href}">${h.primary.label}</a>
           <a class="link-arrow" href="${h.secondary.href}">${h.secondary.label}</a>
         </div>
         <div class="hero-proof">
@@ -130,6 +130,37 @@ export const appBand = () => `
   </div>
 </section>`;
 
+/* ---------- Banda comercial (B2B) ---------- */
+export const salesBand = () => `
+<section class="section app-band">
+  <div class="container">
+    <div class="app-grid">
+      <div>
+        <h2 style="max-width:17ch">Vamos fazer a conta com os seus números.</h2>
+        <p class="lead measure-sm" style="margin-top:1rem">Em 20 minutos a gente projeta receita adicional e retenção a partir da base real da sua unidade. Sem compromisso e sem apresentação de 40 slides.</p>
+        <div class="cluster" style="margin-top:1.75rem">
+          <a class="btn btn-primary btn-lg" href="checkout.html?seg=academia&amp;plan=academia">Falar com vendas</a>
+          <a class="link-arrow" href="#planos">Ver os planos</a>
+        </div>
+      </div>
+      <div class="sales-facts">
+        ${[
+          ["users", "Implantação assistida", "Um especialista acompanha o seu primeiro mês, do CSV ao primeiro relatório."],
+          ["gear", "Integra com o que você já usa", "Tecnofit, Pacto, EVO, Next Fit e W12 — ou pela nossa API."],
+          ["receipt", "Uma nota fiscal por mês", "Faturamento consolidado para a rede, com rateio por unidade."]
+        ]
+          .map(
+            (f) => `<div class="sales-fact">
+          <span class="icon-tile" aria-hidden="true">${icon[f[0]]()}</span>
+          <span><b>${f[1]}</b><span>${f[2]}</span></span>
+        </div>`
+          )
+          .join("")}
+      </div>
+    </div>
+  </div>
+</section>`;
+
 /* ---------- Reconhecimento ---------- */
 export const awards = () => `
 <div class="awards-strip">
@@ -211,12 +242,17 @@ export const steps = (list, head) => `
 /* ---------- Showcases ----------
    Cada linha ganha o seu próprio fundo: claro, cor da marca, menta.
    É assim que o Nubank mantém a cor presente ao longo da página. */
-const SHOWCASE_SKIN = ["is-light", "is-deep", "is-mint"];
+const SHOWCASE_SKINS = {
+  voce: ["is-light", "is-deep", "is-mint"],
+  nutri: ["is-mint", "is-light", "is-deep"],
+  academia: ["is-light", "is-mint", "is-deep"]
+};
 
-export const showcases = (list) =>
+export const showcases = (list, segKey = "voce") =>
   list
     .map((s, i) => {
-      const skin = SHOWCASE_SKIN[i % SHOWCASE_SKIN.length];
+      const skins = SHOWCASE_SKINS[segKey] || SHOWCASE_SKINS.voce;
+      const skin = skins[i % skins.length];
       const deep = skin === "is-deep";
       return `
 <section class="section showcase-section ${skin}"${i === 0 ? ' id="recursos"' : ""}>

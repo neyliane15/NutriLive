@@ -2,7 +2,7 @@ import { shell } from "./shell.mjs";
 import { header } from "../components/header.mjs";
 import { footer } from "../components/footer.mjs";
 import {
-  hero, tiles, band, appBand, paystrip, stats, steps, showcases,
+  hero, tiles, band, appBand, salesBand, paystrip, stats, steps, showcases,
   features, pricing, trust, testimonials, faq, crossSell, finalCta, stickyCta
 } from "../components/sections.mjs";
 import { site } from "../data/site.mjs";
@@ -72,13 +72,16 @@ export const landing = (c) => {
     jsonLd: jsonLd(c),
     ogImage: `assets/img/og-${c.key}.jpg`,
     scripts: ["qr", "main"],
+    bodyClass: `seg-${c.key}`,
     body: `
-${header({ current: c.key, cta: { label: "Assinar", href: `checkout.html?seg=${c.key}&plan=${featured.planKey}` } })}
+${header({ current: c.key, cta: { label: c.key === "academia" ? "Falar com vendas" : "Assinar", href: `checkout.html?seg=${c.key}&plan=${featured.planKey}` } })}
 <main id="conteudo">
   ${hero(c)}
-  ${tiles(c)}
+  ${
+    c.key === "voce"
+      ? `${tiles(c)}
   ${paystrip()}
-  ${showcases(c.showcases)}
+  ${showcases(c.showcases, c.key)}
   ${band(c)}
   ${steps(c.steps, h.steps)}
   ${features(c.features, h.features)}
@@ -87,7 +90,32 @@ ${header({ current: c.key, cta: { label: "Assinar", href: `checkout.html?seg=${c
   ${testimonials(c.testimonials, h.testimonials)}
   ${trust()}
   ${faq(c.faq, c.key)}
-  ${appBand()}
+  ${appBand()}`
+      : c.key === "nutri"
+      ? `${tiles(c)}
+  ${stats(c.stats)}
+  ${showcases(c.showcases, c.key)}
+  ${steps(c.steps, h.steps)}
+  ${band(c)}
+  ${features(c.features, h.features)}
+  ${testimonials(c.testimonials, h.testimonials)}
+  ${pricing(c)}
+  ${paystrip()}
+  ${trust()}
+  ${faq(c.faq, c.key)}
+  ${appBand()}`
+      : `${stats(c.stats)}
+  ${tiles(c)}
+  ${showcases(c.showcases, c.key)}
+  ${band(c)}
+  ${features(c.features, h.features)}
+  ${testimonials(c.testimonials, h.testimonials)}
+  ${pricing(c)}
+  ${paystrip()}
+  ${trust()}
+  ${faq(c.faq, c.key)}
+  ${salesBand()}`
+  }
   ${crossSell(c.key)}
   ${finalCta(c)}
 </main>

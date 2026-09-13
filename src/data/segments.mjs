@@ -194,7 +194,7 @@ export const content = {
       badge: "Feito com nutricionistas, para nutricionistas",
       title: ["Mais tempo com o paciente.", { hl: "Menos tempo" }, "na planilha."],
       lead:
-        "Monte o plano em minutos, veja quem está seguindo em tempo real e apareça no celular do paciente com o seu nome. Sem CRM, sem PDF perdido no WhatsApp.",
+        "Monte o plano em minutos, veja quem está seguindo em tempo real e apareça no celular do paciente com o seu nome. Sem sistema pela metade, sem PDF perdido no WhatsApp.",
       bullets: [
         "Plano alimentar completo em 4 minutos, com a sua assinatura clínica",
         "Painel de adesão: quem registrou, quem sumiu, quem precisa de você",

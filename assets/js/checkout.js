@@ -428,7 +428,7 @@
     var n = b ? b.cvv : 4;
     var cvv = $("#" + prefix + "-cvv");
     cvv.setAttribute("maxlength", String(n));
-    cvv.setAttribute("placeholder", n === 4 ? "0000" : "CVV");
+    cvv.setAttribute("placeholder", b && b.cvv === 4 ? "0000" : "CVV");
     if (digits(cvv.value).length > n) cvv.value = digits(cvv.value).slice(0, n);
   }
 

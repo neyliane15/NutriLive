@@ -606,3 +606,38 @@
 .cta-recap .btn { background: var(--lime-300); color: var(--leaf-900); box-shadow: none; }
 .cta-recap .btn:hover { background: #B9E477; }
 .cta-recap .btn:active { background: var(--lime-400); }
+
+/* =========================================================================
+   Cada público com a sua própria abertura
+   ========================================================================= */
+
+/* Pessoa física — fundo claro e leve */
+.hero-voce { background: linear-gradient(180deg, var(--white) 0%, var(--leaf-50) 100%); }
+
+/* Nutricionista — fundo menta, mais sóbrio */
+.hero-nutri { background: linear-gradient(170deg, var(--leaf-100) 0%, var(--leaf-50) 62%, var(--white) 100%); }
+.hero-nutri .display-1 { max-width: 15ch; }
+
+/* Academia — abertura escura, tom corporativo */
+.hero-academia {
+  background: linear-gradient(150deg, var(--leaf-700) 0%, var(--leaf-900) 60%, var(--leaf-950) 100%);
+  color: var(--text-on-deep);
+  padding-block: clamp(2.5rem,1.4rem+3.4vw,4.5rem) clamp(3rem,2rem+4vw,5.5rem);
+}
+.hero-academia .display-1 { color: var(--white); max-width: 15ch; }
+.hero-academia .lead { color: var(--text-on-deep-muted); }
+.hero-academia .hero-proof-text { color: var(--text-on-deep-muted); }
+.hero-academia .hero-proof-text strong { color: var(--white); }
+.hero-academia .icon-tile { background: rgba(169,221,92,.16); color: var(--lime-300); }
+.hero-academia .link-arrow { color: var(--lime-300); }
+.hero-academia .hl { background: none; color: var(--lime-300); padding-inline: 0; }
+.hero-academia .hero-stage-glow { background: radial-gradient(circle, rgba(169,221,92,.16) 0%, transparent 66%); }
+.hero-academia :focus-visible { outline-color: var(--lime-300); }
+/* Depois de um hero escuro, a faixa de números segue clara e curta */
+.seg-academia .hero-academia + .section { background: var(--white); }
+
+/* Banda comercial B2B */
+.sales-facts { display: grid; gap: var(--sp-4); max-width: 24rem; }
+.sales-fact { display: flex; gap: var(--sp-3); align-items: flex-start; }
+.sales-fact b { display: block; font-size: var(--fs-sm); font-weight: var(--fw-bold); letter-spacing: -0.012em; }
+.sales-fact span span { display: block; font-size: var(--fs-xs); color: var(--text-muted); margin-top: 2px; line-height: 1.5; }

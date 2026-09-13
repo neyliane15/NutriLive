@@ -440,8 +440,10 @@ const checkoutPage = () =>
                   (m, i) => `<button class="pm-tab" type="button" role="tab" id="tab-${m.key}"
                 aria-selected="${i === 0}" aria-controls="pm-${m.key}" data-pm="${m.key}" tabindex="${i === 0 ? 0 : -1}">
                 ${icon[m.icon]()}
-                <span class="pm-tab-label">${m.label}</span>
-                <span class="pm-tab-sub">${m.sub}</span>
+                <span class="pm-tab-text">
+                  <span class="pm-tab-label">${m.label}</span>
+                  <span class="pm-tab-sub">${m.sub}</span>
+                </span>
                 ${m.badge ? `<span class="pm-badge">${m.badge}</span>` : ""}
               </button>`
                 )
