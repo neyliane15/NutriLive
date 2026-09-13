@@ -97,6 +97,13 @@ ${appbar("Nutri&amp;Live")}
   <div class="mini-row"><span class="mini-label">💧 Hidratação</span><span style="font-size:8px;color:#637F72">1,8 / 2,5 L</span></div>
   <div class="mini-bar" style="margin-top:7px"><i style="width:72%;background:#56B47F"></i></div>
 </div>
+<div class="mini-card">
+  <div class="mini-row"><span class="mini-label">Próxima refeição</span><span style="font-size:8px;color:#1F7A4D;font-weight:700">19:30</span></div>
+  <div style="display:flex;align-items:center;gap:7px;margin-top:5px">
+    <span style="width:22px;height:22px;border-radius:7px;background:#DCF1E2;display:grid;place-items:center;font-size:11px">🥗</span>
+    <span style="flex:1"><b style="font-size:9px">Omelete de espinafre</b><br><span style="font-size:8px;color:#637F72">386 kcal · 28 g de proteína</span></span>
+  </div>
+</div>
 ${tabbar(0)}`,
 
   plano: () => `

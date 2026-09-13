@@ -2,7 +2,7 @@ import { shell } from "./shell.mjs";
 import { header } from "../components/header.mjs";
 import { footer } from "../components/footer.mjs";
 import {
-  hero, tiles, band, appBand, awards, logostrip, stats, steps, showcases,
+  hero, tiles, band, appBand, awards, paystrip, stats, steps, showcases,
   features, pricing, trust, testimonials, faq, crossSell, finalCta, stickyCta
 } from "../components/sections.mjs";
 import { site } from "../data/site.mjs";
@@ -12,19 +12,16 @@ const HEADS = {
     steps: { eyebrow: "Como funciona", title: "Três passos. Nenhum deles é uma planilha.", text: "Do primeiro toque ao seu plano pronto, em menos tempo do que leva pra pedir um delivery." },
     features: { eyebrow: "No app", title: "As coisas pequenas que fazem você continuar.", text: "Cada detalhe existe para tirar uma decisão do seu dia." },
     testimonials: { eyebrow: "Quem já usa", title: "Gente real, semana real, resultado real." },
-    logos: { title: "Citado por", items: ["Exame", "Veja Saúde", "InfoMoney", "Startups", "GQ Brasil"] }
   },
   nutri: {
     steps: { eyebrow: "Como funciona", title: "Do primeiro paciente ao consultório inteiro.", text: "Migração numa tarde, primeiro plano em quatro minutos." },
     features: { eyebrow: "No painel", title: "O que um consultório precisa, sem seis assinaturas.", text: "Prontuário, prescrição, adesão e agenda no mesmo lugar." },
     testimonials: { eyebrow: "Quem já atende por aqui", title: "Nutricionistas que trocaram a planilha e não voltaram." },
-    logos: { title: "Usado por profissionais formados em", items: ["USP", "UNIFESP", "UFRJ", "PUC-PR", "UFMG"] }
   },
   academia: {
     steps: { eyebrow: "Como funciona", title: "Da planilha de alunos ao primeiro relatório.", text: "Uma unidade entra no ar em menos de um dia." },
     features: { eyebrow: "Na operação", title: "Feito para quem gerencia unidade, não app.", text: "Controle, integração e relatório que o financeiro entende." },
     testimonials: { eyebrow: "Quem já opera assim", title: "Academias que pararam de perder aluno em janeiro." },
-    logos: { title: "Integrado com", items: ["Tecnofit", "Pacto", "EVO", "Next Fit", "W12"] }
   }
 };
 
@@ -79,7 +76,7 @@ ${header({ current: c.key, cta: { label: "Assinar", href: `checkout.html?seg=${c
 <main id="conteudo">
   ${hero(c)}
   ${tiles(c)}
-  ${logostrip(h.logos)}
+  ${paystrip()}
   ${showcases(c.showcases)}
   ${band(c)}
   ${steps(c.steps, h.steps)}

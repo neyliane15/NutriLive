@@ -13,6 +13,7 @@ export const content = {
     metaDesc:
       "Plano alimentar feito pra sua rotina, lista de compras pronta e sua evolução em um lugar só. A partir de R$ 19,90/mês no Pix, cartão de crédito ou débito. Cancele quando quiser.",
     screen: "home",
+    heroScreen2: "compras",
 
     hero: {
       badge: "Novo: plano alimentar em 40 segundos",
@@ -189,6 +190,7 @@ export const content = {
     metaDesc:
       "Monte planos alimentares em minutos, acompanhe a adesão do paciente em tempo real e fidelize com o seu nome no app. A partir de R$ 79,90/mês. Pix, crédito ou débito.",
     screen: "dashboard",
+    heroScreen2: "acompanhamento",
 
     hero: {
       badge: "Feito com nutricionistas, para nutricionistas",
@@ -367,6 +369,7 @@ export const content = {
     metaDesc:
       "Ative acompanhamento nutricional para todos os alunos, reduza cancelamento e crie uma nova linha de receita. A partir de R$ 249/mês. Pix, crédito, débito ou boleto.",
     screen: "academia",
+    heroScreen2: "whitelabel",
 
     hero: {
       badge: "Nova receita recorrente para a sua unidade",

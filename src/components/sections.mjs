@@ -3,7 +3,7 @@
    ========================================================================= */
 import { icon } from "./icons.mjs";
 import { device } from "./devices.mjs";
-import { wordmark } from "./brand.mjs";
+import { payMark } from "./paymarks.mjs";
 import { segments, trustFacts, securityPillars, site } from "../data/site.mjs";
 import { brlParts, pct } from "../lib/format.mjs";
 
@@ -131,15 +131,15 @@ export const awards = () => `
   <div class="container">
     <div class="awards">
       ${[
-        ["2026", "Melhor app de saúde", "Google Play — Escolha do editor"],
-        ["2026", "Top 10 healthtech", "Distrito Healthtech Report"],
-        ["2025", "Prêmio Reclame Aqui", "categoria Saúde e Bem-estar"],
-        ["4,9 ★", "38 mil avaliações", "App Store e Google Play"]
+        ["refresh", "30 dias", "Garantia total", "Não gostou, devolvemos 100% do valor — sem perguntar o motivo."],
+        ["x", "2 toques", "Cancelamento", "Direto no app. Sem multa, sem ligação, sem retenção."],
+        ["lock", "PCI-DSS", "Pagamento seguro", "Seu cartão vai direto ao processador. A gente nunca vê o número."],
+        ["receipt", "Todo mês", "Nota fiscal", "Emitida automaticamente e enviada para o seu e-mail."]
       ]
         .map(
           (a) => `<div class="award">
-        <span class="icon-tile" aria-hidden="true">${icon.star()}</span>
-        <span><span class="yr">${a[0]}</span><b>${a[1]}</b><span class="src">${a[2]}</span></span>
+        <span class="icon-tile" aria-hidden="true">${icon[a[0]]()}</span>
+        <span><span class="yr">${a[1]}</span><b>${a[2]}</b><span class="src">${a[3]}</span></span>
       </div>`
         )
         .join("")}
@@ -147,13 +147,19 @@ export const awards = () => `
   </div>
 </section>`;
 
-/* ---------- Logo strip ---------- */
-export const logostrip = (labels) => `
+/* ---------- Faixa de meios de pagamento ---------- */
+export const paystrip = () => `
 <section class="logostrip">
   <div class="container">
-    <p class="logostrip-label">${labels.title}</p>
+    <p class="logostrip-label">Pague como preferir — e mude quando quiser</p>
     <div class="logostrip-row">
-      ${labels.items.map((t) => `<span class="lg">${wordmark(t)}</span>`).join("")}
+      <span class="lg" title="Pix">${payMark.pix()}</span>
+      <span class="lg" title="Visa">${payMark.visa()}</span>
+      <span class="lg" title="Mastercard">${payMark.master()}</span>
+      <span class="lg" title="Elo">${payMark.elo()}</span>
+      <span class="lg" title="American Express">${payMark.amex()}</span>
+      <span class="lg" title="Hipercard">${payMark.hiper()}</span>
+      <span class="lg" title="Boleto bancário">${payMark.boleto()}</span>
     </div>
   </div>
 </section>`;
@@ -179,10 +185,10 @@ export const stats = (list, deep = false) => `
 export const steps = (list, head) => `
 <section class="section" id="como-funciona">
   <div class="container">
-    <div class="section-head is-center" data-reveal>
+    <div class="section-head" data-reveal>
       <p class="eyebrow">${head.eyebrow}</p>
       <h2>${head.title}</h2>
-      ${head.text ? `<p class="lead measure" style="margin-inline:auto">${head.text}</p>` : ""}
+      ${head.text ? `<p class="lead measure">${head.text}</p>` : ""}
     </div>
     <div class="steps mt-16" data-reveal-group>
       ${list
@@ -231,10 +237,10 @@ export const showcases = (list) => `
 export const features = (list, head) => `
 <section class="section">
   <div class="container">
-    <div class="section-head is-center" data-reveal>
+    <div class="section-head" data-reveal>
       <p class="eyebrow">${head.eyebrow}</p>
       <h2>${head.title}</h2>
-      ${head.text ? `<p class="lead measure" style="margin-inline:auto">${head.text}</p>` : ""}
+      ${head.text ? `<p class="lead measure">${head.text}</p>` : ""}
     </div>
     <div class="grid-4 mt-16" data-reveal-group>
       ${list
@@ -367,7 +373,7 @@ export const trust = () => `
 export const testimonials = (list, head) => `
 <section class="section section-soft" id="depoimentos">
   <div class="container">
-    <div class="section-head is-center" data-reveal>
+    <div class="section-head" data-reveal>
       <p class="eyebrow">${head.eyebrow}</p>
       <h2>${head.title}</h2>
     </div>
@@ -432,10 +438,10 @@ export const crossSell = (current) => {
   return `
 <section class="section section-sm">
   <div class="container">
-    <div class="section-head is-center" data-reveal>
+    <div class="section-head" data-reveal>
       <h2 style="font-size:var(--fs-h2)">O Nutri&amp;Live também atende</h2>
     </div>
-    <div class="grid-2 mt-10" data-reveal-group style="max-width:56rem;margin-inline:auto">
+    <div class="grid-2 mt-10" data-reveal-group>
       ${others
         .map((s) => {
           const b = blurbs[s.key];
