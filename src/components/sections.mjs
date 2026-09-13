@@ -5,7 +5,7 @@ import { icon } from "./icons.mjs";
 import { device } from "./devices.mjs";
 import { payMark } from "./paymarks.mjs";
 import { segments, trustFacts, securityPillars, site } from "../data/site.mjs";
-import { brlParts, pct } from "../lib/format.mjs";
+import { brl, brlParts, pct } from "../lib/format.mjs";
 
 /* ---------- Audience switcher ---------- */
 export const audienceSwitch = (current, deep = false) => `
@@ -299,8 +299,8 @@ export const pricing = (c) => {
         <span class="per">/mês</span>
       </p>
       <p class="plan-price-note" data-price-note
-         data-m="Cobrado mensalmente. Cancele quando quiser."
-         data-y="Cobrado 12× no anual. <b>Economize ${save}%</b>">Cobrado mensalmente. Cancele quando quiser.</p>
+         data-m="Cobrado todo mês. Cancele quando quiser."
+         data-y="${brl(p.yearly * 12)} uma vez por ano · <b>economize ${save}%</b>">Cobrado todo mês. Cancele quando quiser.</p>
       <a class="btn ${p.featured ? "btn-primary" : "btn-secondary"} btn-block" href="checkout.html?seg=${c.key}&amp;plan=${p.planKey}" data-plan-cta="${p.planKey}">${p.cta}</a>
       <ul class="plan-features">${feats}${offs}</ul>
       <p class="plan-foot">${p.foot || "Pix, cartão de crédito ou débito. Sem taxa de adesão."}</p>

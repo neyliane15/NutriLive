@@ -2,18 +2,21 @@ import { brand } from "./brand.mjs";
 import { icon } from "./icons.mjs";
 import { nav } from "../data/site.mjs";
 
-export const header = ({ current = "", cta = { label: "Assinar", href: "#planos" } } = {}) => {
+export const header = ({ current = "", cta = { label: "Assinar", href: "#planos" }, home = "index.html" } = {}) => {
+  // Âncoras só funcionam na própria landing; nas demais páginas apontam para a home.
+  const isLanding = ["voce", "nutri", "academia"].indexOf(current) > -1;
+  const resolve = (href) => (href.charAt(0) === "#" && !isLanding ? home + href : href);
   const links = nav
     .map((n) => {
       const isCurrent = n.key === current;
-      return `<a class="nav-link" href="${n.href}"${isCurrent ? ' aria-current="page"' : ""}>${n.label}</a>`;
+      return `<a class="nav-link" href="${resolve(n.href)}"${isCurrent ? ' aria-current="page"' : ""}>${n.label}</a>`;
     })
     .join("");
 
   const drawerLinks = nav
     .map((n) => {
       const isCurrent = n.key === current;
-      return `<a class="nav-drawer-link" href="${n.href}"${isCurrent ? ' aria-current="page"' : ""}>
+      return `<a class="nav-drawer-link" href="${resolve(n.href)}"${isCurrent ? ' aria-current="page"' : ""}>
         <span>${n.label}<span class="nav-drawer-sub">${n.sub}</span></span>
         <span class="chev" aria-hidden="true">${icon.chevronRight()}</span>
       </a>`;

@@ -299,8 +299,8 @@
 }
 .plan-name { font-size: var(--fs-h4); font-weight: var(--fw-black); letter-spacing: -0.02em; }
 .plan-desc { margin-top: .375rem; font-size: var(--fs-sm); color: var(--text-muted); min-height: 2.9em; }
-.plan-price { margin-top: var(--sp-5); display: flex; align-items: flex-start; gap: .25rem; }
-.plan-price .cur { font-size: 1.0625rem; font-weight: var(--fw-bold); margin-top: .55rem; color: var(--ink-800); }
+.plan-price { margin-top: var(--sp-5); display: flex; align-items: flex-start; gap: 0; }
+.plan-price .cur { font-size: 1.0625rem; font-weight: var(--fw-bold); margin-top: .55rem; margin-right: .25rem; color: var(--ink-800); }
 .plan-price .amt {
   font-size: clamp(2.5rem, 2rem + 1.6vw, 3.125rem); font-weight: var(--fw-black);
   letter-spacing: -0.045em; line-height: 1; color: var(--ink-900);
