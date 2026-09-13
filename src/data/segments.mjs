@@ -47,7 +47,7 @@ export const content = {
       { num: "38.412", label: "pessoas cuidando da alimentação todo dia" },
       { num: "2,4 mi", label: "refeições registradas nos últimos 12 meses" },
       { num: "4,9★", label: "média na App Store e no Google Play" },
-      { num: "40s", label: "é o tempo médio para gerar um plano completo" }
+      { num: "40s", label: "para montar o plano, as receitas e a lista de compras" }
     ],
 
     showcases: [

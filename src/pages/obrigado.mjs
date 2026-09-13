@@ -15,7 +15,7 @@ const page = () =>
 <header class="co-header">
   <div class="container co-header-inner">
     ${brand({})}
-    <span class="co-secure">${icon.shield()} Pagamento confirmado</span>
+    <span class="co-secure" data-head-badge>${icon.shield()} Pagamento confirmado</span>
   </div>
 </header>
 
@@ -25,10 +25,11 @@ const page = () =>
       <div class="success-check" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none"><path d="M20 6.5 9.6 17 4 11.4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <h1 class="display-2" data-greeting>Tudo certo!</h1>
+      <h1 class="display-2" data-greeting tabindex="-1">Tudo certo!</h1>
       <p class="lead" style="margin-top:1rem" data-success-line>
         Sua assinatura está ativa. Enviamos o acesso para o seu e-mail.
       </p>
+      <p class="success-paid" data-paid-line hidden></p>
       <div class="cluster" style="justify-content:center;margin-top:2rem">
         <a class="btn btn-primary btn-lg" href="#" data-noop>${icon.play_store()} Baixar o app</a>
         <a class="btn btn-secondary btn-lg" href="#" data-noop>Abrir no navegador</a>
@@ -46,11 +47,21 @@ const page = () =>
       <div class="co-panel-body" style="margin-top:1.25rem">
         <div class="co-line"><span class="cl-label">Plano</span><span class="cl-value" data-r-plan>—</span></div>
         <div class="co-line"><span class="cl-label">Ciclo</span><span class="cl-value" data-r-cycle>—</span></div>
-        <div class="co-line"><span class="cl-label">Forma de pagamento</span><span class="cl-value" data-r-method>—</span></div>
+        <div class="co-line">
+          <span class="cl-label">Forma de pagamento</span>
+          <span class="cl-value">
+            <span data-r-method>—</span>
+            <small class="receipt-sub" data-r-method-sub hidden></small>
+          </span>
+        </div>
+        <div class="co-line" data-r-coupon-row hidden>
+          <span class="cl-label">Cupom</span><span class="cl-value" data-r-coupon>—</span>
+        </div>
         <div class="co-line"><span class="cl-label">Próxima cobrança</span><span class="cl-value" data-r-renew>—</span></div>
         <div class="co-total">
           <span class="ct-label">Pago hoje</span>
           <span class="ct-value tnum" data-r-total>—</span>
+          <small class="ct-note" data-r-after hidden></small>
         </div>
         <p class="text-xs soft" style="margin-top:1rem">A nota fiscal chega no seu e-mail em até 24 horas. Você pode ver e baixar todas as faturas no app, em <b>Menu › Assinatura</b>.</p>
       </div>

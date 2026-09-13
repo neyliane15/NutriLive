@@ -431,6 +431,7 @@ const checkoutPage = () =>
               <h2 class="co-panel-title" id="t-pag">Como você quer pagar</h2>
               <p class="co-panel-sub">Escolha a forma de pagamento da sua assinatura.</p>
             </div>
+            <span class="co-panel-done" data-panel-done="2" hidden>${icon.check()} Pronto</span>
           </div>
           <div class="co-panel-body">
             <div class="pm-tabs" role="tablist" aria-label="Forma de pagamento">

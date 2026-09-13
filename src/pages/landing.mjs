@@ -2,7 +2,7 @@ import { shell } from "./shell.mjs";
 import { header } from "../components/header.mjs";
 import { footer } from "../components/footer.mjs";
 import {
-  hero, tiles, band, appBand, awards, paystrip, stats, steps, showcases,
+  hero, tiles, band, appBand, paystrip, stats, steps, showcases,
   features, pricing, trust, testimonials, faq, crossSell, finalCta, stickyCta
 } from "../components/sections.mjs";
 import { site } from "../data/site.mjs";
@@ -85,7 +85,6 @@ ${header({ current: c.key, cta: { label: "Assinar", href: `checkout.html?seg=${c
   ${pricing(c)}
   ${stats(c.stats)}
   ${testimonials(c.testimonials, h.testimonials)}
-  ${awards()}
   ${trust()}
   ${faq(c.faq, c.key)}
   ${appBand()}

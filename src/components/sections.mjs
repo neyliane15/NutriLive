@@ -111,8 +111,7 @@ export const appBand = () => `
   <div class="container">
     <div class="app-grid">
       <div>
-        <p class="eyebrow">Baixe o app</p>
-        <h2 style="margin-top:.75rem;max-width:16ch">Aponte a câmera e comece agora.</h2>
+        <h2 style="max-width:16ch">Aponte a câmera e comece agora.</h2>
         <p class="lead measure-sm" style="margin-top:1rem">Funciona em iPhone e Android, sincroniza sozinho e continua funcionando quando a internet cai.</p>
         <div class="app-stores">
           <a class="store-badge" href="#" data-noop aria-label="Baixar na App Store">
@@ -133,7 +132,7 @@ export const appBand = () => `
 
 /* ---------- Reconhecimento ---------- */
 export const awards = () => `
-<section class="section section-sm">
+<div class="awards-strip">
   <div class="container">
     <div class="awards">
       ${[
@@ -192,11 +191,10 @@ export const steps = (list, head) => `
 <section class="section" id="como-funciona">
   <div class="container">
     <div class="section-head" data-reveal>
-      <p class="eyebrow">${head.eyebrow}</p>
       <h2>${head.title}</h2>
       ${head.text ? `<p class="lead measure">${head.text}</p>` : ""}
     </div>
-    <div class="steps mt-16" data-reveal-group>
+    <div class="steps mt-12" data-reveal-group>
       ${list
         .map(
           (s, i) => `<div class="step" data-reveal>
@@ -251,11 +249,10 @@ export const features = (list, head) => `
 <section class="section">
   <div class="container">
     <div class="section-head" data-reveal>
-      <p class="eyebrow">${head.eyebrow}</p>
       <h2>${head.title}</h2>
       ${head.text ? `<p class="lead measure">${head.text}</p>` : ""}
     </div>
-    <div class="grid-3 mt-16" data-reveal-group>
+    <div class="grid-3 mt-12" data-reveal-group>
       ${list
         .map(
           (f) => `<article class="card card-interactive feature-card" data-reveal>
@@ -387,10 +384,9 @@ export const testimonials = (list, head) => `
 <section class="section section-soft" id="depoimentos">
   <div class="container">
     <div class="section-head" data-reveal>
-      <p class="eyebrow">${head.eyebrow}</p>
       <h2>${head.title}</h2>
     </div>
-    <div class="quotes mt-16" data-reveal-group>
+    <div class="quotes mt-12" data-reveal-group>
       ${list
         .map(
           (t) => `<figure class="card card-lg quote" data-reveal>
@@ -404,6 +400,7 @@ export const testimonials = (list, head) => `
         )
         .join("")}
     </div>
+    ${awards()}
   </div>
 </section>`;
 
@@ -425,11 +422,11 @@ export const faq = (list, key) => `
           .map(
             (f, i) => `<div class="accordion-item">
           <h3>
-            <button class="accordion-trigger" type="button" aria-expanded="false" aria-controls="faq-${key}-${i}" id="faqb-${key}-${i}">
+            <button class="accordion-trigger" type="button" aria-expanded="${i === 0}" aria-controls="faq-${key}-${i}" id="faqb-${key}-${i}">
               <span>${f.q}</span><span class="accordion-icon" aria-hidden="true"></span>
             </button>
           </h3>
-          <div class="accordion-panel" id="faq-${key}-${i}" role="region" aria-labelledby="faqb-${key}-${i}" data-open="false">
+          <div class="accordion-panel" id="faq-${key}-${i}" role="region" aria-labelledby="faqb-${key}-${i}" data-open="${i === 0}">
             <div><p>${f.a}</p></div>
           </div>
         </div>`
@@ -472,24 +469,44 @@ export const crossSell = (current) => {
 };
 
 /* ---------- Final CTA ---------- */
-export const finalCta = (c) => `
-<section class="section cta-final">
+export const finalCta = (c) => {
+  const featured = c.plans.find((p) => p.featured) || c.plans[0];
+  const m = brlParts(featured.monthly);
+  return `
+<section class="section cta-final section-deep">
   <div class="container">
-    <div style="max-width:44rem" data-reveal>
-      <h2 class="display-2">${c.finalCta.title}</h2>
-      <p class="lead" style="margin-top:1.25rem">${c.finalCta.text}</p>
-      <div class="cluster" style="margin-top:2rem">
-        <a class="btn btn-light btn-lg" href="${c.finalCta.primary.href}">${c.finalCta.primary.label}<span class="btn-arrow" aria-hidden="true">${icon.arrowRight()}</span></a>
-        <a class="btn btn-outline-light btn-lg" href="${c.finalCta.secondary.href}">${c.finalCta.secondary.label}</a>
+    <div class="cta-final-grid">
+      <div data-reveal>
+        <h2 class="display-2">${c.finalCta.title}</h2>
+        <p class="lead" style="margin-top:1.25rem">${c.finalCta.text}</p>
+        <div class="cluster" style="margin-top:2rem">
+          <a class="btn btn-light btn-lg" href="${c.finalCta.primary.href}">${c.finalCta.primary.label}<span class="btn-arrow" aria-hidden="true">${icon.arrowRight()}</span></a>
+          <a class="btn btn-outline-light btn-lg" href="${c.finalCta.secondary.href}">${c.finalCta.secondary.label}</a>
+        </div>
+        <ul class="cta-final-marks">
+          <li>${icon.check()}<span>30 dias de garantia</span></li>
+          <li>${icon.check()}<span>Cancele quando quiser</span></li>
+          <li>${icon.check()}<span>Pix, crédito ou débito</span></li>
+        </ul>
       </div>
-      <ul class="cluster" style="margin-top:2rem;gap:1rem 1.75rem;font-size:var(--fs-sm);color:var(--text-on-deep-muted)">
-        <li style="display:flex;gap:.4375rem;align-items:center">${icon.check()} 30 dias de garantia</li>
-        <li style="display:flex;gap:.4375rem;align-items:center">${icon.check()} Cancele quando quiser</li>
-        <li style="display:flex;gap:.4375rem;align-items:center">${icon.check()} Pix, crédito ou débito</li>
-      </ul>
+
+      <aside class="cta-recap" data-reveal="scale" aria-label="Resumo do plano ${featured.name}">
+        <p class="cta-recap-flag">${featured.flag || "Mais escolhido"}</p>
+        <p class="cta-recap-name">${featured.name}</p>
+        <p class="cta-recap-price"><span>R$</span><b>${m.int}</b><i>,${m.dec}</i><em>/mês</em></p>
+        <ul class="cta-recap-list">
+          ${featured.features
+            .slice(0, 4)
+            .map((f) => `<li>${icon.check()}<span>${f}</span></li>`)
+            .join("")}
+        </ul>
+        <a class="btn btn-primary btn-block" href="checkout.html?seg=${c.key}&amp;plan=${featured.planKey}">${featured.cta}</a>
+        <p class="cta-recap-foot">${icon.lock()} Pagamento criptografado · nota fiscal automática</p>
+      </aside>
     </div>
   </div>
 </section>`;
+};
 
 /* ---------- Sticky mobile CTA ---------- */
 export const stickyCta = (c) => {

@@ -45,7 +45,7 @@
 </svg>
   <span class="brand-word" aria-hidden="true">Nutri<span class="amp">&amp;</span>Live</span>
 </a>
-    <span class="co-secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21.5s7.5-3.4 7.5-9.4V5.9L12 2.9 4.5 5.9v6.2c0 6 7.5 9.4 7.5 9.4Z"/><path d="m9 11.8 2.2 2.2L15.4 9.8"/></svg> Pagamento confirmado</span>
+    <span class="co-secure" data-head-badge><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21.5s7.5-3.4 7.5-9.4V5.9L12 2.9 4.5 5.9v6.2c0 6 7.5 9.4 7.5 9.4Z"/><path d="m9 11.8 2.2 2.2L15.4 9.8"/></svg> Pagamento confirmado</span>
   </div>
 </header>
 
@@ -55,10 +55,11 @@
       <div class="success-check" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none"><path d="M20 6.5 9.6 17 4 11.4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <h1 class="display-2" data-greeting>Tudo certo!</h1>
+      <h1 class="display-2" data-greeting tabindex="-1">Tudo certo!</h1>
       <p class="lead" style="margin-top:1rem" data-success-line>
         Sua assinatura está ativa. Enviamos o acesso para o seu e-mail.
       </p>
+      <p class="success-paid" data-paid-line hidden></p>
       <div class="cluster" style="justify-content:center;margin-top:2rem">
         <a class="btn btn-primary btn-lg" href="#" data-noop><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3a1.4 1.4 0 0 0-.5 1.1v17.2a1.4 1.4 0 0 0 .5 1.1L13 12ZM15.2 10.2 5.4 1.6l10.6 6.1zM5.4 22.4l9.8-8.6 1.5 1.5zM18.9 9.3l2.6 1.5a1.4 1.4 0 0 1 0 2.4l-2.6 1.5L16.2 12z"/></svg> Baixar o app</a>
         <a class="btn btn-secondary btn-lg" href="#" data-noop>Abrir no navegador</a>
@@ -76,11 +77,21 @@
       <div class="co-panel-body" style="margin-top:1.25rem">
         <div class="co-line"><span class="cl-label">Plano</span><span class="cl-value" data-r-plan>—</span></div>
         <div class="co-line"><span class="cl-label">Ciclo</span><span class="cl-value" data-r-cycle>—</span></div>
-        <div class="co-line"><span class="cl-label">Forma de pagamento</span><span class="cl-value" data-r-method>—</span></div>
+        <div class="co-line">
+          <span class="cl-label">Forma de pagamento</span>
+          <span class="cl-value">
+            <span data-r-method>—</span>
+            <small class="receipt-sub" data-r-method-sub hidden></small>
+          </span>
+        </div>
+        <div class="co-line" data-r-coupon-row hidden>
+          <span class="cl-label">Cupom</span><span class="cl-value" data-r-coupon>—</span>
+        </div>
         <div class="co-line"><span class="cl-label">Próxima cobrança</span><span class="cl-value" data-r-renew>—</span></div>
         <div class="co-total">
           <span class="ct-label">Pago hoje</span>
           <span class="ct-value tnum" data-r-total>—</span>
+          <small class="ct-note" data-r-after hidden></small>
         </div>
         <p class="text-xs soft" style="margin-top:1rem">A nota fiscal chega no seu e-mail em até 24 horas. Você pode ver e baixar todas as faturas no app, em <b>Menu › Assinatura</b>.</p>
       </div>

@@ -160,8 +160,10 @@
         co.unobserve(entry.target);
         var el = entry.target;
         var p = parse(el.getAttribute("data-count"));
-        if (!p) return;
-        var start = performance.now(), dur = 1100;
+        // Valores pequenos (notas, multiplicadores) não animam: contar de 0 até
+        // 4,9 mostraria "0,2★" na tela por meio segundo.
+        if (!p || p.value < 100) return;
+        var start = performance.now(), dur = 850;
         var tick = function (now) {
           var t = Math.min(1, (now - start) / dur);
           var eased = 1 - Math.pow(1 - t, 3);
@@ -176,7 +178,7 @@
         };
         requestAnimationFrame(tick);
       });
-    }, { threshold: 0.5 });
+    }, { threshold: 0.6 });
     counters.forEach(function (el) { co.observe(el); });
   }
 

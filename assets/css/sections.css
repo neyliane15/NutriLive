@@ -525,3 +525,84 @@
   .showcase-section { padding-block: var(--section-y-sm); }
   .showcase + .showcase { margin-top: 0; }
 }
+
+/* =========================================================================
+   Correções da rodada 1 de crítica
+   ========================================================================= */
+
+/* CTA final — herda a família escura; marcas com tamanho fixo */
+.cta-final .lead, .cta-final .muted { color: var(--text-on-deep-muted); }
+.cta-final-marks {
+  display: flex; flex-wrap: wrap; gap: .75rem 1.75rem; margin-top: var(--sp-8);
+}
+.cta-final-marks li {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: var(--fs-sm); color: var(--text-on-deep-muted); white-space: nowrap;
+}
+.cta-final-marks svg { width: 18px; height: 18px; flex: none; color: var(--lime-300); }
+
+/* Selos do rodapé — o rodapé não é .section-deep */
+.site-footer .seal { color: rgba(234,246,238,.72); }
+.site-footer .seal svg { color: rgba(234,246,238,.62); }
+
+/* Cabeçalho fixo: opaco quando gruda, para nada vazar por trás */
+.site-header[data-stuck="true"] {
+  background: var(--white);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+
+/* Planos: listas não esticam, rodapé desce sozinho, botões na mesma linha */
+.plan-features { align-content: start; }
+.plan-desc { min-height: 3.15em; }
+.plan-foot { margin-top: auto; }
+
+/* Dúvidas: a coluna da esquerda não estica */
+.faq-layout > :first-child { align-self: start; }
+@media (min-width: 960px) { .accordion { margin-top: -1.25rem; } }
+
+/* Segurança: títulos de duas linhas não desalinham o corpo */
+.trust-card h3 { min-height: 2.4em; }
+@media (max-width: 699px) { .trust-card h3 { min-height: 0; } }
+
+/* Garantias, agora dentro dos depoimentos */
+.awards-strip {
+  margin-top: var(--sp-12); padding-top: var(--sp-10);
+  border-top: 1px solid var(--border);
+}
+.awards-strip .container { padding-inline: 0; max-width: none; }
+
+/* Faixa de produtos: nada de 2px de rolagem lateral */
+.tiles-band { overflow-x: clip; }
+.tiles-scroll { scrollbar-gutter: auto; }
+
+/* CTA final: lado direito com o resumo do plano */
+.cta-final-grid { display: grid; gap: clamp(2rem,1rem+4vw,4rem); align-items: center; }
+@media (min-width: 940px) { .cta-final-grid { grid-template-columns: minmax(0,1.1fr) 21rem; } }
+.cta-recap {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: var(--r-xl);
+  padding: var(--sp-6);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.cta-recap-flag {
+  display: inline-block; background: var(--lime-300); color: var(--leaf-900);
+  font-size: var(--fs-2xs); font-weight: var(--fw-bold); letter-spacing: .02em;
+  padding: .25rem .625rem; border-radius: var(--r-pill);
+}
+.cta-recap-name { margin-top: var(--sp-4); font-size: var(--fs-h4); font-weight: var(--fw-black); color: var(--white); letter-spacing: -0.02em; }
+.cta-recap-price { display: flex; align-items: flex-start; gap: 0; margin-top: .25rem; color: var(--white); }
+.cta-recap-price span { font-size: 1rem; font-weight: var(--fw-bold); margin-top: .5rem; margin-right: .25rem; }
+.cta-recap-price b { font-size: 2.75rem; font-weight: var(--fw-black); letter-spacing: -0.045em; line-height: 1; }
+.cta-recap-price i { font-size: 1.125rem; font-weight: var(--fw-black); font-style: normal; letter-spacing: -0.03em; margin-top: .25rem; }
+.cta-recap-price em { font-size: var(--fs-sm); font-style: normal; font-weight: var(--fw-medium); color: var(--text-on-deep-muted); align-self: flex-end; margin-bottom: .25rem; margin-left: .25rem; }
+.cta-recap-list { display: grid; gap: .5rem; margin-top: var(--sp-5); }
+.cta-recap-list li { display: flex; gap: .5rem; align-items: flex-start; font-size: var(--fs-xs); color: var(--text-on-deep-muted); line-height: 1.5; }
+.cta-recap-list svg { width: 15px; height: 15px; flex: none; margin-top: 2px; color: var(--lime-300); }
+.cta-recap .btn { margin-top: var(--sp-5); }
+.cta-recap-foot { display: flex; align-items: center; gap: .375rem; margin-top: var(--sp-4); font-size: var(--fs-2xs); color: rgba(234,246,238,.6); }
+.cta-recap-foot svg { width: 13px; height: 13px; flex: none; }
+.cta-final .lead { max-width: 44ch; }
+.cta-recap .btn { background: var(--lime-300); color: var(--leaf-900); box-shadow: none; }
+.cta-recap .btn:hover { background: #B9E477; }
+.cta-recap .btn:active { background: var(--lime-400); }

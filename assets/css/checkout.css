@@ -395,7 +395,6 @@
 .pix-qr-veil-mark svg { width: 34px; height: 34px; stroke-width: 2.6; }
 @keyframes nl-veilpop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .pix-qr-veil-mark { animation: none; } }
-[data-pix-status][data-state="expired"] ~ * .pix-qr,
 .pix-qr-card.is-stale .pix-qr { filter: grayscale(1); opacity: .35; }
 
 .pix-steps { display: grid; gap: .875rem; }
@@ -511,3 +510,12 @@
 .receipt-sub { display: block; font-size: var(--fs-2xs); color: var(--text-soft); font-weight: var(--fw-regular); margin-top: 1px; }
 .next-steps { display: grid; gap: var(--sp-4); max-width: 34rem; margin: var(--sp-10) auto 0; text-align: left; }
 .success-hero h1:focus-visible { outline: none; }
+
+/* ---------------- Success: paid line ---------------- */
+.success-paid {
+  margin-top: .75rem; font-size: var(--fs-sm); color: var(--text-muted);
+  max-width: 40ch; margin-inline: auto; line-height: 1.55;
+}
+.success-paid[hidden] { display: none; }
+.receipt .co-line .cl-value { text-align: right; }
+.receipt .co-total .ct-note { text-align: right; }

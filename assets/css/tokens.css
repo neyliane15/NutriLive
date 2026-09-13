@@ -110,8 +110,8 @@
   --sp-10: 2.5rem;   --sp-12: 3rem;     --sp-14: 3.5rem;   --sp-16: 4rem;
   --sp-20: 5rem;     --sp-24: 6rem;     --sp-28: 7rem;     --sp-32: 8rem;
 
-  --section-y:    clamp(3.5rem, 2.2rem + 5.6vw, 7.5rem);
-  --section-y-sm: clamp(2.5rem, 1.8rem + 3.2vw, 4.5rem);
+  --section-y:    clamp(3rem, 2.1rem + 3.9vw, 5.5rem);
+  --section-y-sm: clamp(2.25rem, 1.8rem + 2vw, 3.5rem);
   --gutter:       clamp(1.25rem, 0.55rem + 2.6vw, 2.5rem);
   --container:    1200px;
   --container-wide: 1320px;
