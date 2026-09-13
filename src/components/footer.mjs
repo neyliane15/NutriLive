@@ -10,11 +10,11 @@ export const footer = () => `
         ${brand({})}
         <p style="margin-top:1rem;max-width:32ch;line-height:1.6">${site.tagline}<br>Cuidar da alimentação, sem complicar a vida.</p>
         <div class="store-badges" style="margin-top:1.5rem">
-          <a class="store-badge" href="#" aria-label="Baixar na App Store">
+          <a class="store-badge" href="#" data-noop aria-label="Baixar na App Store">
             ${icon.apple_store()}
             <span><span class="sb-top">Baixe na</span><span class="sb-main">App Store</span></span>
           </a>
-          <a class="store-badge" href="#" aria-label="Baixar no Google Play">
+          <a class="store-badge" href="#" data-noop aria-label="Baixar no Google Play">
             ${icon.play_store()}
             <span><span class="sb-top">Disponível no</span><span class="sb-main">Google Play</span></span>
           </a>
@@ -25,7 +25,7 @@ export const footer = () => `
           (c) => `<div>
         <h2 class="footer-title">${c.title}</h2>
         <ul class="footer-list">
-          ${c.links.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}
+          ${c.links.map((l) => `<li><a href="${l.href}"${l.href === "#" ? " data-noop" : ""}>${l.label}</a></li>`).join("")}
         </ul>
       </div>`
         )
@@ -34,9 +34,9 @@ export const footer = () => `
 
     <div style="margin-top:3.5rem;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between">
       <div class="social-row">
-        <a class="social-btn" href="#" aria-label="Instagram do Nutri&amp;Live">${icon.instagram()}</a>
-        <a class="social-btn" href="#" aria-label="LinkedIn do Nutri&amp;Live">${icon.linkedin()}</a>
-        <a class="social-btn" href="#" aria-label="YouTube do Nutri&amp;Live">${icon.youtube()}</a>
+        <a class="social-btn" href="#" data-noop aria-label="Instagram do Nutri&amp;Live">${icon.instagram()}</a>
+        <a class="social-btn" href="#" data-noop aria-label="LinkedIn do Nutri&amp;Live">${icon.linkedin()}</a>
+        <a class="social-btn" href="#" data-noop aria-label="YouTube do Nutri&amp;Live">${icon.youtube()}</a>
         <a class="social-btn" href="${site.whatsappHref}" aria-label="WhatsApp do Nutri&amp;Live">${icon.whatsapp()}</a>
       </div>
       <div class="seal-row">

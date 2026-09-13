@@ -378,7 +378,7 @@ export const content = {
         "Revenda com a sua marca e fique com a margem"
       ],
       primary: { label: "Falar com vendas", href: "checkout.html?seg=academia&plan=academia" },
-      secondary: { label: "Ver os números", href: "#como-funciona" },
+      secondary: { label: "Ver os números", href: "#numeros" },
       proof: "**212 unidades** ativas · redes de 1 a 40 academias"
     },
 
@@ -529,7 +529,7 @@ export const content = {
       title: "Uma conversa de 20 minutos resolve.",
       text: "A gente monta a projeção de receita e de retenção com os números da sua unidade, sem compromisso.",
       primary: { label: "Falar com vendas", href: "checkout.html?seg=academia&plan=academia" },
-      secondary: { label: "Baixar o material comercial", href: "#" }
+      secondary: { label: "Baixar o material comercial", href: "#", noop: true }
     }
   }
 };

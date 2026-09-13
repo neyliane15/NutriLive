@@ -202,7 +202,7 @@ export const paystrip = () => `
 
 /* ---------- Stats ---------- */
 export const stats = (list, deep = false) => `
-<section class="section section-sm${deep ? " section-deep" : " section-soft"}">
+<section class="section section-sm${deep ? " section-deep" : " section-soft"}" id="numeros">
   <div class="container">
     <div class="statband" data-reveal-group>
       ${list
@@ -517,7 +517,7 @@ export const finalCta = (c) => {
         <p class="lead" style="margin-top:1.25rem">${c.finalCta.text}</p>
         <div class="cluster" style="margin-top:2rem">
           <a class="btn btn-light btn-lg" href="${c.finalCta.primary.href}">${c.finalCta.primary.label}<span class="btn-arrow" aria-hidden="true">${icon.arrowRight()}</span></a>
-          <a class="btn btn-outline-light btn-lg" href="${c.finalCta.secondary.href}">${c.finalCta.secondary.label}</a>
+          <a class="btn btn-outline-light btn-lg" href="${c.finalCta.secondary.href}"${c.finalCta.secondary.noop ? " data-noop" : ""}>${c.finalCta.secondary.label}</a>
         </div>
         <ul class="cta-final-marks">
           <li>${icon.check()}<span>30 dias de garantia</span></li>
