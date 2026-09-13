@@ -1,0 +1,147 @@
+/* =========================================================================
+   Nutri&Live — Design Tokens
+   Single source of truth for colour, type, space, radius, elevation, motion.
+   ========================================================================= */
+
+:root {
+  /* ---------- Brand: leaf green ---------- */
+  --leaf-50:  #F0F9F2;
+  --leaf-100: #DCF1E2;
+  --leaf-200: #B7E3C7;
+  --leaf-300: #89CFA5;
+  --leaf-400: #55B57F;
+  --leaf-500: #2F9761;
+  --leaf-600: #1F7A4D;
+  --leaf-700: #17603D;
+  --leaf-800: #124B31;
+  --leaf-900: #0D3524;
+  --leaf-950: #071F15;
+
+  /* ---------- Ink: green-tinted neutrals ---------- */
+  --ink-950: #06120D;
+  --ink-900: #0E2018;
+  --ink-800: #1A3226;
+  --ink-700: #2B483A;
+  --ink-600: #435F52;
+  --ink-500: #637F72;
+  --ink-400: #8CA598;
+  --ink-300: #B5C9BF;
+  --ink-200: #D7E5DD;
+  --ink-100: #EAF2ED;
+  --ink-50:  #F5FAF7;
+  --white:   #FFFFFF;
+
+  /* ---------- Accents ---------- */
+  --lime-200: #DFF5B8;
+  --lime-300: #C7EC8A;
+  --lime-400: #A9DD5C;
+  --pix-500:  #32BCAD;
+  --pix-600:  #1F9A8D;
+  --amber-500:#E08A00;
+  --amber-100:#FDF1DC;
+  --danger-600:#C7362F;
+  --danger-500:#DC4A42;
+  --danger-100:#FCEBEA;
+
+  /* ---------- Semantic surfaces ---------- */
+  --bg:            var(--white);
+  --bg-soft:       var(--leaf-50);
+  --bg-mint:       var(--leaf-100);
+  --bg-deep:       var(--leaf-900);
+  --surface:       var(--white);
+  --surface-sunk:  var(--ink-50);
+  --border:        var(--ink-200);
+  --border-strong: var(--ink-300);
+  --border-subtle: var(--ink-100);
+
+  /* ---------- Semantic text ---------- */
+  --text:          var(--ink-900);
+  --text-muted:    var(--ink-600);
+  --text-soft:     var(--ink-500);
+  --text-on-deep:  #EAF6EE;
+  --text-on-deep-muted: rgba(234, 246, 238, .72);
+  --text-brand:    var(--leaf-700);
+
+  /* ---------- Interactive ---------- */
+  --accent:        var(--leaf-600);
+  --accent-hover:  var(--leaf-700);
+  --accent-press:  var(--leaf-800);
+  --accent-soft:   var(--leaf-100);
+  --focus-ring:    var(--leaf-500);
+
+  /* ---------- Typography ---------- */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Fluid scale — 360px → 1440px viewport */
+  --fs-display-1: clamp(2.375rem, 1.42rem + 4.24vw, 4.5rem);
+  --fs-display-2: clamp(2rem, 1.36rem + 2.84vw, 3.375rem);
+  --fs-h1:        clamp(1.875rem, 1.30rem + 2.56vw, 3.00rem);
+  --fs-h2:        clamp(1.625rem, 1.29rem + 1.49vw, 2.25rem);
+  --fs-h3:        clamp(1.250rem, 1.09rem + 0.71vw, 1.625rem);
+  --fs-h4:        clamp(1.0625rem, 1.00rem + 0.28vw, 1.1875rem);
+  --fs-lead:      clamp(1.0625rem, 0.97rem + 0.43vw, 1.3125rem);
+  --fs-body:      1rem;
+  --fs-sm:        0.9375rem;
+  --fs-xs:        0.8125rem;
+  --fs-2xs:       0.75rem;
+
+  --lh-tight:   0.98;
+  --lh-snug:    1.12;
+  --lh-heading: 1.18;
+  --lh-body:    1.6;
+  --lh-loose:   1.72;
+
+  --ls-display: -0.035em;
+  --ls-heading: -0.022em;
+  --ls-body:    -0.011em;
+  --ls-wide:    0.06em;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+  --fw-bold:    700;
+  --fw-black:   800;
+
+  /* ---------- Space (4px base) ---------- */
+  --sp-1:  0.25rem;  --sp-2:  0.5rem;   --sp-3:  0.75rem;  --sp-4:  1rem;
+  --sp-5:  1.25rem;  --sp-6:  1.5rem;   --sp-7:  1.75rem;  --sp-8:  2rem;
+  --sp-10: 2.5rem;   --sp-12: 3rem;     --sp-14: 3.5rem;   --sp-16: 4rem;
+  --sp-20: 5rem;     --sp-24: 6rem;     --sp-28: 7rem;     --sp-32: 8rem;
+
+  --section-y:    clamp(3.5rem, 2.2rem + 5.6vw, 7.5rem);
+  --section-y-sm: clamp(2.5rem, 1.8rem + 3.2vw, 4.5rem);
+  --gutter:       clamp(1.25rem, 0.55rem + 2.6vw, 2.5rem);
+  --container:    1200px;
+  --container-wide: 1320px;
+  --measure:      64ch;
+
+  /* ---------- Radius ---------- */
+  --r-xs: 6px;  --r-sm: 10px; --r-md: 14px; --r-lg: 20px;
+  --r-xl: 28px; --r-2xl: 36px; --r-pill: 999px;
+
+  /* ---------- Elevation (green-tinted, never grey) ---------- */
+  --sh-xs: 0 1px 2px rgba(7, 31, 21, .06);
+  --sh-sm: 0 1px 2px rgba(7, 31, 21, .05), 0 2px 6px rgba(7, 31, 21, .05);
+  --sh-md: 0 2px 4px rgba(7, 31, 21, .04), 0 8px 20px rgba(7, 31, 21, .07);
+  --sh-lg: 0 4px 8px rgba(7, 31, 21, .04), 0 18px 40px rgba(7, 31, 21, .10);
+  --sh-xl: 0 8px 16px rgba(7, 31, 21, .05), 0 34px 70px rgba(7, 31, 21, .14);
+  --sh-focus: 0 0 0 3px var(--white), 0 0 0 6px var(--focus-ring);
+  --sh-focus-tight: 0 0 0 3px rgba(47, 151, 97, .35);
+
+  /* ---------- Motion ---------- */
+  --ease-out:    cubic-bezier(.22, .61, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: cubic-bezier(.34, 1.32, .48, 1);
+  --dur-1: 120ms;  --dur-2: 200ms;  --dur-3: 320ms;
+  --dur-4: 480ms;  --dur-5: 720ms;
+
+  /* ---------- Layers ---------- */
+  --z-base: 0; --z-raised: 10; --z-sticky: 100; --z-header: 200;
+  --z-drawer: 300; --z-modal: 400; --z-toast: 500;
+
+  --header-h: 68px;
+}
+
+@media (min-width: 900px) { :root { --header-h: 76px; } }

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Segurança e privacidade — Nutri&Live</title>
+<meta name="description" content="Como o Nutri&Live protege os seus dados de saúde e de pagamento: criptografia, PCI-DSS, LGPD e servidores no Brasil.">
+<meta name="theme-color" content="#17603D">
+<meta name="color-scheme" content="light">
+<link rel="canonical" href="https://nutrielive.com.br/seguranca.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20rx%3D%2210%22%20fill%3D%22%2317603D%22%2F%3E%3Cpath%20d%3D%22M31.5%208.4c.7%206-.5%2011.1-3.7%2014.9-3.3%203.9-7.9%205.7-13.4%205.3-.3%201.5-.4%203-.4%204.6a1.2%201.2%200%201%201-2.4%200c0-1.9.2-3.8.6-5.5a22%2022%200%200%201%204.2-8.9%201.2%201.2%200%200%201%201.9%201.5%2019.6%2019.6%200%200%200-3.4%206.8c4.3.2%207.9-1.4%2010.5-4.5%202.5-3%203.6-7.1%203.4-11.9-5.7.2-10.1%201.5-13.2%203.6-3.3%202.2-4.9%205.2-4.9%208.9%200%201.4.3%202.7.9%203.9a1.2%201.2%200%200%201-2.1%201.2%2010.9%2010.9%200%200%201-1.3-5.1c0-4.6%202.1-8.3%206.1-11%203.7-2.5%209-3.8%2015.7-4l1.5-.1Z%22%20fill%3D%22%23A9DD5C%22%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Crect%20width%3D%2240%22%20height%3D%2240%22%20rx%3D%2210%22%20fill%3D%22%2317603D%22%2F%3E%3Cpath%20d%3D%22M31.5%208.4c.7%206-.5%2011.1-3.7%2014.9-3.3%203.9-7.9%205.7-13.4%205.3-.3%201.5-.4%203-.4%204.6a1.2%201.2%200%201%201-2.4%200c0-1.9.2-3.8.6-5.5a22%2022%200%200%201%204.2-8.9%201.2%201.2%200%200%201%201.9%201.5%2019.6%2019.6%200%200%200-3.4%206.8c4.3.2%207.9-1.4%2010.5-4.5%202.5-3%203.6-7.1%203.4-11.9-5.7.2-10.1%201.5-13.2%203.6-3.3%202.2-4.9%205.2-4.9%208.9%200%201.4.3%202.7.9%203.9a1.2%201.2%200%200%201-2.1%201.2%2010.9%2010.9%200%200%201-1.3-5.1c0-4.6%202.1-8.3%206.1-11%203.7-2.5%209-3.8%2015.7-4l1.5-.1Z%22%20fill%3D%22%23A9DD5C%22%2F%3E%3C%2Fsvg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nutri&Live">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Segurança e privacidade — Nutri&Live">
+<meta property="og:description" content="Como o Nutri&Live protege os seus dados de saúde e de pagamento: criptografia, PCI-DSS, LGPD e servidores no Brasil.">
+<meta property="og:url" content="https://nutrielive.com.br/seguranca.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/sections.css">
+<link rel="stylesheet" href="assets/css/checkout.css">
+<link rel="stylesheet" href="assets/css/motion.css">
+
+</head>
+<body class="">
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+
+<header class="site-header" id="site-header" data-stuck="false">
+  <div class="container header-inner">
+    
+<a class="brand " href="index.html" aria-label="Nutri&amp;Live — página inicial">
+  
+<svg class="" width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true" focusable="false">
+  <path d="M34.2 5.6c.6 0 1.1.4 1.2 1 .9 6.9-.5 12.9-4.2 17.4-3.8 4.5-9 6.6-15 6.2-.3 1.6-.4 3.3-.4 5.1a1.3 1.3 0 1 1-2.6 0c0-2.1.2-4.1.6-6a24 24 0 0 1 4.6-9.7 1.3 1.3 0 0 1 2 1.6 21.4 21.4 0 0 0-3.8 7.5c4.9.3 9-1.5 12-5.1 2.9-3.5 4.2-8.2 3.8-13.7-6.6.2-11.7 1.6-15.3 4-3.8 2.6-5.7 6-5.7 10.3 0 1.7.4 3.2 1.1 4.5a1.3 1.3 0 0 1-2.2 1.3 12 12 0 0 1-1.5-5.8c0-5.2 2.4-9.5 7-12.5C19.7 8.4 26 6.9 33.6 6.7l.6-1.1Z" fill="currentColor"/>
+</svg>
+  <span class="brand-word" aria-hidden="true">Nutri<span class="amp">&amp;</span>Live</span>
+</a>
+    <nav class="header-nav" aria-label="Navegação principal"><a class="nav-link" href="index.html">Para você</a><a class="nav-link" href="nutricionistas.html">Para nutricionistas</a><a class="nav-link" href="academias.html">Para academias</a><a class="nav-link" href="#planos">Preços</a><a class="nav-link" href="seguranca.html" aria-current="page">Segurança</a></nav>
+    <div class="header-actions">
+      <a class="btn btn-ghost btn-sm hide-md" href="#" data-noop>Entrar</a>
+      <a class="btn btn-primary btn-sm" href="index.html#planos">Assinar</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Abrir menu" data-nav-toggle>
+        <span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>
+<div class="nav-drawer" id="nav-drawer" data-open="false" hidden>
+  <div class="container">
+    <nav aria-label="Navegação mobile"><a class="nav-drawer-link" href="index.html">
+        <span>Para você<span class="nav-drawer-sub">Plano alimentar, receitas e evolução</span></span>
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>
+      </a><a class="nav-drawer-link" href="nutricionistas.html">
+        <span>Para nutricionistas<span class="nav-drawer-sub">Prontuário, planos e adesão em tempo real</span></span>
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>
+      </a><a class="nav-drawer-link" href="academias.html">
+        <span>Para academias<span class="nav-drawer-sub">Nutrição para toda a base de alunos</span></span>
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>
+      </a><a class="nav-drawer-link" href="#planos">
+        <span>Preços<span class="nav-drawer-sub">Mensal, sem fidelidade</span></span>
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>
+      </a><a class="nav-drawer-link" href="seguranca.html" aria-current="page">
+        <span>Segurança<span class="nav-drawer-sub">Como protegemos seus dados</span></span>
+        <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>
+      </a></nav>
+    <div class="nav-drawer-cta">
+      <a class="btn btn-primary btn-block" href="index.html#planos">Assinar</a>
+      <a class="btn btn-secondary btn-block" href="#" data-noop>Entrar na minha conta</a>
+    </div>
+  </div>
+</div>
+<main id="conteudo">
+  <section class="section" style="padding-bottom:var(--section-y-sm);background:var(--bg-soft)">
+    <div class="container container-narrow">
+      <p class="eyebrow">Segurança</p>
+      <h1 class="display-2" style="margin-top:.75rem">O que a gente faz para você poder confiar.</h1>
+      <p class="lead" style="margin-top:1rem">Dado de alimentação é dado de saúde. Aqui está, sem jargão, como ele é protegido — e o que você controla.</p>
+      <p class="text-xs soft" style="margin-top:1.5rem">Última atualização: 13 de setembro de 2026</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container container-narrow legal-body">
+<div class="trust-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+  <article class="card card-lg trust-card">
+    <span class="icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.6"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/><circle cx="12" cy="15.6" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+    <h3>Criptografia de ponta a ponta</h3>
+    <p>Tudo que trafega entre você e a gente usa TLS 1.3. Seus dados de saúde ficam criptografados em repouso com AES-256.</p>
+  </article><article class="card card-lg trust-card">
+    <span class="icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 9.6h19M6 15h3.5"/></svg></span>
+    <h3>Seu cartão nunca passa por aqui</h3>
+    <p>Os dados do cartão vão direto para o nosso parceiro de pagamentos, certificado PCI-DSS nível 1. Guardamos só os 4 últimos dígitos.</p>
+  </article><article class="card card-lg trust-card">
+    <span class="icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21.5s7.5-3.4 7.5-9.4V5.9L12 2.9 4.5 5.9v6.2c0 6 7.5 9.4 7.5 9.4Z"/><path d="m9 11.8 2.2 2.2L15.4 9.8"/></svg></span>
+    <h3>LGPD desde a primeira linha</h3>
+    <p>Você decide o que compartilhar, com quem e por quanto tempo. Exporte ou apague tudo quando quiser, direto no app.</p>
+  </article><article class="card card-lg trust-card">
+    <span class="icon-tile" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 5.3A9.9 9.9 0 0 1 12 5.2c5 0 9 4.3 10 6.8-.5 1.2-1.7 2.9-3.4 4.3M6.2 7.5C4.4 8.9 2.9 10.7 2 12c1 2.5 5 6.8 10 6.8 1.5 0 2.9-.4 4.1-1"/><path d="M9.7 9.9a3 3 0 0 0 4.3 4.2"/></svg></span>
+    <h3>Nunca vendemos seus dados</h3>
+    <p>Sem anúncios, sem revenda, sem parceiro curioso. Nosso negócio é a assinatura — e é assim que fica.</p>
+  </article>
+</div>
+
+<h2 id="infra" style="margin-top:var(--sp-12);font-size:var(--fs-h3)">Infraestrutura</h2>
+<ul style="margin-top:var(--sp-4);display:grid;gap:.75rem;max-width:70ch"><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Servidores em data centers no Brasil (região São Paulo), com redundância em duas zonas de disponibilidade.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Criptografia AES-256 em repouso e TLS 1.3 em trânsito, com HSTS e certificados renovados automaticamente.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Backups automáticos a cada 6 horas, com retenção de 35 dias e teste de restauração mensal.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Isolamento de ambientes: desenvolvimento, homologação e produção nunca compartilham dados reais.</span></li></ul>
+
+<h2 id="pagamentos" style="margin-top:var(--sp-12);font-size:var(--fs-h3)">Pagamentos</h2>
+<p style="margin-top:var(--sp-4);color:var(--text-muted);max-width:70ch">O Nutri&Live não recebe, não processa e não armazena o número completo do seu cartão. Os dados vão criptografados diretamente para o nosso parceiro de pagamentos, certificado PCI-DSS nível 1, que devolve apenas um token. O que fica guardado na sua conta são a bandeira e os 4 últimos dígitos, para você reconhecer o cartão.</p>
+<ul style="margin-top:var(--sp-4);display:grid;gap:.75rem;max-width:70ch"><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Antifraude com análise de risco em cada cobrança recorrente.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>3-D Secure 2.0 quando o banco emissor solicita.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Pix com QR dinâmico e identificador único por cobrança.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Estorno integral em até 5 dias úteis no cartão e 1 dia útil no Pix.</span></li></ul>
+
+<h2 id="lgpd" style="margin-top:var(--sp-12);font-size:var(--fs-h3)">LGPD e os seus direitos</h2>
+<p style="margin-top:var(--sp-4);color:var(--text-muted);max-width:70ch">Tratamos dados pessoais como controladores no serviço para pessoa física, e como operadores quando a controladora é a academia ou a clínica contratante. Em qualquer caso, você tem direitos garantidos pela Lei nº 13.709/2018.</p>
+<ul style="margin-top:var(--sp-4);display:grid;gap:.75rem;max-width:70ch"><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Acesso e portabilidade:</b> exporte tudo em PDF ou CSV pelo app, a qualquer momento.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Correção:</b> altere qualquer informação do seu perfil sem precisar falar com ninguém.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Eliminação:</b> apague a sua conta e todos os dados vinculados em Menu › Conta › Excluir conta. A exclusão é definitiva em até 30 dias.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Revogação de consentimento:</b> desconecte o seu nutricionista ou a sua academia quando quiser, sem perder o seu histórico pessoal.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><b>Oposição:</b> escreva para o nosso DPO e a gente responde em até 15 dias.</span></li></ul>
+<div id="titular" class="notice" style="margin-top:var(--sp-6)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.8" y="5" width="18.4" height="14" rx="2.6"/><path d="m3.6 7 7.3 5.2a2 2 0 0 0 2.2 0L20.4 7"/></svg>
+  <span>Encarregado de dados (DPO): <b>dpo@nutrielive.com.br</b> · Nutri&Live Tecnologia em Saúde Ltda., Av. Paulista, 1374 — 11º andar, Bela Vista, São Paulo/SP, 01310-100.</span>
+</div>
+
+<h2 id="compartilhamento" style="margin-top:var(--sp-12);font-size:var(--fs-h3)">Com quem compartilhamos</h2>
+<p style="margin-top:var(--sp-4);color:var(--text-muted);max-width:70ch">Com ninguém que você não tenha autorizado. Não vendemos, não alugamos e não trocamos dados com anunciantes ou corretoras de dados. Os únicos terceiros que tocam nos seus dados são operadores necessários ao serviço — provedor de nuvem, processador de pagamentos, envio de e-mail transacional — todos sob contrato de tratamento de dados e obrigação de sigilo.</p>
+
+<h2 id="pratica" style="margin-top:var(--sp-12);font-size:var(--fs-h3)">Práticas de desenvolvimento</h2>
+<ul style="margin-top:var(--sp-4);display:grid;gap:.75rem;max-width:70ch"><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Revisão de código obrigatória e testes automatizados em cada mudança.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Acesso a dados de produção restrito, nominal, com autenticação em dois fatores e registro de auditoria.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Teste de intrusão anual por empresa independente e programa de divulgação responsável de vulnerabilidades.</span></li><li style="display:flex;gap:.625rem;align-items:flex-start;color:var(--text-muted)"><span style="width:18px;height:18px;flex:none;margin-top:3px;color:var(--leaf-600)"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.25" fill="currentColor"/><path d="M16.2 9.3 10.7 14.9 7.8 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Monitoramento 24/7 e plano de resposta a incidentes com notificação à ANPD e aos titulares quando aplicável.</span></li></ul>
+<p style="margin-top:var(--sp-4);color:var(--text-muted);max-width:70ch">Encontrou uma falha? Escreva para <b>seguranca@nutrielive.com.br</b>. A gente responde em até 48 horas e reconhece publicamente quem nos ajuda.</p></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        
+<a class="brand " href="index.html" aria-label="Nutri&amp;Live — página inicial">
+  
+<svg class="" width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true" focusable="false">
+  <path d="M34.2 5.6c.6 0 1.1.4 1.2 1 .9 6.9-.5 12.9-4.2 17.4-3.8 4.5-9 6.6-15 6.2-.3 1.6-.4 3.3-.4 5.1a1.3 1.3 0 1 1-2.6 0c0-2.1.2-4.1.6-6a24 24 0 0 1 4.6-9.7 1.3 1.3 0 0 1 2 1.6 21.4 21.4 0 0 0-3.8 7.5c4.9.3 9-1.5 12-5.1 2.9-3.5 4.2-8.2 3.8-13.7-6.6.2-11.7 1.6-15.3 4-3.8 2.6-5.7 6-5.7 10.3 0 1.7.4 3.2 1.1 4.5a1.3 1.3 0 0 1-2.2 1.3 12 12 0 0 1-1.5-5.8c0-5.2 2.4-9.5 7-12.5C19.7 8.4 26 6.9 33.6 6.7l.6-1.1Z" fill="currentColor"/>
+</svg>
+  <span class="brand-word" aria-hidden="true">Nutri<span class="amp">&amp;</span>Live</span>
+</a>
+        <p style="margin-top:1rem;max-width:32ch;line-height:1.6">Sua saúde, seu melhor plano.<br>Cuidar da alimentação, sem complicar a vida.</p>
+        <div class="store-badges" style="margin-top:1.5rem">
+          <a class="store-badge" href="#" aria-label="Baixar na App Store">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5a4.3 4.3 0 0 0-3.4-1.8c-1.5-.2-2.8.8-3.6.8s-1.9-.8-3.1-.8a4.5 4.5 0 0 0-3.8 2.3c-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3s1.6-.7 3-.7 1.8.7 3.1.7 2.1-1.1 2.9-2.2a9.6 9.6 0 0 0 1.3-2.7 4.2 4.2 0 0 1-2.5-3.7ZM14.1 5.6A4.1 4.1 0 0 0 15 2.5a4.2 4.2 0 0 0-2.8 1.4A3.9 3.9 0 0 0 11.3 7a3.5 3.5 0 0 0 2.8-1.4Z"/></svg>
+            <span><span class="sb-top">Baixe na</span><span class="sb-main">App Store</span></span>
+          </a>
+          <a class="store-badge" href="#" aria-label="Baixar no Google Play">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 2.3a1.4 1.4 0 0 0-.5 1.1v17.2a1.4 1.4 0 0 0 .5 1.1L13 12ZM15.2 10.2 5.4 1.6l10.6 6.1zM5.4 22.4l9.8-8.6 1.5 1.5zM18.9 9.3l2.6 1.5a1.4 1.4 0 0 1 0 2.4l-2.6 1.5L16.2 12z"/></svg>
+            <span><span class="sb-top">Disponível no</span><span class="sb-main">Google Play</span></span>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h2 class="footer-title">Produto</h2>
+        <ul class="footer-list">
+          <li><a href="index.html">Para você</a></li><li><a href="nutricionistas.html">Para nutricionistas</a></li><li><a href="academias.html">Para academias</a></li><li><a href="index.html#planos">Preços</a></li><li><a href="#">Novidades</a></li>
+        </ul>
+      </div><div>
+        <h2 class="footer-title">Confiança</h2>
+        <ul class="footer-list">
+          <li><a href="seguranca.html">Segurança e privacidade</a></li><li><a href="termos.html">Termos de uso</a></li><li><a href="privacidade.html">Política de privacidade</a></li><li><a href="#">Status do sistema</a></li><li><a href="privacidade.html#titular">Portal do titular (LGPD)</a></li>
+        </ul>
+      </div><div>
+        <h2 class="footer-title">Ajuda</h2>
+        <ul class="footer-list">
+          <li><a href="#">Central de ajuda</a></li><li><a href="#">Falar com a gente</a></li><li><a href="termos.html#cancelamento">Cancelar assinatura</a></li><li><a href="termos.html#reembolso">Reembolso em 30 dias</a></li><li><a href="https://wa.me/5511400012340">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:3.5rem;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:space-between">
+      <div class="social-row">
+        <a class="social-btn" href="#" aria-label="Instagram do Nutri&amp;Live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.1" cy="6.9" r="1.05" fill="currentColor" stroke="none"/></svg></a>
+        <a class="social-btn" href="#" aria-label="LinkedIn do Nutri&amp;Live"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5ZM3 9.5h4v11H3zM10 9.5h3.8v1.5a4.2 4.2 0 0 1 3.7-1.9c3 0 4.5 1.9 4.5 5.3v6.1h-4v-5.4c0-1.5-.5-2.5-1.9-2.5-1 0-1.7.7-2 1.4a2.6 2.6 0 0 0-.1.9v5.6H10z"/></svg></a>
+        <a class="social-btn" href="#" aria-label="YouTube do Nutri&amp;Live"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.5 8.2a2.8 2.8 0 0 0-2-2C18.8 5.7 12 5.7 12 5.7s-6.8 0-8.5.5a2.8 2.8 0 0 0-2 2A29 29 0 0 0 1 12a29 29 0 0 0 .5 3.8 2.8 2.8 0 0 0 2 2c1.7.4 8.5.4 8.5.4s6.8 0 8.5-.4a2.8 2.8 0 0 0 2-2A29 29 0 0 0 23 12a29 29 0 0 0-.5-3.8ZM9.9 15.3V8.7l5.6 3.3z"/></svg></a>
+        <a class="social-btn" href="https://wa.me/5511400012340" aria-label="WhatsApp do Nutri&amp;Live"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.2A9.7 9.7 0 0 0 3.6 16.8L2.3 21.7l5-1.3A9.7 9.7 0 1 0 12 2.2Zm0 17.7a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 19.9Zm4.4-6c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.7 1-.3.2-.5.1a6.6 6.6 0 0 1-1.9-1.2 7.3 7.3 0 0 1-1.4-1.7c-.1-.3 0-.4.1-.5l.4-.5.2-.4v-.4L9.7 8c-.2-.4-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4 8.7 8.7 0 0 0 1.5.5 3.6 3.6 0 0 0 1.7.1 2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg></a>
+      </div>
+      <div class="seal-row">
+        <span class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.6"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/><circle cx="12" cy="15.6" r="1.2" fill="currentColor" stroke="none"/></svg> Site com TLS 1.3</span>
+        <span class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21.5s7.5-3.4 7.5-9.4V5.9L12 2.9 4.5 5.9v6.2c0 6 7.5 9.4 7.5 9.4Z"/><path d="m9 11.8 2.2 2.2L15.4 9.8"/></svg> PCI-DSS nível 1</span>
+        <span class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.8"/><path d="M3.4 12h17.2M12 3.2a14 14 0 0 1 0 17.6 14 14 0 0 1 0-17.6Z"/></svg> Dados no Brasil</span>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-legal">
+        <p style="margin-bottom:.5rem">Nutri&Live Tecnologia em Saúde Ltda. — CNPJ 58.412.907/0001-24. Av. Paulista, 1374 — 11º andar, Bela Vista, São Paulo/SP, 01310-100.</p><p style="margin-bottom:.5rem">O Nutri&Live é uma ferramenta de organização e educação alimentar. Não substitui consulta, diagnóstico ou prescrição de profissional de saúde. Planos gerados no app são sugestões educativas e devem ser validados por um nutricionista habilitado.</p><p style="margin-bottom:.5rem">Pagamentos processados por instituição parceira certificada PCI-DSS nível 1. Nutri&Live não armazena o número completo do seu cartão.</p>
+        <p>© 2026 Nutri&Live. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/main.js" defer></script>
+</body>
+</html>
