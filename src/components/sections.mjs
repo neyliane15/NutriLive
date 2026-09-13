@@ -27,46 +27,125 @@ export const hero = (c) => {
   const h = c.hero;
   const proof = h.proof.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   return `
-<section class="hero" id="topo">
-  <div class="bg-art" aria-hidden="true">
-    <span class="bg-blob float-slow" style="width:340px;height:340px;background:#B7E3C7;right:-90px;top:-70px"></span>
-    <span class="bg-blob float-slower" style="width:260px;height:260px;background:#DFF5B8;left:-110px;bottom:-40px;opacity:.5"></span>
-  </div>
+<section class="hero hero-nu" id="topo">
   <div class="container">
+    <div style="margin-bottom:clamp(1.75rem,1rem+2vw,2.75rem)">${audienceSwitch(c.key)}</div>
     <div class="hero-grid">
       <div class="hero-copy">
-        <div data-reveal="fade">${audienceSwitch(c.key)}</div>
-        ${h.badge ? `<p class="pill-note" data-reveal="fade" style="--reveal-delay:60ms">${icon.sparkles()}<span>${h.badge}</span></p>` : ""}
-        <h1 class="display-1" data-reveal style="--reveal-delay:100ms">${renderTitle(h.title)}</h1>
-        <p class="lead measure-sm" data-reveal style="--reveal-delay:160ms">${h.lead}</p>
-        <ul class="hero-bullets" data-reveal style="--reveal-delay:220ms">
-          ${h.bullets.map((b) => `<li><span class="tick" aria-hidden="true">${icon.check()}</span><span>${b}</span></li>`).join("")}
-        </ul>
-        <div class="hero-cta" data-reveal style="--reveal-delay:280ms">
-          <a class="btn btn-primary btn-lg" href="${h.primary.href}">${h.primary.label}<span class="btn-arrow" aria-hidden="true">${icon.arrowRight()}</span></a>
-          <a class="btn btn-secondary btn-lg" href="${h.secondary.href}">${h.secondary.label}</a>
+        <h1 class="display-1">${renderTitle(h.title)}</h1>
+        <p class="lead">${h.lead}</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="${h.primary.href}">${h.primary.label}</a>
+          <a class="link-arrow" href="${h.secondary.href}">${h.secondary.label}</a>
         </div>
-        <div class="hero-proof" data-reveal="fade" style="--reveal-delay:340ms">
-          <div class="avatar-stack" aria-hidden="true">
-            <span class="avatar avatar-sm" style="background:#B7E3C7">AP</span>
-            <span class="avatar avatar-sm" style="background:#DFF5B8;color:#124B31">CR</span>
-            <span class="avatar avatar-sm" style="background:#89CFA5;color:#0D3524">RS</span>
-            <span class="avatar avatar-sm" style="background:#17603D;color:#fff">+</span>
-          </div>
+        <div class="hero-proof">
+          <span class="quote-stars" style="margin:0" aria-label="4,9 de 5 estrelas">${icon.star().repeat(5)}</span>
           <p class="hero-proof-text">${proof}</p>
         </div>
       </div>
-      <div class="hero-stage" data-reveal="scale" style="--reveal-delay:180ms">
+      <div class="hero-stage">
         <span class="hero-stage-glow" aria-hidden="true"></span>
         <div class="device-duo">
-          ${device(c.screen, { cls: "float-slow" })}
-          ${device(c.heroScreen2 || "compras", { size: "device-sm", cls: "float-slower" })}
+          ${device(c.screen)}
+          ${device(c.heroScreen2 || "compras", { size: "device-sm" })}
         </div>
       </div>
     </div>
   </div>
 </section>`;
 };
+
+/* ---------- Faixa de produtos (padrão Nubank) ---------- */
+export const tiles = (c) => `
+<section class="tiles-band">
+  <div class="container">
+    <div class="tiles-head">
+      <h2 style="font-size:var(--fs-h3)">${
+        c.key === "voce" ? "Tudo em um app só" : c.key === "nutri" ? "Tudo em um painel só" : "Tudo em uma conta só"
+      }</h2>
+      <a class="link-arrow" href="#recursos">Ver por dentro</a>
+    </div>
+    <div class="tiles-scroll">
+      ${c.tiles
+        .map(
+          (t) => `<a class="tile" href="${t.href}">
+        <span class="icon-tile" aria-hidden="true">${icon[t.icon] ? icon[t.icon]() : icon.check()}</span>
+        <h3>${t.title}</h3>
+        <p>${t.text}</p>
+        <span class="tile-go">Saiba mais ${icon.arrowRight()}</span>
+      </a>`
+        )
+        .join("")}
+    </div>
+  </div>
+</section>`;
+
+/* ---------- Faixa cheia na cor da marca (padrão Nubank) ---------- */
+export const band = (c) => `
+<section class="band section-deep">
+  <div class="container">
+    <div class="band-grid">
+      <div>
+        <h2 class="display-2">${c.band.title}</h2>
+        <p class="lead" style="margin-top:1.25rem">${c.band.text}</p>
+        <div class="cluster" style="margin-top:2rem">
+          <a class="btn btn-light btn-lg" href="${c.band.cta.href}">${c.band.cta.label}</a>
+        </div>
+      </div>
+      <div style="display:grid;place-items:center">
+        ${device(c.band.screen)}
+      </div>
+    </div>
+  </div>
+</section>`;
+
+/* ---------- Baixe o app, com QR (padrão Nubank) ---------- */
+export const appBand = () => `
+<section class="section app-band">
+  <div class="container">
+    <div class="app-grid">
+      <div>
+        <p class="eyebrow">Baixe o app</p>
+        <h2 style="margin-top:.75rem;max-width:16ch">Aponte a câmera e comece agora.</h2>
+        <p class="lead measure-sm" style="margin-top:1rem">Funciona em iPhone e Android, sincroniza sozinho e continua funcionando quando a internet cai.</p>
+        <div class="app-stores">
+          <a class="store-badge" href="#" data-noop aria-label="Baixar na App Store">
+            ${icon.apple_store()}<span><span class="sb-top">Baixe na</span><span class="sb-main">App Store</span></span>
+          </a>
+          <a class="store-badge" href="#" data-noop aria-label="Baixar no Google Play">
+            ${icon.play_store()}<span><span class="sb-top">Disponível no</span><span class="sb-main">Google Play</span></span>
+          </a>
+        </div>
+      </div>
+      <div class="qr-card">
+        <div class="qr-box" data-app-qr aria-label="QR Code para baixar o aplicativo Nutri&amp;Live"></div>
+        <p class="qr-note">Aponte a câmera do celular para abrir a loja</p>
+      </div>
+    </div>
+  </div>
+</section>`;
+
+/* ---------- Reconhecimento ---------- */
+export const awards = () => `
+<section class="section section-sm">
+  <div class="container">
+    <div class="awards">
+      ${[
+        ["2026", "Melhor app de saúde", "Google Play — Escolha do editor"],
+        ["2026", "Top 10 healthtech", "Distrito Healthtech Report"],
+        ["2025", "Prêmio Reclame Aqui", "categoria Saúde e Bem-estar"],
+        ["4,9 ★", "38 mil avaliações", "App Store e Google Play"]
+      ]
+        .map(
+          (a) => `<div class="award">
+        <span class="icon-tile" aria-hidden="true">${icon.star()}</span>
+        <span><span class="yr">${a[0]}</span><b>${a[1]}</b><span class="src">${a[2]}</span></span>
+      </div>`
+        )
+        .join("")}
+    </div>
+  </div>
+</section>`;
 
 /* ---------- Logo strip ---------- */
 export const logostrip = (labels) => `

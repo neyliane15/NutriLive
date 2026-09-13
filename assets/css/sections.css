@@ -93,7 +93,7 @@
 .device-statusbar .sb-icons { display: flex; gap: 3px; align-items: center; }
 .device-statusbar svg { height: 10px; width: auto; }
 
-.device-body { flex: 1; min-height: 0; overflow: hidden; padding: 0 12px 12px; }
+.device-body { flex: 1; min-height: 0; overflow: hidden; padding: 0 12px 12px; display: flex; flex-direction: column; }
 .device-sm .device-body { padding: 0 9px 9px; }
 
 .device-float {
@@ -110,8 +110,8 @@
 
 /* Duo / trio arrangement */
 .device-duo { position: relative; display: flex; align-items: center; justify-content: center; }
-.device-duo .device:nth-child(2) { margin-left: -58px; margin-top: 64px; }
-@media (min-width: 1180px) { .device-duo .device:nth-child(2) { margin-left: -46px; } }
+.device-duo .device:nth-child(2) { margin-left: -46px; margin-top: 72px; }
+@media (min-width: 1024px) { .device-duo { gap: 18px; } .device-duo .device:nth-child(2) { margin-left: 0; margin-top: 84px; } }
 @media (max-width: 479px) { .device-duo .device:nth-child(2) { display: none; } }
 
 /* ---------------- Mini app UI (inside device) ---------------- */
@@ -158,6 +158,7 @@
 .mini-tick.on { background: var(--leaf-600); border-color: var(--leaf-600); }
 .mini-tick.on::after { content: ""; width: 6px; height: 3px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translate(0.5px,-1px); }
 .mini-tabbar {
+  margin-top: auto !important;
   display: flex; align-items: center; justify-content: space-around;
   padding: 7px 4px 3px; margin: 8px -4px 0; border-top: 1px solid var(--ink-100);
   font-size: 7px; font-weight: var(--fw-semi); color: var(--ink-400);
@@ -416,3 +417,87 @@
 .legal-body h2:first-child { margin-top: 0 !important; }
 .legal-body p + p { margin-top: var(--sp-4); }
 .legal-body b { color: var(--ink-900); font-weight: var(--fw-semi); }
+
+/* =========================================================================
+   Layout no padrão Nubank
+   ========================================================================= */
+
+/* ---------- Hero: manchete grande à esquerda, produto à direita ---------- */
+.hero-nu { background: var(--white); padding-block: clamp(2rem,1rem+3vw,4rem) 0; overflow: clip; }
+.hero-nu .hero-grid { align-items: center; gap: clamp(2rem,1rem+4vw,4rem); }
+.hero-nu .hero-copy > * + * { margin-top: var(--sp-6); }
+.hero-nu .display-1 { max-width: 14ch; }
+.hero-nu .lead { max-width: 34ch; font-size: clamp(1.0625rem,1rem+.5vw,1.375rem); color: var(--ink-700); }
+.hero-nu .hero-cta { margin-top: var(--sp-8) !important; align-items: center; }
+.hero-nu .hero-stage { min-height: 0; }
+
+/* Faixa de produtos logo abaixo do hero — a assinatura do Nubank */
+.tiles-band { background: var(--bg-soft); padding-block: clamp(2rem,1.4rem+2.4vw,3.5rem); }
+.tiles-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; }
+.tiles-scroll {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(224px, 1fr);
+  gap: var(--sp-4); margin-top: var(--sp-6);
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  padding-bottom: .5rem; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter);
+  scrollbar-width: thin;
+}
+@media (min-width: 1100px) {
+  .tiles-scroll { grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); overflow: visible; margin-inline: 0; padding-inline: 0; }
+}
+.tile {
+  scroll-snap-align: start;
+  display: flex; flex-direction: column; gap: var(--sp-3);
+  background: var(--white); border-radius: var(--r-lg);
+  padding: var(--sp-5); min-height: 172px;
+  border: 1px solid transparent;
+  transition: transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out), border-color var(--dur-3) var(--ease-out);
+}
+@media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); border-color: var(--leaf-200); } }
+.tile h3 { font-size: 1.0625rem; font-weight: var(--fw-bold); letter-spacing: -0.018em; }
+.tile p { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.5; flex: 1; }
+.tile .tile-go { display: flex; align-items: center; gap: .375rem; font-size: var(--fs-xs); font-weight: var(--fw-bold); color: var(--leaf-700); }
+.tile .tile-go svg { width: 15px; height: 15px; transition: transform var(--dur-2) var(--ease-out); }
+.tile:hover .tile-go svg { transform: translateX(3px); }
+
+/* ---------- Faixa cheia na cor da marca ---------- */
+.band {
+  background: var(--leaf-700); color: var(--text-on-deep);
+  padding-block: clamp(3rem,2rem+4vw,5.5rem); position: relative; overflow: clip;
+}
+.band::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(70% 120% at 88% 10%, rgba(169,221,92,.16), transparent 62%);
+}
+.band .container { position: relative; z-index: 1; }
+.band-grid { display: grid; gap: clamp(2rem,1rem+3vw,3.5rem); align-items: center; }
+@media (min-width: 900px) { .band-grid { grid-template-columns: 1.15fr 1fr; } }
+.band h2 { color: var(--white); max-width: 18ch; }
+.band .lead { color: var(--text-on-deep-muted); max-width: 44ch; }
+
+/* ---------- Baixe o app (QR + lojas) — outra assinatura do Nubank ---------- */
+.app-band { background: var(--bg-mint); }
+.app-grid { display: grid; gap: clamp(2rem,1rem+4vw,4rem); align-items: center; }
+@media (min-width: 900px) { .app-grid { grid-template-columns: 1fr auto; } }
+.qr-card {
+  background: var(--white); border-radius: var(--r-xl); padding: var(--sp-5);
+  box-shadow: var(--sh-md); display: grid; gap: var(--sp-3); justify-items: center;
+  width: max-content; margin-inline: auto;
+}
+.qr-card .qr-box { width: 168px; height: 168px; }
+.qr-card .qr-box svg { width: 100%; height: 100%; display: block; }
+.qr-card .qr-note { font-size: var(--fs-2xs); color: var(--text-soft); text-align: center; max-width: 18ch; line-height: 1.4; }
+.app-stores { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: var(--sp-6); }
+.app-stores .store-badge { border-color: var(--ink-300); color: var(--ink-900); }
+.app-stores .store-badge:hover { background: var(--white); border-color: var(--leaf-500); }
+
+/* ---------- Rodapé na cor da marca ---------- */
+.site-footer { background: var(--leaf-800); }
+
+/* ---------- Prêmios / reconhecimento ---------- */
+.awards { display: grid; gap: var(--sp-5); }
+@media (min-width: 700px) { .awards { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .awards { grid-template-columns: repeat(4, 1fr); } }
+.award { display: flex; gap: var(--sp-3); align-items: flex-start; }
+.award .yr { font-family: var(--font-sans); font-size: var(--fs-2xs); font-weight: var(--fw-bold); color: var(--leaf-600); letter-spacing: var(--ls-wide); }
+.award b { display: block; font-size: var(--fs-sm); font-weight: var(--fw-bold); margin-top: 2px; }
+.award span.src { display: block; font-size: var(--fs-xs); color: var(--text-soft); margin-top: 2px; }

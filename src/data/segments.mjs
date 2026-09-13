@@ -29,6 +29,19 @@ export const content = {
       proof: "**+38 mil pessoas** usam o Nutri&Live todo dia · 4,9 ★ nas lojas"
     },
 
+    tiles: [
+      { icon: "clipboard", title: "Plano alimentar", text: "De 1, 3 ou 7 dias, com o que você já gosta de comer.", href: "#recursos" },
+      { icon: "book", title: "Receitas inteligentes", text: "Diz o que tem em casa e sai o jantar, com os macros contados.", href: "#recursos" },
+      { icon: "cart", title: "Lista de compras", text: "Sai do plano pro mercado, com quantidade e preço estimado.", href: "#recursos" },
+      { icon: "trend", title: "Minha evolução", text: "Peso, medidas e constância em gráficos que fazem sentido.", href: "#recursos" },
+      { icon: "users", title: "Seu nutri junto", text: "Conecte a sua nutricionista e ela acompanha tudo pelo painel.", href: "nutricionistas.html" }
+    ],
+    band: {
+      title: "Assinar é fácil. Cancelar também.",
+      text: "Sem fidelidade, sem multa e sem aquela ligação de retenção. Você cancela em dois toques dentro do app, e ainda tem 30 dias para pedir tudo de volta.",
+      cta: { label: "Ver os planos", href: "#planos" },
+      screen: "home"
+    },
     stats: [
       { num: "38.412", label: "pessoas cuidando da alimentação todo dia" },
       { num: "2,4 mi", label: "refeições registradas nos últimos 12 meses" },
@@ -192,6 +205,19 @@ export const content = {
       proof: "**1.240 nutricionistas** já atendem pelo Nutri&Live · CFN-friendly"
     },
 
+    tiles: [
+      { icon: "users", title: "Painel de pacientes", text: "Ordenado por risco de abandono, com a adesão da semana.", href: "#recursos" },
+      { icon: "clipboard", title: "Prescrição em minutos", text: "Rascunho calculado, você revisa e envia com o seu nome.", href: "#recursos" },
+      { icon: "scale", title: "Antropometria", text: "Dobras, circunferências e composição corporal com gráficos.", href: "#recursos" },
+      { icon: "chart", title: "Relatórios de adesão", text: "Por paciente ou pela carteira inteira, semana a semana.", href: "#recursos" },
+      { icon: "camera", title: "App com a sua marca", text: "Seu logo, suas cores e o seu CRN no celular do paciente.", href: "#recursos" }
+    ],
+    band: {
+      title: "Teste 14 dias. Sem cartão, sem pegadinha.",
+      text: "Você cria a conta, migra uma paciente e monta o primeiro plano hoje. Se não fizer sentido, é só não assinar — não pedimos cartão para começar.",
+      cta: { label: "Começar teste grátis", href: "checkout.html?seg=nutri&plan=profissional" },
+      screen: "dashboard"
+    },
     stats: [
       { num: "1.240", label: "nutricionistas ativos no Brasil" },
       { num: "4 min", label: "para montar um plano completo, em média" },
@@ -357,6 +383,19 @@ export const content = {
       proof: "**212 unidades** ativas · redes de 1 a 40 academias"
     },
 
+    tiles: [
+      { icon: "building", title: "Ativação em massa", text: "Importe a base do seu sistema e convide todo mundo de uma vez.", href: "#recursos" },
+      { icon: "trend", title: "Risco de cancelamento", text: "Cruzamos frequência e registro alimentar para avisar antes.", href: "#recursos" },
+      { icon: "chart", title: "Painel da rede", text: "Engajamento por unidade, por professor e por aluno.", href: "#recursos" },
+      { icon: "camera", title: "Whitelabel", text: "App, e-mail e PDF com a sua marca. O aluno vê a academia.", href: "#recursos" },
+      { icon: "gear", title: "Integrações", text: "Tecnofit, Pacto, EVO, Next Fit e W12 — ou a nossa API.", href: "#recursos" }
+    ],
+    band: {
+      title: "O aluno que come bem treina mais tempo.",
+      text: "Entre os alunos que ativam nutrição, o cancelamento cai 31% e a permanência média sobe 2,7 meses. É retenção que aparece no caixa.",
+      cta: { label: "Falar com vendas", href: "checkout.html?seg=academia&plan=academia" },
+      screen: "academia"
+    },
     stats: [
       { num: "212", label: "unidades usando o Nutri&Live hoje" },
       { num: "−31%", label: "de cancelamento entre alunos que ativam nutrição" },

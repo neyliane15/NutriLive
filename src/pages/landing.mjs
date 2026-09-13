@@ -2,8 +2,8 @@ import { shell } from "./shell.mjs";
 import { header } from "../components/header.mjs";
 import { footer } from "../components/footer.mjs";
 import {
-  hero, logostrip, stats, steps, showcases, features,
-  pricing, trust, testimonials, faq, crossSell, finalCta, stickyCta
+  hero, tiles, band, appBand, awards, logostrip, stats, steps, showcases,
+  features, pricing, trust, testimonials, faq, crossSell, finalCta, stickyCta
 } from "../components/sections.mjs";
 import { site } from "../data/site.mjs";
 
@@ -73,19 +73,24 @@ export const landing = (c) => {
     desc: c.metaDesc,
     canonical: c.slug === "index.html" ? "" : c.slug,
     jsonLd: jsonLd(c),
+    scripts: ["qr", "main"],
     body: `
 ${header({ current: c.key, cta: { label: "Assinar", href: `checkout.html?seg=${c.key}&plan=${featured.planKey}` } })}
 <main id="conteudo">
   ${hero(c)}
+  ${tiles(c)}
   ${logostrip(h.logos)}
-  ${stats(c.stats)}
-  ${steps(c.steps, h.steps)}
   ${showcases(c.showcases)}
+  ${band(c)}
+  ${steps(c.steps, h.steps)}
   ${features(c.features, h.features)}
   ${pricing(c)}
+  ${stats(c.stats)}
   ${testimonials(c.testimonials, h.testimonials)}
+  ${awards()}
   ${trust()}
   ${faq(c.faq, c.key)}
+  ${appBand()}
   ${crossSell(c.key)}
   ${finalCta(c)}
 </main>

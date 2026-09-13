@@ -347,7 +347,7 @@ select.input {
 }
 .avatar-sm { width: 34px; height: 34px; font-size: var(--fs-2xs); }
 .avatar-stack { display: flex; }
-.avatar-stack .avatar + .avatar { margin-left: -12px; box-shadow: 0 0 0 3px var(--white); }
+.avatar-stack .avatar + .avatar { margin-left: -9px; box-shadow: 0 0 0 2.5px var(--white); }
 .section-soft .avatar-stack .avatar + .avatar { box-shadow: 0 0 0 3px var(--bg-soft); }
 
 /* ---------------- Divider / rule ---------------- */
