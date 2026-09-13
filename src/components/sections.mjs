@@ -245,7 +245,7 @@ export const steps = (list, head) => `
 const SHOWCASE_SKINS = {
   voce: ["is-light", "is-deep", "is-mint"],
   nutri: ["is-mint", "is-light", "is-deep"],
-  academia: ["is-light", "is-mint", "is-deep"]
+  academia: ["is-mint", "is-deep", "is-light"]
 };
 
 export const showcases = (list, segKey = "voce") =>
