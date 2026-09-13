@@ -204,13 +204,20 @@ export const steps = (list, head) => `
   </div>
 </section>`;
 
-/* ---------- Showcases ---------- */
-export const showcases = (list) => `
-<section class="section section-soft" id="recursos">
+/* ---------- Showcases ----------
+   Cada linha ganha o seu próprio fundo: claro, cor da marca, menta.
+   É assim que o Nubank mantém a cor presente ao longo da página. */
+const SHOWCASE_SKIN = ["is-light", "is-deep", "is-mint"];
+
+export const showcases = (list) =>
+  list
+    .map((s, i) => {
+      const skin = SHOWCASE_SKIN[i % SHOWCASE_SKIN.length];
+      const deep = skin === "is-deep";
+      return `
+<section class="section showcase-section ${skin}"${i === 0 ? ' id="recursos"' : ""}>
   <div class="container">
-    ${list
-      .map(
-        (s) => `<div class="showcase${s.flip ? " is-flip" : ""}">
+    <div class="showcase${s.flip ? " is-flip" : ""}">
       <div class="showcase-copy" data-reveal="${s.flip ? "right" : "left"}">
         <p class="eyebrow">${s.eyebrow}</p>
         <h2 style="margin-top:.75rem">${s.title}</h2>
@@ -225,13 +232,13 @@ export const showcases = (list) => `
         </ul>
       </div>
       <div class="showcase-media" data-reveal="${s.flip ? "left" : "right"}">
-        <div class="media-panel">${device(s.screen)}</div>
+        <div class="media-panel${deep ? " media-panel-deep" : ""}">${device(s.screen)}</div>
       </div>
-    </div>`
-      )
-      .join("")}
+    </div>
   </div>
 </section>`;
+    })
+    .join("");
 
 /* ---------- Feature grid ---------- */
 export const features = (list, head) => `
@@ -242,7 +249,7 @@ export const features = (list, head) => `
       <h2>${head.title}</h2>
       ${head.text ? `<p class="lead measure">${head.text}</p>` : ""}
     </div>
-    <div class="grid-4 mt-16" data-reveal-group>
+    <div class="grid-3 mt-16" data-reveal-group>
       ${list
         .map(
           (f) => `<article class="card card-interactive feature-card" data-reveal>

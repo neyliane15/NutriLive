@@ -101,10 +101,8 @@ export const content = {
     features: [
       { icon: "droplet", title: "Hidratação", text: "Meta de água calculada pelo seu peso, com lembretes que não enchem o saco." },
       { icon: "flame", title: "Calorias e macros", text: "Proteínas, carboidratos e gorduras contados sem você precisar pesar tudo." },
-      { icon: "cart", title: "Lista de compras", text: "Sai do plano direto pro mercado, com quantidade e preço estimado por item." },
       { icon: "target", title: "Score diário", text: "Uma nota simples de 0 a 100 que mostra como foi o seu dia. Sem punição." },
       { icon: "bell", title: "Lembretes gentis", text: "Você escolhe o horário e o tom. Dá pra silenciar tudo com um toque." },
-      { icon: "clipboard", title: "Conecte seu nutri", text: "Se você já tem nutricionista, ela acompanha tudo pelo painel dela." },
       { icon: "phone", title: "Funciona offline", text: "Registrou no avião ou no elevador? Sincroniza sozinho quando voltar." },
       { icon: "download", title: "Seus dados são seus", text: "Exporte tudo em PDF ou CSV a qualquer momento. Sem pedir permissão." }
     ],
@@ -277,9 +275,7 @@ export const content = {
 
     features: [
       { icon: "clipboard", title: "Prontuário completo", text: "Anamnese, antropometria, exames e evolução clínica com histórico datado." },
-      { icon: "scale", title: "Antropometria", text: "Dobras, circunferências, bioimpedância e composição corporal com gráficos." },
       { icon: "file", title: "PDF com a sua marca", text: "Logo, cores, CRN e assinatura. O material sai profissional sem designer." },
-      { icon: "chart", title: "Relatórios de adesão", text: "Semana a semana, por paciente ou pela carteira inteira." },
       { icon: "calendar", title: "Agenda e retornos", text: "Lembrete automático de retorno para o paciente e para você." },
       { icon: "users", title: "Multiprofissional", text: "Divida a carteira com sócias e estagiárias, com permissão por papel." },
       { icon: "shield", title: "Sigilo profissional", text: "Trilha de auditoria de quem acessou cada prontuário, e quando." },
@@ -457,10 +453,8 @@ export const content = {
     features: [
       { icon: "building", title: "Multiunidade", text: "Uma conta, várias academias, com permissão e meta por unidade." },
       { icon: "users", title: "Papéis da equipe", text: "Recepção, consultor, professor e gestor — cada um vê só o que precisa." },
-      { icon: "trend", title: "Risco de cancelamento", text: "Modelo que cruza frequência, registro alimentar e evolução do aluno." },
       { icon: "dumbbell", title: "Integra com o treino", text: "Gasto calórico do treino entra no cálculo do plano do aluno." },
       { icon: "gear", title: "API e webhooks", text: "Conecte ao seu CRM, BI ou sistema de cobrança sem retrabalho." },
-      { icon: "camera", title: "Marca própria", text: "Whitelabel de app, e-mail e PDF. O aluno vê a sua academia." },
       { icon: "headset", title: "Implantação assistida", text: "Um especialista acompanha o seu primeiro mês, do CSV ao primeiro relatório." },
       { icon: "receipt", title: "Faturamento único", text: "Uma nota fiscal por mês para a rede toda, com rateio por unidade." }
     ],

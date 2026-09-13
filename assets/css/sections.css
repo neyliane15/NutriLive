@@ -501,3 +501,17 @@
 .award .yr { font-family: var(--font-sans); font-size: var(--fs-2xs); font-weight: var(--fw-bold); color: var(--leaf-600); letter-spacing: var(--ls-wide); }
 .award b { display: block; font-size: var(--fs-sm); font-weight: var(--fw-bold); margin-top: 2px; }
 .award span.src { display: block; font-size: var(--fs-xs); color: var(--text-soft); margin-top: 2px; }
+
+/* ---------- Showcase: uma pele por linha ---------- */
+.showcase-section.is-light { background: var(--white); }
+.showcase-section.is-mint  { background: var(--bg-soft); }
+.showcase-section.is-deep  { background: var(--leaf-800); color: var(--text-on-deep); }
+.showcase-section.is-deep h2 { color: var(--white); }
+.showcase-section.is-deep .lead { color: var(--text-on-deep-muted); }
+.showcase-section.is-deep .eyebrow { color: var(--lime-300); }
+.showcase-section.is-deep .showcase-list span { color: var(--text-on-deep-muted); }
+.showcase-section.is-deep .showcase-list b { color: var(--white); }
+.showcase-section.is-deep .showcase-list .tick { background: var(--lime-300); color: var(--leaf-900); }
+.showcase-section.is-deep :focus-visible { outline-color: var(--lime-300); }
+.showcase-section.is-light .media-panel { background: linear-gradient(160deg, var(--leaf-50) 0%, var(--white) 100%); border: 1px solid var(--leaf-100); }
+.showcase-section.is-deep .media-panel { background: linear-gradient(160deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.02) 100%); }
