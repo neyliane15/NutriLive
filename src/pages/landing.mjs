@@ -70,6 +70,7 @@ export const landing = (c) => {
     desc: c.metaDesc,
     canonical: c.slug === "index.html" ? "" : c.slug,
     jsonLd: jsonLd(c),
+    ogImage: `assets/img/og-${c.key}.jpg`,
     scripts: ["qr", "main"],
     body: `
 ${header({ current: c.key, cta: { label: "Assinar", href: `checkout.html?seg=${c.key}&plan=${featured.planKey}` } })}

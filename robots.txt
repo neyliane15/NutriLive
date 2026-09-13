@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nutrielive.com.br/sitemap.xml

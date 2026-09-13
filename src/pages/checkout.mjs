@@ -25,7 +25,7 @@ const catalogue = () => {
 };
 
 const stepper = () => `
-<div class="co-steps" aria-label="Etapas da assinatura">
+<div class="co-steps" role="group" aria-label="Etapas da assinatura">
   <div class="co-step" data-step-ind="1" data-state="current">
     <span class="co-step-dot" aria-hidden="true">1</span><span class="co-step-label">Seus dados</span>
   </div>
@@ -37,6 +37,7 @@ const stepper = () => `
   <div class="co-step" data-step-ind="3" data-state="todo">
     <span class="co-step-dot" aria-hidden="true">3</span><span class="co-step-label">Pronto</span>
   </div>
+  <p class="co-steps-now sr-only" data-step-now>Etapa 1 de 3: seus dados.</p>
 </div>`;
 
 const cardBrandSvg = `
@@ -44,8 +45,24 @@ const cardBrandSvg = `
   <text x="48" y="12.5" text-anchor="end" font-family="Inter, sans-serif" font-size="11" font-weight="800" letter-spacing="-0.02em" fill="currentColor" data-brand-text></text>
 </svg>`;
 
+/* A dismissible, instructive alert used for declined payments. */
+const payAlert = () => `
+<div class="pay-alert" data-pay-alert hidden>
+  <div class="pay-alert-icon" aria-hidden="true">${icon.alert()}</div>
+  <div class="pay-alert-body">
+    <p class="pay-alert-title" data-pay-alert-title></p>
+    <p class="pay-alert-text" data-pay-alert-text></p>
+    <ul class="pay-alert-list" data-pay-alert-list></ul>
+    <div class="pay-alert-actions">
+      <button class="btn btn-secondary btn-sm" type="button" data-pay-retry>Tentar de novo</button>
+      <button class="btn btn-ghost btn-sm" type="button" data-pay-switch-pix>${icon.pix()} Pagar com Pix</button>
+    </div>
+    <p class="pay-alert-code text-2xs" data-pay-alert-code></p>
+  </div>
+</div>`;
+
 const creditPanel = () => `
-<div class="pm-panel" id="pm-credito" role="tabpanel" aria-labelledby="tab-credito" tabindex="0">
+<div class="pm-panel" id="pm-credito" role="tabpanel" aria-labelledby="tab-credito">
   <div class="cc-preview" data-cc-preview data-face="front" aria-hidden="true">
     <div class="cc-card">
       <div class="cc-face cc-front">
@@ -61,7 +78,7 @@ const creditPanel = () => `
             <span class="cc-fieldlabel">Nome no cartão</span>
             <span class="cc-fieldvalue" data-cc-name>Seu nome aqui</span>
           </span>
-          <span>
+          <span class="cc-exp">
             <span class="cc-fieldlabel">Validade</span>
             <span class="cc-fieldvalue" data-cc-exp>MM/AA</span>
           </span>
@@ -70,7 +87,7 @@ const creditPanel = () => `
       <div class="cc-face cc-back">
         <div class="cc-magstripe"></div>
         <div class="cc-cvvrow">
-          <span class="cc-fieldlabel" style="white-space:nowrap">CVV</span>
+          <span class="cc-fieldlabel">CVV</span>
           <span class="cc-cvvbox" data-cc-cvv>•••</span>
         </div>
         <p class="cc-backnote">Os 3 dígitos ficam no verso do cartão, ao lado da assinatura. Na Amex são 4 dígitos na frente.</p>
@@ -81,7 +98,8 @@ const creditPanel = () => `
   <div class="field" data-field="numero">
     <label class="field-label" for="cc-numero">Número do cartão</label>
     <div class="input-wrap">
-      <input class="input" id="cc-numero" name="cc-numero" inputmode="numeric" autocomplete="cc-number"
+      <input class="input" id="cc-numero" name="cc-numero" type="text" inputmode="numeric" pattern="[0-9 ]*"
+             enterkeyhint="next" autocomplete="section-credito cc-number"
              placeholder="0000 0000 0000 0000" maxlength="23" aria-describedby="err-numero" spellcheck="false">
       <span class="input-affix" data-brand-affix></span>
     </div>
@@ -90,24 +108,30 @@ const creditPanel = () => `
 
   <div class="field" data-field="nome">
     <label class="field-label" for="cc-nome">Nome impresso no cartão</label>
-    <input class="input" id="cc-nome" name="cc-nome" autocomplete="cc-name" placeholder="Como está no cartão"
-           aria-describedby="err-nome" spellcheck="false">
+    <input class="input" id="cc-nome" name="cc-nome" type="text" enterkeyhint="next"
+           autocomplete="section-credito cc-name" placeholder="Como está no cartão"
+           aria-describedby="err-nome" spellcheck="false" autocapitalize="characters">
     <span class="field-error" id="err-nome" role="alert"></span>
   </div>
 
   <div class="field-row field-row-2">
-    <div class="field" data-field="validade" style="margin-top:0">
+    <div class="field" data-field="validade">
       <label class="field-label" for="cc-validade">Validade</label>
-      <input class="input" id="cc-validade" name="cc-validade" inputmode="numeric" autocomplete="cc-exp"
+      <input class="input" id="cc-validade" name="cc-validade" type="text" inputmode="numeric" pattern="[0-9/]*"
+             enterkeyhint="next" autocomplete="section-credito cc-exp"
              placeholder="MM/AA" maxlength="5" aria-describedby="err-validade">
       <span class="field-error" id="err-validade" role="alert"></span>
     </div>
-    <div class="field" data-field="cvv" style="margin-top:0">
+    <div class="field" data-field="cvv">
       <label class="field-label" for="cc-cvv">Código de segurança
-        <span class="info-dot" title="3 dígitos no verso do cartão (4 na frente, se for Amex)">?</span>
+        <button class="info-dot" type="button" data-cvv-help aria-expanded="false" aria-controls="cvv-help">
+          <span aria-hidden="true">?</span><span class="sr-only">Onde fica o código de segurança</span>
+        </button>
       </label>
-      <input class="input" id="cc-cvv" name="cc-cvv" inputmode="numeric" autocomplete="cc-csc"
-             placeholder="CVV" maxlength="4" aria-describedby="err-cvv">
+      <input class="input" id="cc-cvv" name="cc-cvv" type="text" inputmode="numeric" pattern="[0-9]*"
+             enterkeyhint="done" autocomplete="section-credito cc-csc"
+             placeholder="CVV" maxlength="4" aria-describedby="err-cvv cvv-help">
+      <span class="field-hint" id="cvv-help" hidden>São os 3 dígitos do verso do cartão. Na Amex, são 4 na frente.</span>
       <span class="field-error" id="err-cvv" role="alert"></span>
     </div>
   </div>
@@ -125,7 +149,7 @@ const creditPanel = () => `
 </div>`;
 
 const debitPanel = () => `
-<div class="pm-panel" id="pm-debito" role="tabpanel" aria-labelledby="tab-debito" tabindex="0" hidden>
+<div class="pm-panel" id="pm-debito" role="tabpanel" aria-labelledby="tab-debito" hidden>
   <div class="notice" style="margin-bottom:1.5rem">
     ${icon.info()}
     <span><b>Como funciona o débito recorrente.</b> Você autoriza uma vez e, todo mês, o valor sai direto da sua conta. Na primeira cobrança o seu banco pode pedir uma confirmação no app dele.</span>
@@ -134,7 +158,8 @@ const debitPanel = () => `
   <div class="field" data-field="dnumero">
     <label class="field-label" for="db-numero">Número do cartão de débito</label>
     <div class="input-wrap">
-      <input class="input" id="db-numero" name="db-numero" inputmode="numeric" autocomplete="cc-number"
+      <input class="input" id="db-numero" name="db-numero" type="text" inputmode="numeric" pattern="[0-9 ]*"
+             enterkeyhint="next" autocomplete="section-debito cc-number"
              placeholder="0000 0000 0000 0000" maxlength="23" aria-describedby="err-dnumero" spellcheck="false">
       <span class="input-affix" data-brand-affix></span>
     </div>
@@ -143,29 +168,32 @@ const debitPanel = () => `
 
   <div class="field" data-field="dnome">
     <label class="field-label" for="db-nome">Nome impresso no cartão</label>
-    <input class="input" id="db-nome" name="db-nome" autocomplete="cc-name" placeholder="Como está no cartão"
-           aria-describedby="err-dnome" spellcheck="false">
+    <input class="input" id="db-nome" name="db-nome" type="text" enterkeyhint="next"
+           autocomplete="section-debito cc-name" placeholder="Como está no cartão"
+           aria-describedby="err-dnome" spellcheck="false" autocapitalize="characters">
     <span class="field-error" id="err-dnome" role="alert"></span>
   </div>
 
   <div class="field-row field-row-2">
-    <div class="field" data-field="dvalidade" style="margin-top:0">
+    <div class="field" data-field="dvalidade">
       <label class="field-label" for="db-validade">Validade</label>
-      <input class="input" id="db-validade" name="db-validade" inputmode="numeric" autocomplete="cc-exp"
+      <input class="input" id="db-validade" name="db-validade" type="text" inputmode="numeric" pattern="[0-9/]*"
+             enterkeyhint="next" autocomplete="section-debito cc-exp"
              placeholder="MM/AA" maxlength="5" aria-describedby="err-dvalidade">
       <span class="field-error" id="err-dvalidade" role="alert"></span>
     </div>
-    <div class="field" data-field="dcvv" style="margin-top:0">
+    <div class="field" data-field="dcvv">
       <label class="field-label" for="db-cvv">Código de segurança</label>
-      <input class="input" id="db-cvv" name="db-cvv" inputmode="numeric" autocomplete="cc-csc"
+      <input class="input" id="db-cvv" name="db-cvv" type="text" inputmode="numeric" pattern="[0-9]*"
+             enterkeyhint="done" autocomplete="section-debito cc-csc"
              placeholder="CVV" maxlength="4" aria-describedby="err-dcvv">
       <span class="field-error" id="err-dcvv" role="alert"></span>
     </div>
   </div>
 
-  <fieldset style="border:0;padding:0;margin-top:1.5rem">
-    <legend class="field-label" style="padding:0">Seu banco</legend>
-    <div class="bank-grid" role="group" data-banks>
+  <fieldset class="bank-fieldset" data-field="banco">
+    <legend class="field-label">Seu banco</legend>
+    <div class="bank-grid" role="group" aria-describedby="err-banco" data-banks>
       ${[
         ["Nubank", "#820AD1", "N"],
         ["Itaú", "#EC7000", "I"],
@@ -179,17 +207,17 @@ const debitPanel = () => `
         .map(
           ([n, c, m]) =>
             `<button class="bank-opt" type="button" aria-pressed="false" data-bank="${n}">
-              <span class="bank-mark" style="background:${c}${c === "#F8D117" ? ";color:#124B31" : ""}">${m}</span>
-              <span>${n}</span>
+              <span class="bank-mark" style="background:${c}${c === "#F8D117" ? ";color:#124B31" : ""}" aria-hidden="true">${m}</span>
+              <span class="bank-name">${n}</span>
             </button>`
         )
         .join("")}
     </div>
-    <span class="field-error" id="err-banco" role="alert" data-field-error="banco"></span>
+    <span class="field-error" id="err-banco" role="alert"></span>
   </fieldset>
 
-  <label class="choice" style="margin-top:1.5rem;align-items:flex-start" data-field="autorizacao">
-    <input type="checkbox" id="db-auth" data-auth-check>
+  <label class="choice choice-stack" data-field="autorizacao">
+    <input type="checkbox" id="db-auth" data-auth-check aria-describedby="err-autorizacao">
     <span class="choice-radio" style="border-radius:6px" aria-hidden="true"></span>
     <span class="choice-body">
       <span class="choice-title">Autorizo o débito automático mensal</span>
@@ -200,31 +228,40 @@ const debitPanel = () => `
 </div>`;
 
 const pixPanel = () => `
-<div class="pm-panel" id="pm-pix" role="tabpanel" aria-labelledby="tab-pix" tabindex="0" hidden>
+<div class="pm-panel" id="pm-pix" role="tabpanel" aria-labelledby="tab-pix" hidden>
   <div class="pix-wrap">
-    <div>
-      <div class="pix-qr-card">
+    <div class="pix-col-qr">
+      <div class="pix-qr-card" data-pix-qr-card>
         <div class="pix-qr" data-pix-qr role="img" aria-label="QR Code do Pix para pagamento da assinatura"></div>
+        <div class="pix-qr-veil" data-pix-veil hidden aria-hidden="true">
+          <span class="pix-qr-veil-mark">${icon.check()}</span>
+        </div>
         <span class="pix-qr-brand">${icon.pix()} Pix · pagamento na hora</span>
       </div>
-      <p class="text-xs soft text-center" style="margin-top:.75rem">Válido por <b data-pix-clock class="tnum">30:00</b></p>
+      <p class="pix-timer" data-pix-timer>${icon.clock()}<span>Válido por <b data-pix-clock class="tnum">30:00</b></span></p>
+      <button class="btn btn-secondary btn-sm btn-block pix-renew" type="button" data-pix-renew hidden>
+        ${icon.refresh()} Gerar um novo código
+      </button>
     </div>
-    <div>
+    <div class="pix-col-how">
       <ol class="pix-steps">
         <li><span class="n">1</span><span>Abra o app do seu banco e entre em <b>Pix &gt; Pagar com QR Code</b>.</span></li>
         <li><span class="n">2</span><span>Aponte a câmera para o código ao lado — ou use o Pix copia e cola.</span></li>
-        <li><span class="n">3</span><span>Confirme o valor e pronto. A liberação é imediata, sem taxa.</span></li>
+        <li><span class="n">3</span><span>Confirme o valor. A gente reconhece o pagamento aqui na hora.</span></li>
       </ol>
 
       <div class="pix-code">
         <span class="pix-code-text" data-pix-code>—</span>
-        <button class="btn btn-secondary btn-sm pix-copy" type="button" data-pix-copy>${icon.copy()} Copiar</button>
+        <button class="btn btn-secondary btn-sm pix-copy" type="button" data-pix-copy>${icon.copy()} <span data-pix-copy-label>Copiar</span></button>
       </div>
-      <p class="field-hint" data-pix-copied hidden style="color:var(--leaf-700);font-weight:600">Código copiado.</p>
+      <p class="field-hint pix-copied" data-pix-copied hidden>${icon.check()} Código copiado. Cole no app do seu banco.</p>
 
-      <div class="pix-status" data-pix-status>
-        <span class="spin" aria-hidden="true"></span>
-        <span data-pix-status-text>Aguardando o seu pagamento…</span>
+      <div class="pix-status" data-pix-status data-state="waiting">
+        <span class="pix-status-mark" aria-hidden="true"><span class="spin"></span></span>
+        <span class="pix-status-body">
+          <b data-pix-status-text>Aguardando o seu pagamento…</b>
+          <small data-pix-status-sub>Deixe esta página aberta. Assim que o Pix cair, a gente segue sozinho.</small>
+        </span>
       </div>
 
       <div class="notice" style="margin-top:1.25rem">
@@ -235,62 +272,77 @@ const pixPanel = () => `
   </div>
 </div>`;
 
-const summary = () => `
-<aside class="co-aside">
-  <div class="co-summary">
+const summaryInner = () => `
+  <div class="co-summary" data-summary>
     <div class="co-summary-head">
-      <div>
+      <div class="co-summary-id">
         <p class="co-summary-title" data-sum-plan>Plano Plus</p>
         <p class="text-xs soft" data-sum-seg>Para você</p>
       </div>
       <a class="co-planswitch" href="index.html#planos" data-sum-switch>Trocar</a>
+      <button class="co-summary-toggle" type="button" data-summary-toggle aria-expanded="true" aria-controls="resumo-detalhes">
+        <span class="co-summary-toggle-total tnum" data-sum-total-mini>R$ 39,90</span>
+        <span class="co-summary-toggle-word">Detalhes</span>
+        ${icon.chevronDown()}
+      </button>
     </div>
-    <div class="co-summary-body">
-      <ul class="plan-features" style="margin-top:0;gap:.5rem" data-sum-feats></ul>
-      <hr class="rule rule-soft" style="margin:1.25rem 0">
-      <div class="co-line">
-        <span class="cl-label" data-sum-cycle-label>Assinatura mensal</span>
-        <span class="cl-value" data-sum-base>R$ 39,90</span>
-      </div>
-      <div class="co-line is-discount" data-sum-discount-row hidden>
-        <span class="cl-label" data-sum-discount-label>Desconto anual</span>
-        <span class="cl-value" data-sum-discount>− R$ 0,00</span>
-      </div>
-      <div class="co-line is-discount" data-sum-coupon-row hidden>
-        <span class="cl-label">Cupom <b data-sum-coupon-code></b></span>
-        <span class="cl-value" data-sum-coupon>− R$ 0,00</span>
-      </div>
+    <div id="resumo-detalhes" class="co-summary-fold">
+      <div class="co-summary-body">
+        <ul class="plan-features" style="margin-top:0;gap:.5rem" data-sum-feats></ul>
+        <hr class="rule rule-soft" style="margin:1.25rem 0">
+        <div class="co-line">
+          <span class="cl-label" data-sum-cycle-label>Assinatura mensal</span>
+          <span class="cl-value tnum" data-sum-base>R$ 39,90</span>
+        </div>
+        <div class="co-line is-discount" data-sum-discount-row hidden>
+          <span class="cl-label" data-sum-discount-label>Desconto anual</span>
+          <span class="cl-value tnum" data-sum-discount>− R$ 0,00</span>
+        </div>
+        <div class="co-line is-discount" data-sum-coupon-row hidden>
+          <span class="cl-label">Cupom <b data-sum-coupon-code></b>
+            <button class="co-coupon-remove" type="button" data-coupon-remove>remover</button>
+          </span>
+          <span class="cl-value tnum" data-sum-coupon>− R$ 0,00</span>
+        </div>
 
-      <div class="co-coupon">
-        <button class="co-coupon-toggle" type="button" data-coupon-toggle aria-expanded="false" aria-controls="coupon-form">Tenho um cupom</button>
-        <div id="coupon-form" hidden>
-          <div class="co-coupon-form">
-            <label class="sr-only" for="cupom">Código do cupom</label>
-            <input class="input" id="cupom" placeholder="CUPOM" maxlength="16" autocomplete="off" spellcheck="false">
-            <button class="btn btn-secondary" type="button" data-coupon-apply>Aplicar</button>
+        <div class="co-coupon">
+          <button class="co-coupon-toggle" type="button" data-coupon-toggle aria-expanded="false" aria-controls="coupon-form">Tenho um cupom</button>
+          <div id="coupon-form" hidden>
+            <div class="co-coupon-form">
+              <label class="sr-only" for="cupom">Código do cupom</label>
+              <input class="input" id="cupom" placeholder="CUPOM" maxlength="16" autocomplete="off"
+                     spellcheck="false" autocapitalize="characters" enterkeyhint="done" aria-describedby="coupon-msg">
+              <button class="btn btn-secondary" type="button" data-coupon-apply>Aplicar</button>
+            </div>
+            <p class="co-coupon-msg" id="coupon-msg" data-coupon-msg role="status" hidden></p>
           </div>
-          <p class="co-coupon-msg" data-coupon-msg hidden></p>
+        </div>
+
+        <div class="co-total">
+          <span class="ct-label">Total hoje</span>
+          <span class="ct-value tnum" data-sum-total>R$ 39,90</span>
+          <small class="ct-note" data-sum-renew>Renova em 13/10/2026</small>
         </div>
       </div>
-
-      <div class="co-total">
-        <span class="ct-label">Total hoje<small data-sum-renew>Renova em 13/10/2026</small></span>
-        <span class="ct-value tnum" data-sum-total>R$ 39,90</span>
+      <div class="co-summary-foot">
+        <ul class="co-guarantees">
+          ${trustFacts.guarantees.map((g) => `<li>${icon[g.icon] ? icon[g.icon]() : icon.check()}<span>${g.text}</span></li>`).join("")}
+        </ul>
       </div>
     </div>
-    <div class="co-summary-foot">
-      <ul class="co-guarantees">
-        ${trustFacts.guarantees.map((g) => `<li>${icon[g.icon] ? icon[g.icon]() : icon.check()}<span>${g.text}</span></li>`).join("")}
-      </ul>
-    </div>
-  </div>
+  </div>`;
 
-  <ul class="co-trustbar">
-    <li>${icon.lock()} TLS 1.3</li>
-    <li>${icon.shield()} PCI-DSS nível 1</li>
-    <li>${icon.globe()} Dados no Brasil</li>
-  </ul>
+const summary = () => `
+<aside class="co-aside" aria-label="Resumo do pedido">
+  ${summaryInner()}
 </aside>`;
+
+const trustbar = () => `
+<ul class="co-trustbar">
+  <li>${icon.lock()} TLS 1.3</li>
+  <li>${icon.shield()} PCI-DSS nível 1</li>
+  <li>${icon.globe()} Dados no Brasil</li>
+</ul>`;
 
 const checkoutPage = () =>
   shell({
@@ -307,16 +359,16 @@ const checkoutPage = () =>
   </div>
 </header>
 
-<div class="container" style="padding-top:1.25rem">
+<div class="container co-backbar">
   <a class="co-back" href="index.html#planos" data-back>${icon.arrowLeft()} Voltar para os planos</a>
 </div>
 
 <main class="co-main" id="conteudo">
   <div class="container">
-    <div style="margin-bottom:1.5rem">${stepper()}</div>
+    <div class="co-stepbar">${stepper()}</div>
 
-    <form class="co-layout" id="checkout-form" novalidate>
-      <div>
+    <form class="co-layout" id="checkout-form" novalidate autocomplete="on">
+      <div class="co-col-main">
         <!-- STEP 1 -->
         <section class="co-panel" data-step="1" aria-labelledby="t-dados">
           <div class="co-panel-head">
@@ -324,28 +376,48 @@ const checkoutPage = () =>
               <h1 class="co-panel-title" id="t-dados">Seus dados</h1>
               <p class="co-panel-sub">Usamos só para criar a sua conta e emitir a nota fiscal.</p>
             </div>
+            <span class="co-panel-done" data-panel-done="1" hidden>${icon.check()} Pronto</span>
           </div>
           <div class="co-panel-body">
             <div class="field" data-field="nomeCompleto">
               <label class="field-label" for="nome">Nome completo</label>
-              <input class="input" id="nome" name="nome" autocomplete="name" placeholder="Como no seu documento" aria-describedby="err-nomeCompleto">
+              <div class="input-wrap">
+                <input class="input" id="nome" name="nome" type="text" autocomplete="name" enterkeyhint="next"
+                       placeholder="Como no seu documento" aria-describedby="err-nomeCompleto" autocapitalize="words">
+                <span class="input-ok" aria-hidden="true">${icon.check()}</span>
+              </div>
               <span class="field-error" id="err-nomeCompleto" role="alert"></span>
             </div>
             <div class="field" data-field="email">
               <label class="field-label" for="email">E-mail</label>
-              <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@email.com" aria-describedby="err-email hint-email" spellcheck="false">
+              <div class="input-wrap">
+                <input class="input" id="email" name="email" type="email" inputmode="email" autocomplete="email"
+                       enterkeyhint="next" placeholder="voce@email.com" aria-describedby="err-email hint-email"
+                       spellcheck="false" autocapitalize="none">
+                <span class="input-ok" aria-hidden="true">${icon.check()}</span>
+              </div>
               <span class="field-hint" id="hint-email">É para lá que vão o acesso, o recibo e a nota fiscal.</span>
               <span class="field-error" id="err-email" role="alert"></span>
             </div>
             <div class="field-row field-row-2">
-              <div class="field" data-field="cpf" style="margin-top:0">
+              <div class="field" data-field="cpf">
                 <label class="field-label" for="cpf">CPF</label>
-                <input class="input" id="cpf" name="cpf" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14" aria-describedby="err-cpf">
+                <div class="input-wrap">
+                  <input class="input" id="cpf" name="cpf" type="text" inputmode="numeric" pattern="[0-9.\\-]*"
+                         enterkeyhint="next" autocomplete="off" placeholder="000.000.000-00" maxlength="14"
+                         aria-describedby="err-cpf">
+                  <span class="input-ok" aria-hidden="true">${icon.check()}</span>
+                </div>
                 <span class="field-error" id="err-cpf" role="alert"></span>
               </div>
-              <div class="field" data-field="telefone" style="margin-top:0">
+              <div class="field" data-field="telefone">
                 <label class="field-label" for="telefone">Celular</label>
-                <input class="input" id="telefone" name="telefone" inputmode="tel" autocomplete="tel-national" placeholder="(11) 90000-0000" maxlength="16" aria-describedby="err-telefone">
+                <div class="input-wrap">
+                  <input class="input" id="telefone" name="telefone" type="tel" inputmode="tel"
+                         autocomplete="tel-national" enterkeyhint="next" placeholder="(11) 90000-0000"
+                         maxlength="16" aria-describedby="err-telefone">
+                  <span class="input-ok" aria-hidden="true">${icon.check()}</span>
+                </div>
                 <span class="field-error" id="err-telefone" role="alert"></span>
               </div>
             </div>
@@ -367,22 +439,24 @@ const checkoutPage = () =>
                   (m, i) => `<button class="pm-tab" type="button" role="tab" id="tab-${m.key}"
                 aria-selected="${i === 0}" aria-controls="pm-${m.key}" data-pm="${m.key}" tabindex="${i === 0 ? 0 : -1}">
                 ${icon[m.icon]()}
-                <span>${m.label}</span>
+                <span class="pm-tab-label">${m.label}</span>
+                <span class="pm-tab-sub">${m.sub}</span>
                 ${m.badge ? `<span class="pm-badge">${m.badge}</span>` : ""}
               </button>`
                 )
                 .join("")}
             </div>
 
+            ${payAlert()}
             ${creditPanel()}
             ${debitPanel()}
             ${pixPanel()}
           </div>
         </section>
 
-        <div style="margin-top:1.5rem">
-          <label class="choice" style="align-items:flex-start" data-field="termos">
-            <input type="checkbox" id="aceite" data-terms>
+        <div class="co-finish">
+          <label class="choice choice-stack" data-field="termos">
+            <input type="checkbox" id="aceite" data-terms aria-describedby="err-termos">
             <span class="choice-radio" style="border-radius:6px" aria-hidden="true"></span>
             <span class="choice-body">
               <span class="choice-title">Li e aceito os termos</span>
@@ -391,15 +465,19 @@ const checkoutPage = () =>
           </label>
           <span class="field-error" id="err-termos" role="alert"></span>
 
-          <button class="btn btn-primary btn-lg btn-block" type="submit" data-submit style="margin-top:1.5rem">
-            ${icon.lock()}<span data-submit-label>Assinar por R$ 39,90/mês</span>
-          </button>
+          <div class="co-cta">
+            <button class="btn btn-primary btn-lg btn-block" type="submit" data-submit>
+              ${icon.lock()}<span data-submit-label>Assinar por R$ 39,90/mês</span>
+            </button>
+          </div>
 
-          <p class="text-xs soft text-center" style="margin-top:1rem;max-width:44ch;margin-inline:auto">
+          <p class="co-cta-fine text-xs soft text-center" data-cta-fine>
             Ao confirmar, a cobrança recorrente começa hoje. Você pode cancelar quando quiser pelo app, sem multa.
           </p>
 
-          <p class="field-error" id="err-form" role="alert" style="justify-content:center;margin-top:1rem"></p>
+          <p class="field-error co-formerror" id="err-form" role="alert"></p>
+
+          ${trustbar()}
         </div>
       </div>
 
@@ -408,8 +486,10 @@ const checkoutPage = () =>
   </div>
 </main>
 
-<footer style="padding:2rem 0 3rem;border-top:1px solid var(--border-subtle);background:var(--white)">
-  <div class="container" style="display:flex;flex-wrap:wrap;gap:1rem 1.5rem;align-items:center;justify-content:space-between">
+<p class="sr-only" data-live aria-live="polite" role="status"></p>
+
+<footer class="co-footer">
+  <div class="container co-footer-inner">
     <p class="text-xs soft">© ${new Date().getFullYear()} ${site.name} · CNPJ ${site.cnpj}</p>
     <div class="cluster text-xs">
       <a class="link" href="termos.html">Termos</a>

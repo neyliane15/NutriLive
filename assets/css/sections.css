@@ -515,3 +515,13 @@
 .showcase-section.is-deep :focus-visible { outline-color: var(--lime-300); }
 .showcase-section.is-light .media-panel { background: linear-gradient(160deg, var(--leaf-50) 0%, var(--white) 100%); border: 1px solid var(--leaf-100); }
 .showcase-section.is-deep .media-panel { background: linear-gradient(160deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.02) 100%); }
+
+/* ---------- Celular: aparelhos e respiros mais compactos ---------- */
+@media (max-width: 699px) {
+  .showcase-media .device { width: 236px; border-radius: 38px; padding: 8px; }
+  .showcase-media .device-screen { border-radius: 31px; }
+  .media-panel { padding: 1.25rem; border-radius: var(--r-xl); }
+  .band-grid .device { width: 236px; }
+  .showcase-section { padding-block: var(--section-y-sm); }
+  .showcase + .showcase { margin-top: 0; }
+}

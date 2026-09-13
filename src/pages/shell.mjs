@@ -14,7 +14,8 @@ export const shell = ({
   body,
   scripts = ["main"],
   jsonLd = "",
-  ogType = "website"
+  ogType = "website",
+  ogImage = "assets/img/og-voce.jpg"
 }) => `<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -33,7 +34,12 @@ export const shell = ({
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="${desc}">
 <meta property="og:url" content="${site.url}/${canonical}">
+<meta property="og:image" content="${site.url}/${ogImage}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${title}">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${site.url}/${ogImage}">
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/tokens.css">
 <link rel="stylesheet" href="assets/css/base.css">
