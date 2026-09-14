@@ -201,15 +201,6 @@
     window.addEventListener("resize", showAfter);
   }
 
-  /* ---------------- QR de download do app ---------------- */
-  var qrHost = $("[data-app-qr]");
-  if (qrHost && window.NLQR) {
-    qrHost.innerHTML = window.NLQR.toSvg("https://nutrielive.com.br/app", {
-      ecc: "M", border: 1, dark: "#0D3524", light: "#FFFFFF",
-      label: "QR Code para baixar o app Nutri&Live"
-    });
-  }
-
   /* ---------------- Inert placeholder links ---------------- */
   $$("[data-noop]").forEach(function (a) {
     a.addEventListener("click", function (e) {

@@ -6,6 +6,7 @@ import { device } from "./devices.mjs";
 import { payMark } from "./paymarks.mjs";
 import { segments, trustFacts, securityPillars, site } from "../data/site.mjs";
 import { brl, brlParts, pct } from "../lib/format.mjs";
+import { qrSvg } from "../lib/qr.mjs";
 
 /* ---------- Audience switcher ---------- */
 export const audienceSwitch = (current, deep = false) => `
@@ -123,7 +124,10 @@ export const appBand = () => `
         </div>
       </div>
       <div class="qr-card">
-        <div class="qr-box" data-app-qr aria-label="QR Code para baixar o aplicativo Nutri&amp;Live"></div>
+        <div class="qr-box">${qrSvg("https://nutrielive.com.br/app", {
+          ecc: "M", border: 1, dark: "#0D3524", light: "#FFFFFF",
+          label: "QR Code para baixar o aplicativo Nutri&Live"
+        })}</div>
         <p class="qr-note">Aponte a câmera do celular para abrir a loja</p>
       </div>
     </div>
