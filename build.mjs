@@ -25,13 +25,19 @@ const emit = (file, html) => {
   out.push([file, html.length]);
 };
 
-for (const key of order) emit(content[key].slug, landing(content[key]));
+// A página de academias deixou de ser uma landing de produto: virou o
+// cadastro do programa de parceria, com template próprio.
+for (const key of order) {
+  if (key === "academia") continue;
+  emit(content[key].slug, landing(content[key]));
+}
 
 /* Optional pages are registered here as they land. */
 const extra = await Promise.all([
   import("./src/pages/checkout.mjs").catch(() => null),
   import("./src/pages/obrigado.mjs").catch(() => null),
-  import("./src/pages/legal.mjs").catch(() => null)
+  import("./src/pages/legal.mjs").catch(() => null),
+  import("./src/pages/academias.mjs").catch(() => null)
 ]);
 for (const mod of extra) {
   if (mod && typeof mod.pages === "function") {

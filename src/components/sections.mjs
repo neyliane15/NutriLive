@@ -5,7 +5,7 @@ import { icon } from "./icons.mjs";
 import { device } from "./devices.mjs";
 import { payMark } from "./paymarks.mjs";
 import { segments, trustFacts, securityPillars, site } from "../data/site.mjs";
-import { brl, brlParts, pct } from "../lib/format.mjs";
+import { brl, brlParts } from "../lib/format.mjs";
 import { qrSvg } from "../lib/qr.mjs";
 import { illu } from "./illustrations.mjs";
 
@@ -172,10 +172,10 @@ export const awards = () => `
   <div class="container">
     <div class="awards">
       ${[
-        ["refresh", "30 dias", "Garantia total", "Não gostou, devolvemos 100% do valor — sem perguntar o motivo."],
         ["phone", "2 toques", "Cancelamento", "Direto no app. Sem multa, sem ligação, sem retenção."],
+        ["calendar", "Mensal", "Sem fidelidade", "Você paga mês a mês. Nenhum contrato de permanência."],
         ["lock", "PCI-DSS", "Pagamento seguro", "Seu cartão vai direto ao processador. A gente nunca vê o número."],
-        ["receipt", "Todo mês", "Nota fiscal", "Emitida automaticamente e enviada para o seu e-mail."]
+        ["globe", "No Brasil", "Seus dados", "Servidores no país, criptografia AES-256 e conformidade com a LGPD."]
       ]
         .map(
           (a) => `<div class="award">
@@ -322,8 +322,6 @@ export const pricing = (c) => {
   const cards = c.plans
     .map((p) => {
       const m = brlParts(p.monthly);
-      const y = brlParts(p.yearly);
-      const save = pct(p.monthly, p.yearly);
       const feats = p.features
         .map(
           (f) =>
@@ -342,13 +340,11 @@ export const pricing = (c) => {
       <p class="plan-desc">${p.desc}</p>
       <p class="plan-price">
         <span class="cur">R$</span>
-        <span class="amt" data-price-int data-m="${m.int}" data-y="${y.int}">${m.int}</span>
-        <span class="cents" data-price-dec data-m="${m.dec}" data-y="${y.dec}">,${m.dec}</span>
+        <span class="amt">${m.int}</span>
+        <span class="cents">,${m.dec}</span>
         <span class="per">/mês</span>
       </p>
-      <p class="plan-price-note" data-price-note
-         data-m="Cobrado todo mês. Cancele quando quiser."
-         data-y="${brl(p.yearly * 12)} uma vez por ano · <b>economize ${save}%</b>">Cobrado todo mês. Cancele quando quiser.</p>
+      <p class="plan-price-note">Cobrado todo mês. Cancele quando quiser.</p>
       <a class="btn ${p.featured ? "btn-primary" : "btn-secondary"} btn-block" href="checkout.html?seg=${c.key}&amp;plan=${p.planKey}" data-plan-cta="${p.planKey}" aria-label="${p.cta} — plano ${p.name}, ${brl(p.monthly)} por mês">${p.cta}</a>
       <ul class="plan-features">${feats}${offs}</ul>
       <p class="plan-foot">${p.foot || "Pix, cartão de crédito ou débito. Sem taxa de adesão."}</p>
@@ -363,14 +359,6 @@ export const pricing = (c) => {
       <p class="eyebrow">Planos e preços</p>
       <h2>Preço claro. Sem letra miúda.</h2>
       <p class="lead">${c.plansNote}</p>
-      <div class="pricing-toggle">
-        <span class="pricing-toggle-label is-on" data-bill-label="m">Mensal</span>
-        <label class="switch">
-          <input type="checkbox" data-bill-toggle aria-label="Cobrar anualmente e economizar">
-          <span class="switch-track" aria-hidden="true"></span>
-        </label>
-        <span class="pricing-toggle-label" data-bill-label="y">Anual <span class="badge badge-lime" style="margin-left:.25rem">−20%</span></span>
-      </div>
     </div>
 
     <div class="plans" data-reveal-group>${cards}</div>
@@ -390,7 +378,6 @@ export const pricing = (c) => {
               `<span class="badge badge-outline" style="padding:.5rem .875rem;font-size:.8125rem">${m.label}</span>`
           )
           .join("")}
-        <span class="badge badge-outline" style="padding:.5rem .875rem;font-size:.8125rem">Boleto (anual)</span>
       </div>
     </div>
   </div>
@@ -494,7 +481,7 @@ export const crossSell = (current) => {
   const blurbs = {
     voce: { t: "Para você", d: "Plano alimentar, receitas com o que tem em casa e a sua evolução no bolso.", p: "R$ 19,90", icon: "user" },
     nutri: { t: "Para nutricionistas", d: "Prontuário, prescrição em minutos e adesão do paciente em tempo real.", p: "R$ 79,90", icon: "clipboard" },
-    academia: { t: "Para academias", d: "Nutrição para a base inteira, menos cancelamento e receita nova.", p: "R$ 249", icon: "building" }
+    academia: { t: "Para academias", d: "Indique o Nutri&Live para os seus alunos e receba comissão recorrente.", p: null, icon: "building" }
   };
   return `
 <section class="section section-sm">
@@ -509,7 +496,7 @@ export const crossSell = (current) => {
           return `<a class="audience-card" href="${s.slug}" data-reveal>
         <span class="ac-head"><span class="icon-tile" aria-hidden="true">${icon[b.icon]()}</span><h3>${b.t}</h3></span>
         <p>${b.d}</p>
-        <span class="ac-price">a partir de <b>${b.p}</b>/mês</span>
+        ${b.p ? `<span class="ac-price">a partir de <b>${b.p}</b>/mês</span>` : `<span class="ac-price">Programa de parceria · <b>sem custo</b></span>`}
         <span class="link-arrow">Conhecer</span>
       </a>`;
         })
@@ -535,7 +522,7 @@ export const finalCta = (c) => {
           <a class="btn btn-outline-light btn-lg" href="${c.finalCta.secondary.href}"${c.finalCta.secondary.noop ? " data-noop" : ""}>${c.finalCta.secondary.label}</a>
         </div>
         <ul class="cta-final-marks">
-          <li>${icon.check()}<span>30 dias de garantia</span></li>
+          <li>${icon.check()}<span>Sem fidelidade</span></li>
           <li>${icon.check()}<span>Cancele quando quiser</span></li>
           <li>${icon.check()}<span>Pix, crédito ou débito</span></li>
         </ul>

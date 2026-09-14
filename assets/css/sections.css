@@ -674,3 +674,28 @@
   /* a linha pontilhada entre passos deixa de fazer sentido com arte no topo */
   .step:not(:last-child)::after { display: none; }
 }
+
+/* ---------------- Página de parceria (academias) ---------------- */
+.partner-art { width: min(100%, 420px); }
+.partner-art .illu { border-radius: var(--r-2xl); background: rgba(255,255,255,.06); }
+
+.partner-facts { display: grid; gap: var(--sp-4); }
+.partner-facts li { display: flex; gap: var(--sp-3); align-items: flex-start; }
+.partner-facts b { display: block; font-size: var(--fs-body); font-weight: var(--fw-semi); color: var(--white); letter-spacing: -0.012em; }
+.partner-facts span span { display: block; font-size: var(--fs-sm); color: var(--text-on-deep-muted); margin-top: 2px; line-height: 1.5; }
+
+.partner-layout { display: grid; gap: var(--sp-8); align-items: start; }
+@media (min-width: 940px) { .partner-layout { grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); gap: var(--sp-16); } }
+
+.partner-notes { display: grid; gap: var(--sp-3); margin-top: var(--sp-6); }
+.partner-notes li { display: flex; gap: .625rem; align-items: flex-start; font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.55; }
+.partner-notes svg { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--leaf-600); }
+.partner-notes b { color: var(--ink-900); font-weight: var(--fw-semi); word-break: break-word; }
+
+.partner-form textarea.input { min-height: 96px; resize: vertical; padding-block: .875rem; height: auto; }
+.partner-sent {
+  margin-top: var(--sp-5); padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-md); background: var(--leaf-50); border: 1px solid var(--leaf-100);
+}
+.partner-sent .btn { min-width: 0; }
+.partner-sent .btn span { overflow: hidden; text-overflow: ellipsis; }

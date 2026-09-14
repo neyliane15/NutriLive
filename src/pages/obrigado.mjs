@@ -46,7 +46,6 @@ const page = () =>
       </div>
       <div class="co-panel-body" style="margin-top:1.25rem">
         <div class="co-line"><span class="cl-label">Plano</span><span class="cl-value" data-r-plan>—</span></div>
-        <div class="co-line"><span class="cl-label">Ciclo</span><span class="cl-value" data-r-cycle>—</span></div>
         <div class="co-line">
           <span class="cl-label">Forma de pagamento</span>
           <span class="cl-value">
@@ -87,8 +86,8 @@ const page = () =>
     </div>
 
     <div class="notice" style="max-width:34rem;margin:2rem auto 0">
-      ${icon.refresh()}
-      <span><b>Mudou de ideia?</b> Você tem 30 dias para pedir o reembolso integral, sem precisar explicar nada. É só falar com a gente pelo app ou no <a class="link" href="${site.whatsappHref}">WhatsApp</a>.</span>
+      ${icon.phone()}
+      <span><b>Mudou de ideia?</b> Você cancela em dois toques no app, em Menu › Assinatura, sem multa e sem ligação. Precisando de ajuda, fale com a gente no <a class="link" href="${site.whatsappHref}">WhatsApp</a>.</span>
     </div>
   </div>
 </main>

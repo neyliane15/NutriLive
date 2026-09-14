@@ -82,13 +82,13 @@ ${UL([
 
 ${H("lgpd", "LGPD e os seus direitos")}
 ${P(
-  "Tratamos dados pessoais como controladores no serviço para pessoa física, e como operadores quando a controladora é a academia ou a clínica contratante. Em qualquer caso, você tem direitos garantidos pela Lei nº 13.709/2018."
+  "Tratamos dados pessoais como controladores no serviço para pessoa física, e como operadores quando a controladora é a nutricionista ou a clínica contratante. Em qualquer caso, você tem direitos garantidos pela Lei nº 13.709/2018."
 )}
 ${UL([
   "<b>Acesso e portabilidade:</b> exporte tudo em PDF ou CSV pelo app, a qualquer momento.",
   "<b>Correção:</b> altere qualquer informação do seu perfil sem precisar falar com ninguém.",
   "<b>Eliminação:</b> apague a sua conta e todos os dados vinculados em Menu › Conta › Excluir conta. A exclusão é definitiva em até 30 dias.",
-  "<b>Revogação de consentimento:</b> desconecte o seu nutricionista ou a sua academia quando quiser, sem perder o seu histórico pessoal.",
+  "<b>Revogação de consentimento:</b> desconecte o seu nutricionista quando quiser, sem perder o seu histórico pessoal.",
   "<b>Oposição:</b> escreva para o nosso DPO e a gente responde em até 15 dias."
 ])}
 <div id="titular" class="notice" style="margin-top:var(--sp-6)">
@@ -118,7 +118,7 @@ const termos = () =>
   legalShell({
     file: "termos.html",
     title: "Termos de uso — Nutri&Live",
-    desc: "Termos de uso do Nutri&Live: assinatura, cobrança recorrente, cancelamento, reembolso e limites do serviço.",
+    desc: "Termos de uso do Nutri&Live: assinatura mensal, cobrança recorrente, cancelamento, reembolso e programa de parceria.",
     eyebrow: "Jurídico",
     h1: "Termos de uso",
     lead: "Escrito para ser lido. Se alguma parte não estiver clara, fale com a gente antes de assinar.",
@@ -131,7 +131,7 @@ ${P(
 
 ${H("assinatura", "2. Assinatura e cobrança")}
 ${UL([
-  "A assinatura é mensal ou anual, renovada automaticamente no mesmo dia do ciclo seguinte até que você cancele.",
+  "A assinatura é mensal, renovada automaticamente no mesmo dia de cada mês até que você cancele. Não trabalhamos com plano anual nem com contrato de permanência.",
   "Enviamos um aviso por e-mail 3 dias antes de cada renovação, com o valor e a data.",
   "No cartão de crédito e no débito recorrente, a cobrança é automática. No Pix, enviamos o código e a renovação só ocorre se você pagar — nada é debitado sem a sua ação.",
   "Se uma cobrança falhar, tentamos novamente em 3, 5 e 7 dias. Depois disso a assinatura é pausada, sem multa e sem dívida.",
@@ -143,34 +143,39 @@ ${P(
   "Você cancela quando quiser, em Menu › Assinatura › Cancelar, sem falar com ninguém e sem multa. O acesso continua até o fim do período já pago. Não fazemos retenção por telefone nem exigimos justificativa."
 )}
 
-${H("reembolso", "4. Garantia de 30 dias")}
+${H("reembolso", "4. Arrependimento e reembolso")}
 ${P(
-  "Se pedir o reembolso em até 30 dias da primeira cobrança, devolvemos 100% do valor, sem perguntar o motivo. O estorno cai em até 5 dias úteis no cartão e em até 1 dia útil no Pix. Renovações posteriores seguem o direito de arrependimento de 7 dias previsto no art. 49 do Código de Defesa do Consumidor."
+  "Contratou e se arrependeu? O art. 49 do Código de Defesa do Consumidor garante 7 dias corridos, contados da contratação, para desistir sem justificativa e receber de volta tudo o que pagou. O estorno cai em até 5 dias úteis no cartão e em até 1 dia útil no Pix. Fora desse prazo, o cancelamento interrompe as próximas cobranças e o acesso segue até o fim do período já pago."
 )}
 
 ${H("uso", "5. Uso aceitável")}
 ${UL([
   "Você é responsável pela veracidade dos dados que informa — o cálculo depende deles.",
   "A conta é pessoal e intransferível. No plano Família, cada perfil pertence a uma pessoa da mesma residência.",
-  "É proibido usar o serviço para prescrever a terceiros sem habilitação profissional, revender acesso sem contrato de whitelabel, ou extrair dados em massa por meios automatizados."
+  "É proibido usar o serviço para prescrever a terceiros sem habilitação profissional, revender acesso sem contrato de parceria assinado, ou extrair dados em massa por meios automatizados."
 ])}
 
 ${H("profissionais", "6. Contas profissionais")}
 ${P(
-  "Nas contas de nutricionista e de academia, o profissional ou a empresa é o controlador dos dados dos seus pacientes e alunos, e o Nutri&Live atua como operador. A prescrição é ato privativo do nutricionista, nos termos da Resolução CFN nº 599/2018 — o sistema apenas apoia. Cabe ao contratante coletar o consentimento dos titulares e manter o sigilo profissional."
+  "Na conta de nutricionista, o profissional é o controlador dos dados dos seus pacientes e o Nutri&Live atua como operador. A prescrição é ato privativo do nutricionista, nos termos da Resolução CFN nº 599/2018 — o sistema apenas apoia. Cabe ao profissional coletar o consentimento dos titulares e manter o sigilo profissional."
 )}
 
-${H("propriedade", "7. Propriedade e seus dados")}
+${H("parceria", "7. Programa de parceria")}
+${P(
+  "Academias e estúdios participam por indicação: a parceira divulga o Nutri&Live e recebe comissão recorrente sobre as assinaturas originadas pelo seu link, nos termos definidos por escrito no aceite da parceria. A assinatura é contratada pelo próprio aluno, diretamente conosco — a parceira não intermedeia pagamento, não assume obrigação perante o assinante e não adquire direito sobre os dados dele. Não há mensalidade, meta ou exclusividade, e qualquer das partes pode encerrar a parceria a qualquer momento, preservadas as comissões já apuradas."
+)}
+
+${H("propriedade", "8. Propriedade e seus dados")}
 ${P(
   "O software, a marca e o conteúdo editorial são nossos. Os seus dados são seus: você pode exportá-los ou apagá-los a qualquer momento, e mantemos o acesso à exportação por 90 dias após o cancelamento."
 )}
 
-${H("responsabilidade", "8. Limitação de responsabilidade")}
+${H("responsabilidade", "9. Limitação de responsabilidade")}
 ${P(
   "Nos esforçamos por disponibilidade contínua, mas o serviço é fornecido no estado em que se encontra. Nossa responsabilidade, quando houver, fica limitada ao valor pago nos 12 meses anteriores ao evento. Nada aqui afasta direitos do consumidor previstos em lei."
 )}
 
-${H("foro", "9. Lei aplicável")}
+${H("foro", "10. Lei aplicável")}
 ${P(
   `Estes termos são regidos pela lei brasileira. Fica eleito o foro do domicílio do consumidor para dirimir controvérsias. Dúvidas: <b>${site.email}</b>.`
 )}`
@@ -198,7 +203,7 @@ ${UL([
 ${H("bases", "2. Por que podemos tratar esses dados")}
 ${UL([
   "<b>Execução de contrato</b> (art. 7º, V) para tudo que faz a assinatura funcionar.",
-  "<b>Consentimento específico</b> (art. 11, I) para os dados de saúde e para compartilhar com o seu nutricionista ou academia.",
+  "<b>Consentimento específico</b> (art. 11, I) para os dados de saúde e para compartilhar com o seu nutricionista.",
   "<b>Obrigação legal</b> (art. 7º, II) para registros fiscais e contábeis.",
   "<b>Legítimo interesse</b> (art. 7º, IX) para segurança, prevenção a fraude e melhoria do produto, sempre com avaliação de impacto."
 ])}
@@ -207,7 +212,7 @@ ${H("prazo", "3. Por quanto tempo guardamos")}
 ${UL([
   "Dados de saúde: enquanto a conta existir. Após a exclusão, apagamos em até 30 dias, incluindo backups no ciclo seguinte.",
   "Dados fiscais: 5 anos, por exigência legal, isolados do restante.",
-  "Prontuários em contas profissionais: pelo prazo que o CFN determina ao profissional responsável.",
+  "Prontuários em contas de nutricionista: pelo prazo que o CFN determina ao profissional responsável.",
   "Logs de segurança: 6 meses, conforme o Marco Civil da Internet."
 ])}
 

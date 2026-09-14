@@ -27,7 +27,7 @@ export const content = {
       ],
       primary: { label: "Começar por R$ 19,90/mês", href: "checkout.html?seg=voce&plan=plus" },
       secondary: { label: "Ver como funciona", href: "#como-funciona" },
-      proof: "**+38 mil pessoas** usam o Nutri&Live todo dia · 4,9 ★ nas lojas"
+      proof: "**4,9 ★** na App Store e no Google Play"
     },
 
     tiles: [
@@ -44,7 +44,6 @@ export const content = {
       screen: "home"
     },
     stats: [
-      { num: "38.412", label: "pessoas cuidando da alimentação todo dia" },
       { num: "2,4 mi", label: "refeições registradas nos últimos 12 meses" },
       { num: "4,9★", label: "média na App Store e no Google Play" },
       { num: "40s", label: "para montar o plano, as receitas e a lista de compras" }
@@ -102,8 +101,6 @@ export const content = {
       { icon: "droplet", title: "Hidratação", text: "Meta de água calculada pelo seu peso, com lembretes que não enchem o saco." },
       { icon: "flame", title: "Calorias e macros", text: "Proteínas, carboidratos e gorduras contados sem você precisar pesar tudo." },
       { icon: "target", title: "Score diário", text: "Uma nota simples de 0 a 100 que mostra como foi o seu dia. Sem punição." },
-      { icon: "bell", title: "Lembretes gentis", text: "Você escolhe o horário e o tom. Dá pra silenciar tudo com um toque." },
-      { icon: "phone", title: "Funciona offline", text: "Registrou no avião ou no elevador? Sincroniza sozinho quando voltar." },
       { icon: "download", title: "Seus dados são seus", text: "Exporte tudo em PDF ou CSV a qualquer momento. Sem pedir permissão." }
     ],
 
@@ -163,7 +160,6 @@ export const content = {
     faq: [
       { q: "Posso cancelar quando quiser?", a: "Pode, em dois toques dentro do app, em Menu › Assinatura › Cancelar. Sem ligação, sem retenção, sem multa. Você continua com acesso até o fim do período que já pagou." },
       { q: "Como funciona a cobrança mensal?", a: "No cartão de crédito ou débito, a cobrança é automática todo mês na mesma data, com aviso por e-mail 3 dias antes. No Pix, a gente manda o código na véspera do vencimento e você paga quando quiser — se não pagar, a assinatura só pausa, nada é cobrado à força." },
-      { q: "Tem garantia?", a: "Tem: 30 dias. Se você não curtir, pede o reembolso pelo app ou pelo WhatsApp e devolvemos 100% do valor, sem perguntar o motivo. O estorno cai em até 5 dias úteis no cartão e em até 1 dia útil no Pix." },
       { q: "Isso substitui um nutricionista?", a: "Não, e não queremos substituir. O Nutri&Live organiza, calcula e lembra — o julgamento clínico é de um profissional. Se você já tem nutricionista, dá pra conectar o seu perfil ao painel dela sem custo nenhum a mais." },
       { q: "Funciona pra quem tem restrição alimentar?", a: "Sim. Dá pra marcar restrições (lactose, glúten, frutos do mar, oleaginosas e outras), alergias e o que você simplesmente não gosta. O plano nunca sugere um ingrediente que você bloqueou." },
       { q: "Preciso pesar tudo o que como?", a: "Não. Você pode registrar por porção caseira — 'um prato', 'meia concha', 'uma fatia'. A precisão cai um pouco, a constância sobe muito, e é a constância que traz resultado." },
@@ -173,7 +169,7 @@ export const content = {
 
     finalCta: {
       title: "Comece hoje. Cancele quando quiser.",
-      text: "R$ 19,90 no primeiro mês, 30 dias de garantia e o seu plano pronto antes do café esfriar.",
+      text: "R$ 19,90 no primeiro mês e o seu plano pronto antes do café esfriar.",
       primary: { label: "Criar meu plano agora", href: "checkout.html?seg=voce&plan=plus" },
       secondary: { label: "Falar no WhatsApp", href: "https://wa.me/5511400012340" }
     }
@@ -198,11 +194,11 @@ export const content = {
       bullets: [
         "Plano alimentar completo em 4 minutos, com a sua assinatura clínica",
         "Painel de adesão: quem registrou, quem sumiu, quem precisa de você",
-        "O app do paciente com a sua marca, sua foto e o seu CRN"
+        "O app do paciente conectado ao seu acompanhamento, sem PDF solto"
       ],
       primary: { label: "Testar 14 dias grátis", href: "checkout.html?seg=nutri&plan=profissional" },
       secondary: { label: "Ver o painel por dentro", href: "#como-funciona" },
-      proof: "**1.240 nutricionistas** já atendem pelo Nutri&Live · CFN-friendly"
+      proof: "Feito sobre a **Resolução CFN nº 599/2018** · a prescrição continua sendo sua"
     },
 
     tiles: [
@@ -210,7 +206,7 @@ export const content = {
       { icon: "clipboard", title: "Prescrição em minutos", text: "Rascunho calculado, você revisa e envia com o seu nome.", href: "#recursos" },
       { icon: "scale", title: "Antropometria", text: "Dobras, circunferências e composição corporal com gráficos.", href: "#recursos" },
       { icon: "chart", title: "Relatórios de adesão", text: "Por paciente ou pela carteira inteira, semana a semana.", href: "#recursos" },
-      { icon: "camera", title: "App com a sua marca", text: "Seu logo, suas cores e o seu CRN no celular do paciente.", href: "#recursos" }
+      { icon: "chat", title: "Mensagens no app", text: "Fale com o paciente sem misturar com o seu WhatsApp pessoal.", href: "#recursos" }
     ],
     band: {
       title: "Teste 14 dias. Sem cartão, sem pegadinha.",
@@ -219,7 +215,6 @@ export const content = {
       screen: "dashboard"
     },
     stats: [
-      { num: "1.240", label: "nutricionistas ativos no Brasil" },
       { num: "4 min", label: "para montar um plano completo, em média" },
       { num: "+63%", label: "de adesão do paciente entre consultas" },
       { num: "9,2 h", label: "economizadas por mês em tarefas repetidas" }
@@ -247,7 +242,7 @@ export const content = {
         list: [
           ["Tabela TACO e IBGE/POF", "como base de cálculo"],
           ["Substituições equivalentes", "geradas automaticamente"],
-          ["PDF com a sua marca", "ou envio direto pro app do paciente"]
+          ["PDF pronto para imprimir", "ou envio direto pro app do paciente"]
         ],
         screen: "plano",
         flip: true
@@ -269,13 +264,12 @@ export const content = {
 
     steps: [
       { title: "Traga os seus pacientes", text: "Importe por planilha ou convide por link. Em uma tarde você migra a agenda inteira." },
-      { title: "Prescreva em minutos", text: "Gere o rascunho, ajuste com o seu olhar clínico e envie com a sua marca." },
+      { title: "Prescreva em minutos", text: "Gere o rascunho, ajuste com o seu olhar clínico e envie para o paciente." },
       { title: "Acompanhe e retenha", text: "Veja adesão em tempo real, aja antes do abandono e chegue no retorno já sabendo de tudo." }
     ],
 
     features: [
       { icon: "clipboard", title: "Prontuário completo", text: "Anamnese, antropometria, exames e evolução clínica com histórico datado." },
-      { icon: "file", title: "PDF com a sua marca", text: "Logo, cores, CRN e assinatura. O material sai profissional sem designer." },
       { icon: "calendar", title: "Agenda e retornos", text: "Lembrete automático de retorno para o paciente e para você." },
       { icon: "users", title: "Multiprofissional", text: "Divida a carteira com sócias e estagiárias, com permissão por papel." },
       { icon: "shield", title: "Sigilo profissional", text: "Trilha de auditoria de quem acessou cada prontuário, e quando." },
@@ -296,7 +290,7 @@ export const content = {
           "App do paciente incluso",
           "Suporte por e-mail"
         ],
-        off: ["PDF com a sua marca", "Relatórios de adesão"]
+        off: ["Relatórios de adesão", "Agenda com lembrete de retorno"]
       },
       {
         name: "Profissional",
@@ -307,7 +301,6 @@ export const content = {
         features: [
           "Até 60 pacientes ativos",
           "Tudo do Início",
-          "PDF e app com a sua marca",
           "Relatórios de adesão e de risco de abandono",
           "Agenda com lembrete de retorno",
           "Mensagens dentro do app",
@@ -334,7 +327,7 @@ export const content = {
     testimonials: [
       { text: "Eu levava quase uma hora por plano no Excel. Hoje levo quatro minutos e o material sai muito melhor do que eu conseguia fazer sozinha.", name: "Dra. Marina Falcão", role: "CRN-3 12.884 · São Paulo, SP", initials: "MF" },
       { text: "O alerta de queda de adesão salvou umas quinze pacientes esse ano. Eu mando uma mensagem no terceiro dia sem registro e elas voltam.", name: "Dra. Letícia Amaral", role: "CRN-8 5.109 · Londrina, PR", initials: "LA" },
-      { text: "O app sair com a minha logo e o meu CRN mudou a percepção de valor. Consegui subir o preço da consulta em 30% sem perder ninguém.", name: "Dr. Thiago Nunes", role: "CRN-6 9.472 · Fortaleza, CE", initials: "TN" }
+      { text: "O relatório de consulta pronto antes do retorno mudou o meu dia. Eu chego na sessão já sabendo o que aconteceu nas últimas quatro semanas.", name: "Dr. Thiago Nunes", role: "CRN-6 9.472 · Fortaleza, CE", initials: "TN" }
     ],
 
     faq: [

@@ -37,7 +37,7 @@
   var state = {
     seg: CATALOGUE[params.get("seg")] ? params.get("seg") : "voce",
     plan: null,
-    cycle: params.get("ciclo") === "anual" ? "anual" : "mensal",
+    cycle: "mensal",   // a assinatura é só mensal
     method: "credito",
     coupon: null,
     bank: null
@@ -57,10 +57,10 @@
   /* ---------------- Pricing ---------------- */
   function pricing() {
     var monthly = state.plan.monthly;
-    var perMonth = state.cycle === "anual" ? state.plan.yearly : monthly;
-    var months = state.cycle === "anual" ? 12 : 1;
+    var perMonth = monthly;
+    var months = 1;
     var base = monthly * months;
-    var cycleDiscount = state.cycle === "anual" ? base - perMonth * 12 : 0;
+    var cycleDiscount = 0;
     var afterCycle = base - cycleDiscount;
     var couponDiscount = 0;
     if (state.coupon) couponDiscount = Math.round(afterCycle * COUPONS[state.coupon].off);
@@ -78,8 +78,7 @@
 
   function renewDate() {
     var d = new Date();
-    if (state.cycle === "anual") d.setFullYear(d.getFullYear() + 1);
-    else d.setMonth(d.getMonth() + 1);
+    d.setMonth(d.getMonth() + 1);
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
   }
 
@@ -99,17 +98,14 @@
       .map(function (f) { return "<li>" + tick + "<span>" + f + "</span></li>"; })
       .join("");
 
-    $("[data-sum-cycle-label]").innerHTML =
-      state.cycle === "anual"
-        ? "12 meses de " + brl(state.plan.monthly) + "<small>plano anual</small>"
-        : "Assinatura mensal";
+    $("[data-sum-cycle-label]").textContent = "Assinatura mensal";
     $("[data-sum-base]").textContent = brl(p.base);
 
     var dRow = $("[data-sum-discount-row]");
     if (p.cycleDiscount > 0) {
       dRow.hidden = false;
       $("[data-sum-discount]").textContent = "− " + brl(p.cycleDiscount);
-      $("[data-sum-discount-label]").textContent = "Desconto do plano anual (" + p.cyclePct + "%)";
+      $("[data-sum-discount-label]").textContent = "Desconto";
     } else dRow.hidden = true;
 
     var cRow = $("[data-sum-coupon-row]");
@@ -133,33 +129,11 @@
     lastTotal = p.total;
 
     $("[data-sum-renew]").textContent =
-      "Depois " + brl(p.recurring) + (state.cycle === "anual" ? "/ano" : "/mês") + " · renova em " + renewDate();
+      "Depois " + brl(p.recurring) + "/mês · renova em " + renewDate();
 
     var label =
-      state.method === "pix"
-        ? "Já paguei o Pix"
-        : state.cycle === "anual"
-        ? "Assinar por " + totalText + "/ano"
-        : "Assinar por " + totalText + "/mês";
+      state.method === "pix" ? "Já paguei o Pix" : "Assinar por " + totalText + "/mês";
     $("[data-submit-label]").textContent = label;
-
-    // Annual on credit card can be split
-    var inst = $("[data-installments]");
-    if (state.method === "credito" && state.cycle === "anual") {
-      inst.hidden = false;
-      var sel = $("#cc-parcelas");
-      if (sel.dataset.total !== String(p.total)) {
-        sel.dataset.total = String(p.total);
-        sel.innerHTML = "";
-        for (var n = 1; n <= 12; n++) {
-          var o = document.createElement("option");
-          o.value = String(n);
-          o.textContent = n + "× de " + brl(Math.round(p.total / n)) + (n === 1 ? " à vista" : " sem juros");
-          sel.appendChild(o);
-        }
-        sel.value = "12";
-      }
-    } else inst.hidden = true;
 
     if (state.method === "pix") buildPix(p.total);
     persist();
@@ -177,7 +151,6 @@
   function persist() {
     var p = pricing();
     var meta = state.method === "credito" ? cardMeta("cc") : state.method === "debito" ? cardMeta("db") : null;
-    var inst = $("#cc-parcelas");
     try {
       sessionStorage.setItem(
         "nl:order",
@@ -189,10 +162,7 @@
           brand: meta ? meta.brand : null,
           last4: meta ? meta.last4 : null,
           bank: state.method === "debito" ? state.bank : null,
-          installments:
-            state.method === "credito" && state.cycle === "anual" && inst && inst.value
-              ? parseInt(inst.value, 10)
-              : 1,
+          installments: 1,
           name: ($("#nome").value || "").trim(),
           email: ($("#email").value || "").trim(),
           at: Date.now()
@@ -824,7 +794,7 @@
       steps: [
         "Use outro cartão, ou pague no Pix — o valor sai direto da conta e libera na hora.",
         "Se o seu limite reseta na virada da fatura, dá para voltar depois: o plano fica guardado.",
-        "No plano anual dá para parcelar em até 12× sem juros no crédito."
+        "A cobrança é mensal e automática. Você cancela quando quiser."
       ]
     },
     vencido: {
@@ -994,7 +964,7 @@
   function goToThanks() {
     var p = pricing();
     var qs = new URLSearchParams({
-      seg: state.seg, plan: state.plan.key, ciclo: state.cycle,
+      seg: state.seg, plan: state.plan.key,
       metodo: state.method, total: String(p.total),
       nome: ($("#nome").value || "").trim().split(/\s+/)[0] || "",
       email: ($("#email").value || "").trim()

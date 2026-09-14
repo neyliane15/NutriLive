@@ -136,12 +136,6 @@ const creditPanel = () => `
     </div>
   </div>
 
-  <div class="field" data-field="parcelas" data-installments hidden>
-    <label class="field-label" for="cc-parcelas">Parcelamento</label>
-    <select class="input" id="cc-parcelas" name="cc-parcelas"></select>
-    <span class="field-hint">Sem juros em todas as parcelas.</span>
-  </div>
-
   <div class="notice" style="margin-top:1.5rem">
     ${icon.refresh()}
     <span><b>Cobrança automática todo mês.</b> Avisamos por e-mail 3 dias antes de cada renovação, e você cancela em 2 toques no app — sem multa.</span>
@@ -347,7 +341,7 @@ const trustbar = () => `
 const checkoutPage = () =>
   shell({
     title: "Assinar o Nutri&Live — pagamento seguro",
-    desc: "Finalize a sua assinatura do Nutri&Live com Pix, cartão de crédito ou débito. Ambiente criptografado, cancelamento em 2 toques e 30 dias de garantia.",
+    desc: "Finalize a sua assinatura do Nutri&Live com Pix, cartão de crédito ou débito. Ambiente criptografado, cobrança mensal e cancelamento em 2 toques.",
     canonical: "checkout.html",
     bodyClass: "checkout-page",
     scripts: ["qr", "checkout"],

@@ -32,8 +32,6 @@
   var seg = p.get("seg") || order.seg;
   set("[data-r-plan]", "Plano " + (planName || "—") + (SEG[seg] ? " · " + SEG[seg] : ""));
 
-  var cycle = p.get("ciclo") || order.cycle || "mensal";
-  set("[data-r-cycle]", cycle === "anual" ? "Anual (12 meses)" : "Mensal");
 
   var method = p.get("metodo") || order.method || "credito";
   set("[data-r-method]", METHOD[method] || "—");
@@ -69,7 +67,7 @@
   var recurring = parseInt(order.recurring || 0, 10);
   if (recurring && total && recurring !== total) {
     var after = $("[data-r-after]");
-    after.textContent = "Depois " + brl(recurring) + (cycle === "anual" ? "/ano" : "/mês");
+    after.textContent = "Depois " + brl(recurring) + "/mês";
     after.hidden = false;
   }
 

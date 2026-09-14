@@ -125,31 +125,6 @@
     });
   });
 
-  /* ---------------- Pricing: monthly / yearly ---------------- */
-  var billToggle = $("[data-bill-toggle]");
-  if (billToggle) {
-    var applyBilling = function () {
-      var yearly = billToggle.checked;
-      var k = yearly ? "y" : "m";
-      $$("[data-price-int]").forEach(function (el) { el.textContent = el.getAttribute("data-" + k); });
-      $$("[data-price-dec]").forEach(function (el) { el.textContent = "," + el.getAttribute("data-" + k); });
-      $$("[data-price-note]").forEach(function (el) { el.innerHTML = el.getAttribute("data-" + k); });
-      $$("[data-bill-label]").forEach(function (el) {
-        el.classList.toggle("is-on", el.getAttribute("data-bill-label") === k);
-      });
-      $$("[data-plan-cta]").forEach(function (a) {
-        var url = a.getAttribute("href").split("&ciclo=")[0];
-        a.setAttribute("href", url + "&ciclo=" + (yearly ? "anual" : "mensal"));
-      });
-      try { sessionStorage.setItem("nl:ciclo", yearly ? "anual" : "mensal"); } catch (e) {}
-    };
-    try {
-      if (sessionStorage.getItem("nl:ciclo") === "anual") billToggle.checked = true;
-    } catch (e) {}
-    billToggle.addEventListener("change", applyBilling);
-    applyBilling();
-  }
-
   /* ---------------- Animated counters ---------------- */
   var counters = $$("[data-count]");
   if (counters.length && !reduce && "IntersectionObserver" in window) {

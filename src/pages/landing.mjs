@@ -100,7 +100,6 @@ ${header({ current: c.key, cta: {
   ${showcases(c.showcases, c.key)}
   ${steps(c.steps, h.steps, c.key)}
   ${band(c)}
-  ${features(c.features, h.features)}
   ${testimonials(c.testimonials, h.testimonials)}
   ${pricing(c)}
   ${paystrip()}

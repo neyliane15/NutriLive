@@ -43,7 +43,7 @@ export const segments = {
 export const nav = [
   { label: "Para você", href: "index.html", key: "voce", sub: "Plano alimentar, receitas e evolução" },
   { label: "Para nutricionistas", href: "nutricionistas.html", key: "nutri", sub: "Prontuário, planos e adesão em tempo real" },
-  { label: "Para academias", href: "academias.html", key: "academia", sub: "Nutrição para toda a base de alunos" },
+  { label: "Para academias", href: "academias.html", key: "academia", sub: "Programa de parceria por comissão" },
   { label: "Preços", href: "#planos", key: "precos", sub: "Mensal, sem fidelidade" },
   { label: "Segurança", href: "seguranca.html", key: "seguranca", sub: "Como protegemos seus dados" }
 ];
@@ -91,10 +91,10 @@ export const footer = {
 /* ---------- Payment / trust facts reused across pages ---------- */
 export const trustFacts = {
   guarantees: [
-    { icon: "refresh", text: "30 dias de garantia. Não gostou, devolvemos 100%." },
-    { icon: "x", text: "Cancele em 2 toques no app. Sem multa, sem ligação." },
+    { icon: "phone", text: "Cancele em 2 toques no app. Sem multa, sem ligação." },
     { icon: "lock", text: "Pagamento criptografado. Não guardamos seu cartão." },
-    { icon: "receipt", text: "Nota fiscal automática todo mês no seu e-mail." }
+    { icon: "calendar", text: "Cobrança mensal. Sem contrato de permanência." },
+    { icon: "globe", text: "Dados no Brasil, com criptografia e conformidade com a LGPD." }
   ],
   methods: [
     { key: "credito", label: "Cartão de crédito", sub: "Renova sozinho todo mês", icon: "card" },
