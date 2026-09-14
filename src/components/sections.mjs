@@ -292,13 +292,15 @@ export const features = (list, head) => `
       <h2>${head.title}</h2>
       ${head.text ? `<p class="lead measure">${head.text}</p>` : ""}
     </div>
-    <div class="grid-3 mt-12" data-reveal-group>
+    <div class="feature-rows mt-10" data-reveal-group>
       ${list
         .map(
-          (f) => `<article class="card card-interactive feature-card" data-reveal>
+          (f) => `<article class="feature-row" data-reveal>
         <span class="icon-tile" aria-hidden="true">${icon[f.icon] ? icon[f.icon]() : icon.check()}</span>
-        <h3>${f.title}</h3>
-        <p>${f.text}</p>
+        <div>
+          <h3>${f.title}</h3>
+          <p>${f.text}</p>
+        </div>
       </article>`
         )
         .join("")}

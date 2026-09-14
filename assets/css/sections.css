@@ -646,3 +646,13 @@
 .security-pillars { display: grid; gap: var(--sp-5); }
 @media (min-width: 560px) { .security-pillars { grid-template-columns: repeat(2, 1fr); } }
 .security-pillars .trust-card h3 { min-height: 0; }
+
+/* Recursos: linhas densas de ícone + texto, sem moldura de card */
+.feature-rows { display: grid; gap: var(--sp-6) var(--sp-8); }
+@media (min-width: 640px)  { .feature-rows { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .feature-rows { grid-template-columns: repeat(3, 1fr); gap: var(--sp-7) var(--sp-8); } }
+.feature-row { display: flex; gap: var(--sp-4); align-items: flex-start; }
+.feature-row .icon-tile { width: 40px; height: 40px; border-radius: 12px; }
+.feature-row .icon-tile svg { width: 21px; height: 21px; }
+.feature-row h3 { font-size: 1.0625rem; font-weight: var(--fw-bold); letter-spacing: -0.016em; }
+.feature-row p { margin-top: .25rem; font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.55; max-width: 34ch; }
