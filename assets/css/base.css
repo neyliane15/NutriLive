@@ -136,6 +136,11 @@ h4 { font-size: var(--fs-h4); font-weight: var(--fw-semi); letter-spacing: -0.01
 .container-wide { max-width: calc(var(--container-wide) + var(--gutter) * 2); }
 .container-narrow { max-width: calc(760px + var(--gutter) * 2); }
 
+/* Nenhum resíduo de sub-pixel vira rolagem horizontal. `clip` não cria um
+   contêiner de rolagem, então o cabeçalho fixo e o CTA fixo (fora de <main>)
+   continuam funcionando. */
+main { overflow-x: clip; }
+
 .section { padding-block: var(--section-y); position: relative; }
 .section-sm { padding-block: var(--section-y-sm); }
 .section-soft { background: var(--bg-soft); }
@@ -174,6 +179,8 @@ h4 { font-size: var(--fs-h4); font-weight: var(--fw-semi); letter-spacing: -0.01
 
 /* ---------- Utilities ---------- */
 .hide { display: none !important; }
+@media (max-width: 400px)  { .hide-xs { display: none !important; } }
+@media (min-width: 401px)  { .only-xs { display: none !important; } }
 @media (max-width: 767px)  { .hide-sm { display: none !important; } }
 @media (min-width: 768px)  { .only-sm { display: none !important; } }
 @media (max-width: 1023px) { .hide-md { display: none !important; } }

@@ -3,6 +3,7 @@ import { icon } from "./icons.mjs";
 import { nav } from "../data/site.mjs";
 
 export const header = ({ current = "", cta = { label: "Assinar", href: "#planos" }, home = "index.html" } = {}) => {
+  const ctaShort = cta.short || cta.label;
   // Âncoras só funcionam na própria landing; nas demais páginas apontam para a home.
   const isLanding = ["voce", "nutri", "academia"].indexOf(current) > -1;
   const resolve = (href) => (href.charAt(0) === "#" && !isLanding ? home + href : href);
@@ -30,7 +31,7 @@ export const header = ({ current = "", cta = { label: "Assinar", href: "#planos"
     <nav class="header-nav" aria-label="Navegação principal">${links}</nav>
     <div class="header-actions">
       <a class="btn btn-ghost btn-sm hide-md" href="#" data-noop>Entrar</a>
-      <a class="btn btn-primary btn-sm" href="${cta.href}">${cta.label}</a>
+      <a class="btn btn-primary btn-sm" href="${cta.href}"><span class="hide-xs">${cta.label}</span><span class="only-xs">${ctaShort}</span></a>
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-drawer" aria-label="Abrir menu" data-nav-toggle>
         <span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
       </button>

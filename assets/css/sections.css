@@ -52,7 +52,7 @@
 /* Hero visual stage */
 .hero-stage { position: relative; display: grid; place-items: center; min-height: 380px; }
 .hero-stage-glow {
-  position: absolute; width: 108%; aspect-ratio: 1; border-radius: 50%;
+  position: absolute; width: 108%; max-width: 100%; aspect-ratio: 1; border-radius: 50%;
   background: radial-gradient(circle, rgba(137,207,165,.42) 0%, rgba(137,207,165,0) 66%);
   z-index: 0;
 }
@@ -656,3 +656,4 @@
 .feature-row .icon-tile svg { width: 21px; height: 21px; }
 .feature-row h3 { font-size: 1.0625rem; font-weight: var(--fw-bold); letter-spacing: -0.016em; }
 .feature-row p { margin-top: .25rem; font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.55; max-width: 34ch; }
+.security-pillars .pillar-title { font-size: var(--fs-h4); font-weight: var(--fw-bold); letter-spacing: -0.016em; margin-top: 0 !important; }

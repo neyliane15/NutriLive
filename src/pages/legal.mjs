@@ -54,7 +54,7 @@ const seguranca = () =>
     .map(
       (p) => `<article class="card card-lg trust-card">
     <span class="icon-tile" aria-hidden="true">${icon[p.icon]()}</span>
-    <h3>${p.title}</h3>
+    <h2 class="pillar-title">${p.title}</h2>
     <p>${p.text}</p>
   </article>`
     )

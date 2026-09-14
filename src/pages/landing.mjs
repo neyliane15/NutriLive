@@ -73,7 +73,11 @@ export const landing = (c) => {
     ogImage: `assets/img/og-${c.key}.jpg`,
     bodyClass: `seg-${c.key}`,
     body: `
-${header({ current: c.key, cta: { label: c.key === "academia" ? "Falar com vendas" : "Assinar", href: `checkout.html?seg=${c.key}&plan=${featured.planKey}` } })}
+${header({ current: c.key, cta: {
+      label: c.key === "academia" ? "Falar com vendas" : "Assinar",
+      short: c.key === "academia" ? "Vendas" : "Assinar",
+      href: `checkout.html?seg=${c.key}&plan=${featured.planKey}`
+    } })}
 <main id="conteudo">
   ${hero(c)}
   ${

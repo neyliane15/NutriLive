@@ -15,6 +15,13 @@
 }
 [data-reveal="left"]  { transform: translate3d(-22px, 0, 0); }
 [data-reveal="right"] { transform: translate3d(22px, 0, 0); }
+
+/* Em telas estreitas o deslocamento lateral do estado inicial ultrapassava a
+   calha e criava 2px de rolagem horizontal antes da revelação acontecer.
+   Abaixo de 900px a revelação é só vertical. */
+@media (max-width: 900px) {
+  [data-reveal="left"], [data-reveal="right"] { transform: translate3d(0, 18px, 0); }
+}
 [data-reveal="scale"] { transform: scale(.965); }
 [data-reveal="fade"]  { transform: none; }
 
