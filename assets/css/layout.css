@@ -119,9 +119,9 @@ body.is-locked { overflow: hidden; }
   border-top: 1px solid rgba(255,255,255,.11);
   display: flex; flex-wrap: wrap; gap: var(--sp-4) var(--sp-6);
   align-items: center; justify-content: space-between;
-  font-size: var(--fs-xs); color: rgba(234,246,238,.56);
+  font-size: var(--fs-xs); color: var(--text-on-deep-muted);
 }
-.footer-legal { max-width: 78ch; line-height: 1.65; }
+.footer-legal { max-width: var(--measure); line-height: 1.65; }
 .social-row { display: flex; gap: .5rem; }
 .social-btn {
   width: 40px; height: 40px; display: grid; place-items: center;
@@ -143,3 +143,16 @@ body.is-locked { overflow: hidden; }
 .store-badge span { display: block; line-height: 1.15; }
 .store-badge .sb-top { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
 .store-badge .sb-main { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+
+/* ---------- Zoom de texto a 200% (WCAG 1.4.4) ----------
+   Com a fonte-raiz em 32px o cabeçalho passava de 530px num viewport de
+   390px e cortava o botão. Ele passa a caber: a marca some antes do CTA,
+   e a barra cresce em vez de estourar. */
+@media (max-width: 1023px) {
+  .site-header { height: auto; min-height: var(--header-h); }
+  .header-inner { flex-wrap: wrap; row-gap: .5rem; padding-block: .5rem; }
+  .header-actions { flex-shrink: 0; }
+  .brand { min-width: 0; }
+  .brand-word { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .btn { max-width: 100%; }
+}

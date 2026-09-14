@@ -13,7 +13,7 @@
   justify-content: center;
   gap: .5rem;
   padding: .9375rem 1.625rem;
-  min-height: 52px;
+  height: 52px;
   border-radius: var(--r-pill);
   background: var(--btn-bg);
   color: var(--btn-fg);
@@ -58,8 +58,8 @@
 .btn-outline-light { --btn-bg: transparent; --btn-fg: var(--white); --btn-bd: rgba(255,255,255,.34); }
 .btn-outline-light:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.62); }
 
-.btn-lg { min-height: 58px; padding: 1.0625rem 2rem; font-size: 1.0625rem; }
-.btn-sm { min-height: 42px; padding: .625rem 1.125rem; font-size: var(--fs-sm); }
+.btn-lg { height: 58px; padding-inline: 2rem; font-size: 1.0625rem; }
+.btn-sm { height: 42px; padding-inline: 1.125rem; font-size: var(--fs-sm); }
 .btn-block { width: 100%; }
 .btn-icon { padding-inline: .875rem; }
 .btn svg { flex: none; }
@@ -99,7 +99,10 @@
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 3l5 5-5 5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
   transition: transform var(--dur-2) var(--ease-out);
 }
+.link-arrow:hover { color: var(--accent-hover); }
 .link-arrow:hover::after { transform: translateX(3px); }
+.link-arrow:hover > svg { transform: translateX(3px); }
+.link-arrow > svg { transition: transform var(--dur-2) var(--ease-out); }
 .on-deep .link-arrow { color: var(--lime-300); }
 
 /* ---------------- Badges & pills ---------------- */
@@ -260,7 +263,7 @@
   min-height: 54px;
   padding: .875rem 1rem;
   background: var(--white);
-  border: 1.5px solid var(--ink-200);
+  border: 1.5px solid var(--border-control);
   border-radius: var(--r-md);
   font-size: 1rem;
   color: var(--text);
@@ -268,7 +271,7 @@
   -webkit-appearance: none; appearance: none;
 }
 .input::placeholder { color: var(--ink-400); }
-.input:hover { border-color: var(--ink-300); }
+.input:hover { border-color: var(--ink-600); }
 .input:focus { border-color: var(--leaf-500); box-shadow: var(--sh-focus-tight); outline: none; }
 .field.has-error .input { border-color: var(--danger-500); }
 .field.has-error .input:focus { box-shadow: 0 0 0 3px rgba(220,74,66,.22); }
@@ -295,7 +298,7 @@ select.input {
 .choice {
   position: relative; display: flex; align-items: center; gap: var(--sp-3);
   padding: 1rem 1.125rem;
-  border: 1.5px solid var(--ink-200); border-radius: var(--r-md);
+  border: 1.5px solid var(--border-control); border-radius: var(--r-md);
   background: var(--white); cursor: pointer;
   transition: border-color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
@@ -303,7 +306,7 @@ select.input {
 .choice input { position: absolute; opacity: 0; width: 0; height: 0; }
 .choice-radio {
   width: 20px; height: 20px; flex: none; border-radius: 50%;
-  border: 2px solid var(--ink-300); display: grid; place-items: center;
+  border: 2px solid var(--border-control); display: grid; place-items: center;
   transition: border-color var(--dur-2) var(--ease-out);
 }
 .choice-radio::after {
@@ -347,8 +350,11 @@ select.input {
 .accordion-trigger[aria-expanded="true"] .accordion-icon::after { transform: rotate(90deg); opacity: 0; }
 .accordion-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-3) var(--ease-out); }
 .accordion-panel[data-open="true"] { grid-template-rows: 1fr; }
-.accordion-panel > div { overflow: hidden; }
-.accordion-panel p { padding-bottom: var(--sp-5); color: var(--text-muted); max-width: 62ch; }
+/* Fechado, o painel tem altura zero mas continua no fluxo do leitor de tela:
+   sem visibility:hidden as oito respostas do FAQ são lidas em voz alta. */
+.accordion-panel > div { overflow: hidden; visibility: hidden; transition: visibility 0s linear var(--dur-3); }
+.accordion-panel[data-open="true"] > div { visibility: visible; transition-delay: 0s; }
+.accordion-panel p { padding-bottom: var(--sp-5); color: var(--text-muted); max-width: var(--measure); }
 .accordion-panel p + p { padding-top: 0; margin-top: calc(var(--sp-3) * -1 + var(--sp-3)); }
 @media (prefers-reduced-motion: reduce) { .accordion-panel { transition: none; } }
 
@@ -390,9 +396,9 @@ select.input {
 
 /* ---------------- Tooltip-ish inline info ---------------- */
 .info-dot {
-  display: inline-grid; place-items: center; width: 16px; height: 16px;
-  border-radius: 50%; background: var(--ink-200); color: var(--ink-700);
-  font-size: 10px; font-weight: var(--fw-bold); vertical-align: 1px; cursor: help;
+  display: inline-grid; place-items: center; width: 24px; height: 24px;
+  border-radius: 50%; background: var(--ink-500); color: var(--white);
+  font-size: 12px; font-weight: var(--fw-semi); vertical-align: -6px; cursor: help;
 }
 
 /* ---------------- Skeleton ---------------- */

@@ -129,7 +129,7 @@
 .pm-tab {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem;
   padding: .875rem .625rem; border-radius: var(--r-md);
-  border: 1.5px solid var(--ink-200); background: var(--white);
+  border: 1.5px solid var(--border-control); background: var(--white);
   font-size: var(--fs-xs); font-weight: var(--fw-semi); color: var(--ink-700);
   text-align: center; line-height: 1.25;
   transition: border-color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
@@ -469,7 +469,7 @@
 .bank-fieldset > legend { padding: 0; }
 .bank-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: .5rem; margin-top: var(--sp-4); }
 .bank-opt {
-  border: 1.5px solid var(--ink-200); border-radius: var(--r-md);
+  border: 1.5px solid var(--border-control); border-radius: var(--r-md);
   padding: .75rem .5rem; display: grid; place-items: center; gap: .375rem;
   font-size: var(--fs-2xs); font-weight: var(--fw-semi); color: var(--ink-700);
   text-align: center; line-height: 1.3; min-height: 84px;

@@ -86,7 +86,7 @@ ${header({ current: c.key, cta: {
   ${paystrip()}
   ${showcases(c.showcases, c.key)}
   ${band(c)}
-  ${steps(c.steps, h.steps)}
+  ${steps(c.steps, h.steps, c.key)}
   ${features(c.features, h.features)}
   ${stats(c.stats)}
   ${testimonials(c.testimonials, h.testimonials)}
@@ -98,7 +98,7 @@ ${header({ current: c.key, cta: {
       ? `${tiles(c)}
   ${stats(c.stats)}
   ${showcases(c.showcases, c.key)}
-  ${steps(c.steps, h.steps)}
+  ${steps(c.steps, h.steps, c.key)}
   ${band(c)}
   ${features(c.features, h.features)}
   ${testimonials(c.testimonials, h.testimonials)}

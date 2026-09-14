@@ -29,7 +29,7 @@ const tabbar = (active = 0) => {
   return `<div class="mini-tabbar" aria-hidden="true">${tabs
     .map((t, n) =>
       t.i === null
-        ? `<span class="mini-fab"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>`
+        ? `<span class="mini-fab"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>`
         : `<span class="mt${n === active ? " on" : ""}">${t.i}<span>${t.l}</span></span>`
     )
     .join("")}</div>`;
@@ -131,7 +131,7 @@ ${appbar("Plano alimentar")}
 </div>
 <div class="mini-card" style="display:flex;align-items:center;gap:7px">
   <span style="width:22px;height:22px;border-radius:7px;background:#DCF1E2;color:#17603D;display:grid;place-items:center">
-    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 3.5h2.6l2.5 12.1h11.1l1.8-8.6H6.1"/></svg>
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2.5 3.5h2.6l2.5 12.1h11.1l1.8-8.6H6.1"/></svg>
   </span>
   <span style="flex:1;font-size:9px;font-weight:600">Enviar lista de compras</span>
   <span style="font-size:8px;color:#637F72">23 itens</span>

@@ -7,6 +7,7 @@ import { payMark } from "./paymarks.mjs";
 import { segments, trustFacts, securityPillars, site } from "../data/site.mjs";
 import { brl, brlParts, pct } from "../lib/format.mjs";
 import { qrSvg } from "../lib/qr.mjs";
+import { illu } from "./illustrations.mjs";
 
 /* ---------- Audience switcher ---------- */
 export const audienceSwitch = (current, deep = false) => `
@@ -30,9 +31,9 @@ export const hero = (c) => {
   return `
 <section class="hero hero-nu hero-${c.key}" id="topo">
   <div class="container">
-    <div style="margin-bottom:clamp(1.75rem,1rem+2vw,2.75rem)">${audienceSwitch(c.key, c.key === "academia")}</div>
     <div class="hero-grid">
       <div class="hero-copy">
+        <p class="eyebrow hero-eyebrow">${c.navLabel}</p>
         <h1 class="display-1">${renderTitle(h.title)}</h1>
         <p class="lead">${h.lead}</p>
         <div class="hero-cta">
@@ -222,7 +223,13 @@ export const stats = (list, deep = false) => `
 </section>`;
 
 /* ---------- Steps ---------- */
-export const steps = (list, head) => `
+const STEP_ILLU = {
+  voce: ["rotina", "prato", "evolucao"],
+  nutri: ["consulta", "prato", "evolucao"],
+  academia: ["academia", "feira", "evolucao"]
+};
+
+export const steps = (list, head, segKey = "voce") => `
 <section class="section" id="como-funciona">
   <div class="container">
     <div class="section-head" data-reveal>
@@ -231,13 +238,15 @@ export const steps = (list, head) => `
     </div>
     <div class="steps mt-12" data-reveal-group>
       ${list
-        .map(
-          (s, i) => `<div class="step" data-reveal>
+        .map((s, i) => {
+          const key = (STEP_ILLU[segKey] || STEP_ILLU.voce)[i];
+          return `<div class="step" data-reveal>
+        <div class="step-art">${illu[key] ? illu[key]() : ""}</div>
         <div class="step-num" aria-hidden="true">${i + 1}</div>
         <h3>${s.title}</h3>
         <p>${s.text}</p>
-      </div>`
-        )
+      </div>`;
+        })
         .join("")}
     </div>
   </div>
@@ -340,7 +349,7 @@ export const pricing = (c) => {
       <p class="plan-price-note" data-price-note
          data-m="Cobrado todo mês. Cancele quando quiser."
          data-y="${brl(p.yearly * 12)} uma vez por ano · <b>economize ${save}%</b>">Cobrado todo mês. Cancele quando quiser.</p>
-      <a class="btn ${p.featured ? "btn-primary" : "btn-secondary"} btn-block" href="checkout.html?seg=${c.key}&amp;plan=${p.planKey}" data-plan-cta="${p.planKey}">${p.cta}</a>
+      <a class="btn ${p.featured ? "btn-primary" : "btn-secondary"} btn-block" href="checkout.html?seg=${c.key}&amp;plan=${p.planKey}" data-plan-cta="${p.planKey}" aria-label="${p.cta} — plano ${p.name}, ${brl(p.monthly)} por mês">${p.cta}</a>
       <ul class="plan-features">${feats}${offs}</ul>
       <p class="plan-foot">${p.foot || "Pix, cartão de crédito ou débito. Sem taxa de adesão."}</p>
     </article>`;
@@ -423,7 +432,7 @@ export const trust = () => `
 
 /* ---------- Testimonials ---------- */
 export const testimonials = (list, head) => `
-<section class="section section-soft" id="depoimentos">
+<section class="section" id="depoimentos">
   <div class="container">
     <div class="section-head" data-reveal>
       <h2>${head.title}</h2>

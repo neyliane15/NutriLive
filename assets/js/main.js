@@ -29,6 +29,11 @@
       toggle.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
       drawer.setAttribute("data-open", String(open));
       document.body.classList.toggle("is-locked", open);
+      // Sem isto o Tab sai da gaveta e percorre a página atrás do overlay.
+      ["main", ".site-header .header-nav", ".site-footer"].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el) el.inert = open;
+      });
       if (open) {
         var first = drawer.querySelector("a, button");
         if (first) first.focus({ preventScroll: true });
@@ -108,11 +113,14 @@
     });
     // Arrow-key roving between questions
     acc.addEventListener("keydown", function (e) {
-      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      var keys = ["ArrowDown", "ArrowUp", "Home", "End"];
+      if (keys.indexOf(e.key) === -1) return;
       var items = $$(".accordion-trigger", acc);
       var i = items.indexOf(document.activeElement);
       if (i === -1) return;
       e.preventDefault();
+      if (e.key === "Home") return items[0].focus();
+      if (e.key === "End") return items[items.length - 1].focus();
       items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length].focus();
     });
   });

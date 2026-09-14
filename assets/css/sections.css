@@ -42,7 +42,7 @@
 .hero-proof-text strong { color: var(--ink-900); font-weight: var(--fw-bold); }
 
 .hero-bullets { display: grid; gap: .625rem; margin-top: var(--sp-6) !important; }
-.hero-bullets li { display: flex; gap: .625rem; align-items: flex-start; font-size: var(--fs-sm); color: var(--ink-700); }
+.hero-bullets li { display: flex; gap: .625rem; align-items: flex-start; font-size: var(--fs-body); color: var(--ink-700); }
 .hero-bullets .tick {
   width: 20px; height: 20px; flex: none; border-radius: 50%; margin-top: 1px;
   background: var(--leaf-100); color: var(--leaf-700); display: grid; place-items: center;
@@ -222,7 +222,7 @@
   background: var(--leaf-100); color: var(--leaf-700); display: grid; place-items: center;
 }
 .showcase-list .tick svg { width: 13px; height: 13px; }
-.showcase-list span { font-size: var(--fs-sm); color: var(--ink-700); line-height: 1.55; }
+.showcase-list span { font-size: var(--fs-body); color: var(--ink-700); line-height: 1.55; }
 .showcase-list b { color: var(--ink-900); font-weight: var(--fw-semi); }
 
 /* Media panel (soft rounded stage behind a device) */
@@ -294,7 +294,7 @@
   position: absolute; top: -13px; left: 50%; translate: -50% 0;
   background: var(--leaf-600); color: var(--white);
   padding: .3125rem .875rem; border-radius: var(--r-pill);
-  font-size: var(--fs-2xs); font-weight: var(--fw-bold); letter-spacing: .02em;
+  font-size: var(--fs-xs); font-weight: var(--fw-semi); letter-spacing: .02em;
   white-space: nowrap; box-shadow: 0 4px 12px rgba(31,122,77,.3);
 }
 .plan-name { font-size: var(--fs-h4); font-weight: var(--fw-black); letter-spacing: -0.02em; }
@@ -306,17 +306,17 @@
   letter-spacing: -0.045em; line-height: 1; color: var(--ink-900);
 }
 .plan-price .cents { font-size: 1.25rem; font-weight: var(--fw-black); letter-spacing: -0.03em; margin-top: .3rem; color: var(--ink-900); }
-.plan-price .per { font-size: var(--fs-sm); color: var(--text-soft); align-self: flex-end; margin-bottom: .3rem; margin-left: .125rem; font-weight: var(--fw-medium); }
+.plan-price .per { font-size: var(--fs-sm); color: var(--text-muted); align-self: flex-end; margin-bottom: .3rem; margin-left: .125rem; font-weight: var(--fw-regular); }
 .plan-price-note { margin-top: .5rem; font-size: var(--fs-xs); color: var(--text-soft); min-height: 1.5em; }
-.plan-price-note s { color: var(--ink-400); }
+.plan-price-note s { color: var(--ink-600); }
 .plan-price-note b { color: var(--leaf-700); font-weight: var(--fw-bold); }
 .plan .btn { margin-top: var(--sp-5); }
 .plan-features { margin-top: var(--sp-6); display: grid; gap: .6875rem; flex: 1; }
-.plan-features li { display: flex; gap: .625rem; align-items: flex-start; font-size: var(--fs-sm); color: var(--ink-700); line-height: 1.5; }
+.plan-features li { display: flex; gap: .625rem; align-items: flex-start; font-size: var(--fs-body); color: var(--ink-700); line-height: 1.5; }
 .plan-features .tick { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--leaf-600); }
 .plan-features .tick svg { width: 18px; height: 18px; }
 .plan-features .tick.off { color: var(--ink-300); }
-.plan-features .off-text { color: var(--ink-400); }
+.plan-features .off-text { color: var(--ink-500); text-decoration: line-through; text-decoration-color: var(--ink-300); text-decoration-thickness: 1px; }
 .plan-group-title {
   margin-top: var(--sp-4); font-size: var(--fs-2xs); font-weight: var(--fw-bold);
   text-transform: uppercase; letter-spacing: var(--ls-wide); color: var(--ink-500);
@@ -356,7 +356,7 @@
 .quote-stars svg { width: 16px; height: 16px; }
 .quote-text { font-size: 1.0625rem; line-height: 1.55; letter-spacing: -0.013em; color: var(--ink-800); flex: 1; }
 .quote-foot { display: flex; align-items: center; gap: .75rem; margin-top: var(--sp-5); padding-top: var(--sp-4); border-top: 1px solid var(--border-subtle); }
-.quote-name { font-size: var(--fs-sm); font-weight: var(--fw-bold); }
+.quote-name { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
 .quote-role { font-size: var(--fs-xs); color: var(--text-soft); }
 
 /* ---------------- FAQ ---------------- */
@@ -426,7 +426,7 @@
 .hero-nu { background: var(--white); padding-block: clamp(2rem,1rem+3vw,4rem) 0; overflow: clip; }
 .hero-nu .hero-grid { align-items: center; gap: clamp(2rem,1rem+4vw,4rem); }
 .hero-nu .hero-copy > * + * { margin-top: var(--sp-6); }
-.hero-nu .display-1 { max-width: 14ch; }
+.hero-nu .display-1 { max-width: 12ch; }
 .hero-nu .lead { max-width: 34ch; font-size: clamp(1.0625rem,1rem+.5vw,1.375rem); color: var(--ink-700); }
 .hero-nu .hero-cta { margin-top: var(--sp-8) !important; align-items: center; }
 .hero-nu .hero-stage { min-height: 0; }
@@ -455,7 +455,7 @@
 @media (hover: hover) { .tile:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); border-color: var(--leaf-200); } }
 .tile h3 { font-size: 1.0625rem; font-weight: var(--fw-bold); letter-spacing: -0.018em; }
 .tile p { font-size: var(--fs-xs); color: var(--text-muted); line-height: 1.5; flex: 1; }
-.tile .tile-go { display: flex; align-items: center; gap: .375rem; font-size: var(--fs-xs); font-weight: var(--fw-bold); color: var(--leaf-700); }
+.tile .tile-go { display: flex; align-items: center; gap: .375rem; font-size: var(--fs-sm); font-weight: var(--fw-semi); color: var(--leaf-700); }
 .tile .tile-go svg { width: 15px; height: 15px; transition: transform var(--dur-2) var(--ease-out); }
 .tile:hover .tile-go svg { transform: translateX(3px); }
 
@@ -472,7 +472,7 @@
 .band-grid { display: grid; gap: clamp(2rem,1rem+3vw,3.5rem); align-items: center; }
 @media (min-width: 900px) { .band-grid { grid-template-columns: 1.15fr 1fr; } }
 .band h2 { color: var(--white); max-width: 18ch; }
-.band .lead { color: var(--text-on-deep-muted); max-width: 44ch; }
+.band .lead { color: #EAF6EE; max-width: 44ch; }
 
 /* ---------- Baixe o app (QR + lojas) — outra assinatura do Nubank ---------- */
 .app-band { background: var(--bg-mint); }
@@ -522,7 +522,6 @@
   .showcase-media .device-screen { border-radius: 31px; }
   .media-panel { padding: 1.25rem; border-radius: var(--r-xl); }
   .band-grid .device { width: 236px; }
-  .showcase-section { padding-block: var(--section-y-sm); }
   .showcase + .showcase { margin-top: 0; }
 }
 
@@ -593,14 +592,14 @@
 .cta-recap-name { margin-top: var(--sp-4); font-size: var(--fs-h4); font-weight: var(--fw-black); color: var(--white); letter-spacing: -0.02em; }
 .cta-recap-price { display: flex; align-items: flex-start; gap: 0; margin-top: .25rem; color: var(--white); }
 .cta-recap-price span { font-size: 1rem; font-weight: var(--fw-bold); margin-top: .5rem; margin-right: .25rem; }
-.cta-recap-price b { font-size: 2.75rem; font-weight: var(--fw-black); letter-spacing: -0.045em; line-height: 1; }
+.cta-recap-price b { font-size: clamp(2.25rem, 1.9rem + 1.5vw, 2.75rem); font-weight: var(--fw-black); letter-spacing: -0.045em; line-height: 1; }
 .cta-recap-price i { font-size: 1.125rem; font-weight: var(--fw-black); font-style: normal; letter-spacing: -0.03em; margin-top: .25rem; }
 .cta-recap-price em { font-size: var(--fs-sm); font-style: normal; font-weight: var(--fw-medium); color: var(--text-on-deep-muted); align-self: flex-end; margin-bottom: .25rem; margin-left: .25rem; }
 .cta-recap-list { display: grid; gap: .5rem; margin-top: var(--sp-5); }
 .cta-recap-list li { display: flex; gap: .5rem; align-items: flex-start; font-size: var(--fs-xs); color: var(--text-on-deep-muted); line-height: 1.5; }
 .cta-recap-list svg { width: 15px; height: 15px; flex: none; margin-top: 2px; color: var(--lime-300); }
 .cta-recap .btn { margin-top: var(--sp-5); }
-.cta-recap-foot { display: flex; align-items: center; gap: .375rem; margin-top: var(--sp-4); font-size: var(--fs-2xs); color: rgba(234,246,238,.6); }
+.cta-recap-foot { display: flex; align-items: center; gap: .375rem; margin-top: var(--sp-4); font-size: var(--fs-xs); color: var(--text-on-deep-muted); }
 .cta-recap-foot svg { width: 13px; height: 13px; flex: none; }
 .cta-final .lead { max-width: 44ch; }
 .cta-recap .btn { background: var(--lime-300); color: var(--leaf-900); box-shadow: none; }
@@ -652,8 +651,26 @@
 @media (min-width: 640px)  { .feature-rows { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) { .feature-rows { grid-template-columns: repeat(3, 1fr); gap: var(--sp-7) var(--sp-8); } }
 .feature-row { display: flex; gap: var(--sp-4); align-items: flex-start; }
-.feature-row .icon-tile { width: 40px; height: 40px; border-radius: 12px; }
+.feature-row .icon-tile { width: 40px; height: 40px; border-radius: var(--r-md); }
 .feature-row .icon-tile svg { width: 21px; height: 21px; }
 .feature-row h3 { font-size: 1.0625rem; font-weight: var(--fw-bold); letter-spacing: -0.016em; }
 .feature-row p { margin-top: .25rem; font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.55; max-width: 34ch; }
 .security-pillars .pillar-title { font-size: var(--fs-h4); font-weight: var(--fw-bold); letter-spacing: -0.016em; margin-top: 0 !important; }
+
+/* O hero declara o público; quem troca é o menu fixo, que já traz os três. */
+.hero-eyebrow { margin-bottom: var(--sp-4); }
+.hero-academia .hero-eyebrow { color: var(--lime-300); }
+.hero-nu .hero-copy > .display-1 { margin-top: 0; }
+
+/* ---------------- Ilustrações ---------------- */
+.illu { width: 100%; height: auto; display: block; }
+.step-art {
+  border-radius: var(--r-xl); overflow: hidden; margin-bottom: var(--sp-5);
+  background: var(--bg-soft); aspect-ratio: 260 / 200;
+}
+.section-deep .step-art { background: rgba(255,255,255,.06); }
+.steps .step-num { margin-bottom: var(--sp-4); }
+@media (min-width: 800px) {
+  /* a linha pontilhada entre passos deixa de fazer sentido com arte no topo */
+  .step:not(:last-child)::after { display: none; }
+}
