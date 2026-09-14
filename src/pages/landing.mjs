@@ -84,9 +84,9 @@ ${header({ current: c.key, cta: { label: c.key === "academia" ? "Falar com venda
   ${band(c)}
   ${steps(c.steps, h.steps)}
   ${features(c.features, h.features)}
-  ${pricing(c)}
   ${stats(c.stats)}
   ${testimonials(c.testimonials, h.testimonials)}
+  ${pricing(c)}
   ${trust()}
   ${faq(c.faq, c.key)}
   ${appBand()}`
