@@ -41,6 +41,10 @@ const ring = (pct, size = 40) => {
     <circle cx="20" cy="20" r="${r}" fill="none" stroke="rgba(255,255,255,.24)" stroke-width="4"/>
     <circle cx="20" cy="20" r="${r}" fill="none" stroke="#C7EC8A" stroke-width="4" stroke-linecap="round"
       stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct / 100)}" transform="rotate(-90 20 20)"/>
+    <text x="20" y="21.4" text-anchor="middle" font-family="Inter, sans-serif" font-size="12.5"
+      font-weight="800" letter-spacing="-0.04em" fill="#fff">${pct}</text>
+    <text x="20" y="27.4" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.4"
+      font-weight="700" letter-spacing="0.04em" fill="rgba(255,255,255,.62)">/100</text>
   </svg>`;
 };
 
@@ -206,6 +210,13 @@ ${appbar("Lista de compras")}
     <li><span class="mini-tick"></span><span style="flex:1;font-size:9px">Filé de tilápia · 600 g</span><span style="font-size:8px;color:#637F72">R$ 32,90</span></li>
     <li><span class="mini-tick"></span><span style="flex:1;font-size:9px">Ovos caipira · 20 un</span><span style="font-size:8px;color:#637F72">R$ 21,40</span></li>
     <li><span class="mini-tick"></span><span style="flex:1;font-size:9px">Atum em água · 3 latas</span><span style="font-size:8px;color:#637F72">R$ 18,00</span></li>
+  </ul>
+</div>
+<div class="mini-card">
+  <div class="mini-label">🌾 MERCEARIA</div>
+  <ul class="mini-list" style="margin-top:3px">
+    <li><span class="mini-tick on"></span><span style="flex:1;font-size:9px">Arroz integral · 1 kg</span><span style="font-size:8px;color:#637F72">R$ 9,80</span></li>
+    <li><span class="mini-tick"></span><span style="flex:1;font-size:9px">Tapioca granulada · 500 g</span><span style="font-size:8px;color:#637F72">R$ 7,40</span></li>
   </ul>
 </div>
 ${tabbar(3)}`,
