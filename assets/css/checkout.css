@@ -362,9 +362,14 @@
 }
 
 /* ---------------- Pix ---------------- */
-.pix-wrap { display: grid; gap: var(--sp-6); }
+/* min-width: 0 em toda a cadeia: sem isso o código copia-e-cola, que é uma
+   string de 166 caracteres sem quebra, define a largura da coluna e estoura
+   o painel inteiro no celular. */
+.pix-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-6); }
 @media (min-width: 620px) { .pix-wrap { grid-template-columns: auto minmax(0, 1fr); align-items: start; } }
-.pix-col-qr { display: grid; gap: .75rem; justify-items: center; align-content: start; }
+.pix-wrap > * { min-width: 0; }
+.pix-col-qr { display: grid; gap: .75rem; justify-items: center; align-content: start; min-width: 0; }
+.pix-steps, .pix-code, .pix-status, .pix-wrap .notice { min-width: 0; }
 .pix-qr-card {
   position: relative;
   background: var(--white); border: 1.5px solid var(--border);
@@ -404,9 +409,9 @@
   background: var(--leaf-100); color: var(--leaf-800);
   display: grid; place-items: center; font-size: var(--fs-2xs); font-weight: var(--fw-bold);
 }
-.pix-code { margin-top: var(--sp-5); display: flex; gap: .5rem; align-items: stretch; }
+.pix-code { margin-top: var(--sp-5); display: flex; gap: .5rem; align-items: stretch; min-width: 0; }
 .pix-code-text {
-  flex: 1; min-width: 0; padding: .75rem .875rem;
+  flex: 1 1 0; min-width: 0; padding: .75rem .875rem;
   background: var(--ink-50); border: 1.5px solid var(--border);
   border-radius: var(--r-md); font-family: var(--font-mono); font-size: var(--fs-2xs);
   color: var(--ink-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
