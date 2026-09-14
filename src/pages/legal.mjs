@@ -49,7 +49,7 @@ const seguranca = () =>
     lead: "Dado de alimentação é dado de saúde. Aqui está, sem jargão, como ele é protegido — e o que você controla.",
     updated: "13 de setembro de 2026",
     body: `
-<div class="trust-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+<div class="security-pillars">
   ${securityPillars
     .map(
       (p) => `<article class="card card-lg trust-card">

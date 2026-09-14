@@ -641,3 +641,8 @@
 .sales-fact { display: flex; gap: var(--sp-3); align-items: flex-start; }
 .sales-fact b { display: block; font-size: var(--fs-sm); font-weight: var(--fw-bold); letter-spacing: -0.012em; }
 .sales-fact span span { display: block; font-size: var(--fs-xs); color: var(--text-muted); margin-top: 2px; line-height: 1.5; }
+
+/* Página de segurança: quatro pilares em duas colunas, sem órfão na última linha */
+.security-pillars { display: grid; gap: var(--sp-5); }
+@media (min-width: 560px) { .security-pillars { grid-template-columns: repeat(2, 1fr); } }
+.security-pillars .trust-card h3 { min-height: 0; }

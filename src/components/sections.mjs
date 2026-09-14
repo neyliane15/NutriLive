@@ -172,7 +172,7 @@ export const awards = () => `
     <div class="awards">
       ${[
         ["refresh", "30 dias", "Garantia total", "Não gostou, devolvemos 100% do valor — sem perguntar o motivo."],
-        ["x", "2 toques", "Cancelamento", "Direto no app. Sem multa, sem ligação, sem retenção."],
+        ["phone", "2 toques", "Cancelamento", "Direto no app. Sem multa, sem ligação, sem retenção."],
         ["lock", "PCI-DSS", "Pagamento seguro", "Seu cartão vai direto ao processador. A gente nunca vê o número."],
         ["receipt", "Todo mês", "Nota fiscal", "Emitida automaticamente e enviada para o seu e-mail."]
       ]
