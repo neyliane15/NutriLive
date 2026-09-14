@@ -41,13 +41,7 @@ export const shell = ({
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="${site.url}/${ogImage}">
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-latin.woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/tokens.css">
-<link rel="stylesheet" href="assets/css/base.css">
-<link rel="stylesheet" href="assets/css/components.css">
-<link rel="stylesheet" href="assets/css/layout.css">
-<link rel="stylesheet" href="assets/css/sections.css">
-<link rel="stylesheet" href="assets/css/checkout.css">
-<link rel="stylesheet" href="assets/css/motion.css">
+<link rel="stylesheet" href="assets/css/nutrielive.css">
 ${jsonLd ? `<script type="application/ld+json">${jsonLd}</script>` : ""}
 </head>
 <body class="${bodyClass}">
