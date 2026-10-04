@@ -1,3 +1,22 @@
+# Dependências
 node_modules/
+
+# Segredos — nunca versionar. Só .env.example entra no repositório.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Build e temporários
+dist/
 .work/
+app/dist/
+app/drizzle/meta/_journal.json.bak
+
+# Sistema operacional e editor
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
