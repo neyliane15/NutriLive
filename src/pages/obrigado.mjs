@@ -31,8 +31,7 @@ const page = () =>
       </p>
       <p class="success-paid" data-paid-line hidden></p>
       <div class="cluster" style="justify-content:center;margin-top:2rem">
-        <a class="btn btn-primary btn-lg" href="#" data-noop>${icon.play_store()} Baixar o app</a>
-        <a class="btn btn-secondary btn-lg" href="#" data-noop>Abrir no navegador</a>
+        <a class="btn btn-primary btn-lg" href="#" data-noop>${icon.arrowRight()} Entrar na minha conta</a>
       </div>
     </div>
 
@@ -69,7 +68,7 @@ const page = () =>
     <div class="next-steps">
       <h2 style="font-size:var(--fs-h3)">Comece por aqui</h2>
       ${[
-        ["phone", "Baixe o app e entre com o seu e-mail", "Enviamos um link mágico — sem senha para inventar nem esquecer."],
+        ["mail", "Entre com o seu e-mail", "Enviamos um link de acesso — sem senha para inventar nem esquecer."],
         ["clipboard", "Responda 2 minutos de perguntas", "Rotina, restrições, objetivo. É o que faz o plano ser seu de verdade."],
         ["sparkles", "Gere o seu primeiro plano", "Em cerca de 40 segundos você tem plano, receitas e lista de compras."]
       ]

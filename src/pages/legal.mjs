@@ -93,7 +93,7 @@ ${UL([
 ])}
 <div id="titular" class="notice" style="margin-top:var(--sp-6)">
   ${icon.mail()}
-  <span>Encarregado de dados (DPO): <b>dpo@nutrielive.com.br</b> · ${site.razaoSocial}, ${site.endereco}.</span>
+  <span>Encarregado de dados (DPO): <b>dpo@${site.domain}</b>.</span>
 </div>
 
 ${H("compartilhamento", "Com quem compartilhamos")}

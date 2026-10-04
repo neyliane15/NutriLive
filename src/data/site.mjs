@@ -7,9 +7,11 @@ export const site = {
   tagline: "Sua saúde, seu melhor plano.",
   domain: "nutrielive.com.br",
   url: "https://nutrielive.com.br",
-  cnpj: "58.412.907/0001-24",
-  razaoSocial: "Nutri&Live Tecnologia em Saúde Ltda.",
-  endereco: "Av. Paulista, 1374 — 11º andar, Bela Vista, São Paulo/SP, 01310-100",
+  // Preencher com os dados reais antes de publicar. Vazio é melhor que
+  // inventado: um CNPJ falso na página é problema jurídico, não detalhe.
+  cnpj: "",
+  razaoSocial: "",
+  endereco: "",
   email: "oi@nutrielive.com.br",
   whatsapp: "+55 11 4000-1234",
   whatsappHref: "https://wa.me/5511400012340",
@@ -76,14 +78,16 @@ export const footer = {
         { label: "Central de ajuda", href: "#" },
         { label: "Falar com a gente", href: "#" },
         { label: "Cancelar assinatura", href: "termos.html#cancelamento" },
-        { label: "Reembolso em 30 dias", href: "termos.html#reembolso" },
+        { label: "Arrependimento e reembolso", href: "termos.html#reembolso" },
         { label: "WhatsApp", href: site.whatsappHref }
       ]
     }
   ],
   legal: [
-    `${site.razaoSocial} — CNPJ ${site.cnpj}. ${site.endereco}.`,
-    "O Nutri&Live é uma ferramenta de organização e educação alimentar. Não substitui consulta, diagnóstico ou prescrição de profissional de saúde. Planos gerados no app são sugestões educativas e devem ser validados por um nutricionista habilitado.",
+    ...(site.razaoSocial
+      ? [`${site.razaoSocial}${site.cnpj ? ` — CNPJ ${site.cnpj}` : ""}${site.endereco ? `. ${site.endereco}` : ""}.`]
+      : []),
+    "O Nutri&Live é uma ferramenta de organização e educação alimentar. Não substitui consulta, diagnóstico ou prescrição de profissional de saúde. Planos gerados pelo sistema são sugestões educativas e devem ser validados por um nutricionista habilitado.",
     "Pagamentos processados por instituição parceira certificada PCI-DSS nível 1. Nutri&Live não armazena o número completo do seu cartão."
   ]
 };

@@ -2,7 +2,7 @@ import { shell } from "./shell.mjs";
 import { header } from "../components/header.mjs";
 import { footer } from "../components/footer.mjs";
 import {
-  hero, tiles, band, appBand, salesBand, paystrip, stats, steps, showcases,
+  hero, tiles, band, salesBand, paystrip, stats, steps, showcases,
   features, pricing, trust, testimonials, faq, crossSell, finalCta, stickyCta
 } from "../components/sections.mjs";
 import { site } from "../data/site.mjs";
@@ -33,9 +33,8 @@ const jsonLd = (c) =>
         "@type": "Organization",
         name: site.name,
         url: site.url,
-        email: site.email,
-        address: { "@type": "PostalAddress", streetAddress: site.endereco, addressCountry: "BR" }
-      },
+        email: site.email
+              },
       {
         "@type": "Product",
         name: `${site.name} — ${c.navLabel}`,
@@ -92,8 +91,7 @@ ${header({ current: c.key, cta: {
   ${testimonials(c.testimonials, h.testimonials)}
   ${pricing(c)}
   ${trust()}
-  ${faq(c.faq, c.key)}
-  ${appBand()}`
+  ${faq(c.faq, c.key)}`
       : c.key === "nutri"
       ? `${tiles(c)}
   ${stats(c.stats)}
@@ -104,8 +102,7 @@ ${header({ current: c.key, cta: {
   ${pricing(c)}
   ${paystrip()}
   ${trust()}
-  ${faq(c.faq, c.key)}
-  ${appBand()}`
+  ${faq(c.faq, c.key)}`
       : `${stats(c.stats)}
   ${tiles(c)}
   ${showcases(c.showcases, c.key)}

@@ -487,7 +487,7 @@ const checkoutPage = () =>
 
 <footer class="co-footer">
   <div class="container co-footer-inner">
-    <p class="text-xs soft">© ${new Date().getFullYear()} ${site.name} · CNPJ ${site.cnpj}</p>
+    <p class="text-xs soft">© ${new Date().getFullYear()} ${site.name}${site.cnpj ? ` · CNPJ ${site.cnpj}` : ""}</p>
     <div class="cluster text-xs">
       <a class="link" href="termos.html">Termos</a>
       <a class="link" href="privacidade.html">Privacidade</a>

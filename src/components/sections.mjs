@@ -41,13 +41,9 @@ export const hero = (c) => {
           <a class="link-arrow" href="${h.secondary.href}">${h.secondary.label}</a>
         </div>
         <div class="hero-proof">
-          ${
-            c.key === "voce"
-              ? `<span class="quote-stars" style="margin:0" aria-label="4,9 de 5 estrelas">${icon.star().repeat(5)}</span>`
-              : `<span class="icon-tile" style="width:34px;height:34px;border-radius:10px" aria-hidden="true">${
-                  c.key === "nutri" ? icon.clipboard() : icon.building()
-                }</span>`
-          }
+          <span class="icon-tile" style="width:34px;height:34px;border-radius:10px" aria-hidden="true">${
+            c.key === "voce" ? icon.leaf() : c.key === "nutri" ? icon.clipboard() : icon.building()
+          }</span>
           <p class="hero-proof-text">${proof}</p>
         </div>
       </div>
@@ -102,34 +98,6 @@ export const band = (c) => `
       </div>
       <div style="display:grid;place-items:center">
         ${device(c.band.screen)}
-      </div>
-    </div>
-  </div>
-</section>`;
-
-/* ---------- Baixe o app, com QR (padrão Nubank) ---------- */
-export const appBand = () => `
-<section class="section app-band">
-  <div class="container">
-    <div class="app-grid">
-      <div>
-        <h2 style="max-width:16ch">Aponte a câmera e comece agora.</h2>
-        <p class="lead measure-sm" style="margin-top:1rem">Funciona em iPhone e Android, sincroniza sozinho e continua funcionando quando a internet cai.</p>
-        <div class="app-stores">
-          <a class="store-badge" href="#" data-noop aria-label="Baixar na App Store">
-            ${icon.apple_store()}<span><span class="sb-top">Baixe na</span><span class="sb-main">App Store</span></span>
-          </a>
-          <a class="store-badge" href="#" data-noop aria-label="Baixar no Google Play">
-            ${icon.play_store()}<span><span class="sb-top">Disponível no</span><span class="sb-main">Google Play</span></span>
-          </a>
-        </div>
-      </div>
-      <div class="qr-card">
-        <div class="qr-box">${qrSvg("https://nutrielive.com.br/app", {
-          ecc: "M", border: 1, dark: "#0D3524", light: "#FFFFFF",
-          label: "QR Code para baixar o aplicativo Nutri&Live"
-        })}</div>
-        <p class="qr-note">Aponte a câmera do celular para abrir a loja</p>
       </div>
     </div>
   </div>

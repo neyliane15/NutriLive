@@ -27,7 +27,7 @@ export const content = {
       ],
       primary: { label: "Começar por R$ 19,90/mês", href: "checkout.html?seg=voce&plan=plus" },
       secondary: { label: "Ver como funciona", href: "#como-funciona" },
-      proof: "**4,9 ★** na App Store e no Google Play"
+      proof: "Plano, receitas e lista de compras **em um app só**"
     },
 
     tiles: [
@@ -45,7 +45,6 @@ export const content = {
     },
     stats: [
       { num: "2,4 mi", label: "refeições registradas nos últimos 12 meses" },
-      { num: "4,9★", label: "média na App Store e no Google Play" },
       { num: "40s", label: "para montar o plano, as receitas e a lista de compras" }
     ],
 

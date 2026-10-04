@@ -9,16 +9,6 @@ export const footer = () => `
       <div>
         ${brand({})}
         <p style="margin-top:1rem;max-width:32ch;line-height:1.6">${site.tagline}<br>Cuidar da alimentação, sem complicar a vida.</p>
-        <div class="store-badges" style="margin-top:1.5rem">
-          <a class="store-badge" href="#" data-noop aria-label="Baixar na App Store">
-            ${icon.apple_store()}
-            <span><span class="sb-top">Baixe na</span><span class="sb-main">App Store</span></span>
-          </a>
-          <a class="store-badge" href="#" data-noop aria-label="Baixar no Google Play">
-            ${icon.play_store()}
-            <span><span class="sb-top">Disponível no</span><span class="sb-main">Google Play</span></span>
-          </a>
-        </div>
       </div>
       ${footerData.columns
         .map(
