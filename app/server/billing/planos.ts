@@ -6,9 +6,23 @@
    seed e o modo memória, para o sistema rodar inteiro sem Postgres.
    Dinheiro sempre em centavos, inteiro.
    ========================================================================= */
-import type { Plano } from "./portas.js";
+import type { Segment } from "../../shared/contract.js";
 
-export const PLANOS: Plano[] = [
+/** Mesma forma da tabela `plans`, para dar para inserir direto. */
+export interface PlanoCatalogo {
+  key: string;
+  segment: Segment;
+  name: string;
+  description: string;
+  priceCents: number;
+  seatLimit: number;
+  features: string[];
+  featured: boolean;
+  active: boolean;
+  sortOrder: number;
+}
+
+export const PLANOS: PlanoCatalogo[] = [
   /* ------------------------------- pessoal ------------------------------- */
   {
     key: "essencial", segment: "pessoal", name: "Essencial",
