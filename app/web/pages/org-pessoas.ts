@@ -29,7 +29,7 @@ const FILTROS = [
 export function linhaMembro(m: Membro, rota: string, rotuloPessoa: string): string {
   const adesao = m.adherencePct;
   return `
-<tr data-fe2-user="${esc(m.userId)}" data-fe2-nome="${esc(m.name)}">
+<tr data-fe2-user="${esc(m.userId)}" data-fe2-nome="${esc(m.name)}" data-fe2-email="${esc(m.email.toLowerCase())}">
   <td>${pessoa(m.name, m.email)}</td>
   <td>${estadoPill(m.status)}</td>
   <td>
