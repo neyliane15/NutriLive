@@ -26,7 +26,8 @@ const OBJETIVO: Record<string, string> = {
 
 const kg = (n: number) => `${n.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} kg`;
 
-const nivelAdesao = (p: number) => (p >= 75 ? "ok" : p >= 55 ? "atencao" : "risco") as const;
+const nivelAdesao = (p: number): "ok" | "atencao" | "risco" =>
+  p >= 75 ? "ok" : p >= 55 ? "atencao" : "risco";
 
 export function orgPessoa(o: { user: ShellUser; userId: string; dados: FichaDados | null }): string {
   const t = termos(o.user.role);

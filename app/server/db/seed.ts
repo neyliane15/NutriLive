@@ -495,7 +495,7 @@ export async function semear(db: Dados, opcoes: OpcoesSemente = {}): Promise<voi
 
   /** Plano alimentar com conteúdo de verdade, do jeito que a IA devolve. */
   async function criarPlano(usuarioId: string, criadoPor: string | null, metas: { kcal: number; proteinaG: number },
-                            titulo: string, origem: "ia" | "nutricionista", estado: "rascunho" | "enviado" | "ativo", quandoDias: number) {
+                            titulo: string, origem: "ia" | "nutricionista", estado: "rascunho" | "enviado" | "ativo" | "arquivado", quandoDias: number) {
     const dia = (nome: string) => ({
       dia: nome,
       refeicoes: (["cafe", "lanche_manha", "almoco", "lanche_tarde", "jantar"] as const).map((k) => {

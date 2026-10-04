@@ -208,3 +208,22 @@ export interface ContextoGeracao {
   /** Data base do plano, ISO "aaaa-mm-dd". */
   dataBase: string;
 }
+
+/* -------------------------------------------------------------------------
+   Contexto que a validação de segurança clínica recebe. O agente que escreveu
+   seguranca.ts importava isto de um arquivo que não chegou a existir; a forma
+   abaixo é a que o próprio seguranca.ts usa (ctx.perfil, ctx.bloqueio,
+   ctx.kcalMeta, ctx.tmb, ctx.toleranciaKcal).
+   ------------------------------------------------------------------------- */
+export interface ContextoValidacaoBase {
+  /** Perfil de quem vai receber o plano. */
+  perfil: PerfilNutricional;
+  /** Conjunto de proibições montado por `montarBloqueio` em seguranca.ts. */
+  bloqueio: import("./seguranca.js").Bloqueio;
+  /** Meta calórica do dia, já calculada pelo servidor. */
+  kcalMeta: number;
+  /** Taxa metabólica basal, para checar faixas perigosas. */
+  tmb: number;
+  /** Margem aceitável sobre a meta, em fração (0.05 = 5%). */
+  toleranciaKcal: number;
+}

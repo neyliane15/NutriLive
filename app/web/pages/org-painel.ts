@@ -16,7 +16,8 @@ export type PainelDados = z.infer<typeof org.dashboard.out>;
 const ORDEM = { risco: 0, atencao: 1 } as const;
 
 /** Nível da adesão média, para codificar em forma além de cor. */
-const nivelAdesao = (p: number) => (p >= 75 ? "ok" : p >= 55 ? "atencao" : "risco") as const;
+const nivelAdesao = (p: number): "ok" | "atencao" | "risco" =>
+  p >= 75 ? "ok" : p >= 55 ? "atencao" : "risco";
 
 export function orgPainel(o: { user: ShellUser; dados: PainelDados | null }): string {
   const t = termos(o.user.role);

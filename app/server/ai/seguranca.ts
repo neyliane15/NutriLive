@@ -23,11 +23,11 @@
 import type { Alimento, Etiqueta } from "./alimentos.js";
 import { ALIMENTOS, POR_ID, kcalDe } from "./alimentos.js";
 import type {
-  ContextoValidacaoBase, Macros, OrientacaoProfissional, PerfilNutricional,
+  ContextoValidacaoBase, ItemRefeicao, Macros, OrientacaoProfissional, PerfilNutricional,
   PlanoAlimentar, Receita, SaidaReceitas
-} from "./tipos-validacao.js";
+} from "./tipos.js";
 
-export type { ContextoValidacaoBase } from "./tipos-validacao.js";
+export type { ContextoValidacaoBase } from "./tipos.js";
 
 /* ======================================================================== */
 /*  Erro de violação                                                        */
@@ -862,7 +862,7 @@ export function validarPlano(
       if (!perto(r.kcal, esperadoRef, tolRefeicao)) {
         problemas.push(`refeição "${r.titulo}": ${r.kcal} kcal contra ${esperadoRef.toFixed(1)} kcal dos macros`);
       }
-      const somaItens = soma(r.itens.map((i) => i.kcal ?? 0));
+      const somaItens = soma(r.itens.map((i: ItemRefeicao) => i.kcal ?? 0));
       if (!perto(r.kcal, somaItens, Math.max(tolRefeicao, somaItens * 0.01))) {
         problemas.push(`refeição "${r.titulo}": total ${r.kcal} kcal diferente da soma dos itens (${somaItens.toFixed(1)})`);
       }
@@ -966,5 +966,5 @@ export function validarReceitas(
 /** Verificação isolada de uma receita, usada também pelo gerador. */
 export const receitaPermitida = (r: Receita, bloq: Bloqueio): boolean => {
   if (textoViola(r.title, bloq)) return false;
-  return !r.ingredients.some((i) => textoViola(i, bloq));
+  return !r.ingredients.some((i: string) => textoViola(i, bloq));
 };
