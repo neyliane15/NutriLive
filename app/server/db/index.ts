@@ -128,11 +128,19 @@ const listaOrdem = <T extends Tabela>(opcoes?: Opcoes<T>): Ordem<T>[] =>
 /* ======================================================================== */
 
 function criarPostgres(): Dados {
-  /* Importação preguiçosa: em modo memória nem o driver é carregado. */
-  const { drizzle } = require("drizzle-orm/postgres-js") as typeof import("drizzle-orm/postgres-js");
-  const postgres = require("postgres") as typeof import("postgres")["default"];
-  const sql = postgres(env.DATABASE_URL, { max: 10, idle_timeout: 20 });
-  const pg = drizzle(sql, { schema });
+  /* Conexão preguiçosa: o driver só é carregado quando a primeira consulta
+     acontece, então em modo memória ele nem entra no processo. */
+  let conexao: Promise<{ pg: any; sql: any }> | null = null;
+  const ligar = (): Promise<{ pg: any; sql: any }> => {
+    conexao ??= (async () => {
+      const { drizzle } = await import("drizzle-orm/postgres-js");
+      const postgres = (await import("postgres")).default;
+      const sql = postgres(env.DATABASE_URL, { max: 10, idle_timeout: 20 });
+      log.info("banco: Postgres conectado");
+      return { pg: drizzle(sql, { schema }), sql };
+    })();
+    return conexao;
+  };
 
   const condicoes = <T extends Tabela>(tabela: T, filtro?: Filtro<T>): SQL | undefined => {
     const partes: SQL[] = [];
@@ -160,17 +168,20 @@ function criarPostgres(): Dados {
     motor: "postgres",
 
     async inserir(tabela, valores) {
+      const { pg } = await ligar();
       const linhas = await pg.insert(tabela).values(valores as any).returning();
       return linhas[0] as any;
     },
 
     async inserirVarios(tabela, valores) {
       if (!valores.length) return [];
+      const { pg } = await ligar();
       return (await pg.insert(tabela).values(valores as any).returning()) as any;
     },
 
     async buscar(tabela, filtro, opcoes) {
       if (filtroImpossivel(filtro)) return [];
+      const { pg } = await ligar();
       let q: any = pg.select().from(tabela as any).$dynamic();
       const onde = condicoes(tabela, filtro);
       if (onde) q = q.where(onde);
@@ -190,6 +201,7 @@ function criarPostgres(): Dados {
 
     async atualizar(tabela, filtro, patch) {
       if (filtroImpossivel(filtro)) return [];
+      const { pg } = await ligar();
       const onde = condicoes(tabela, filtro);
       let q: any = pg.update(tabela).set(patch as any);
       if (onde) q = q.where(onde);
@@ -198,6 +210,7 @@ function criarPostgres(): Dados {
 
     async remover(tabela, filtro) {
       if (filtroImpossivel(filtro)) return 0;
+      const { pg } = await ligar();
       const onde = condicoes(tabela, filtro);
       let q: any = pg.delete(tabela);
       if (onde) q = q.where(onde);
@@ -207,6 +220,7 @@ function criarPostgres(): Dados {
 
     async contar(tabela, filtro) {
       if (filtroImpossivel(filtro)) return 0;
+      const { pg } = await ligar();
       const onde = condicoes(tabela, filtro);
       let q: any = pg.select({ n: count() }).from(tabela as any).$dynamic();
       if (onde) q = q.where(onde);
@@ -216,12 +230,14 @@ function criarPostgres(): Dados {
 
     async limpar() {
       if (env.NODE_ENV === "production") throw new Error("limpar() é proibido em produção.");
-      /* Ordem reversa de dependência não importa: TRUNCATE em cascata. */
+      const { sql } = await ligar();
       const nomes = Object.values(schema).map((t) => `"${getTableName(t as Tabela)}"`).join(", ");
       await sql.unsafe(`TRUNCATE ${nomes} CASCADE`);
     },
 
     async encerrar() {
+      if (!conexao) return;
+      const { sql } = await conexao;
       await sql.end({ timeout: 5 });
     }
   };
@@ -255,9 +271,6 @@ const iguais = (a: unknown, b: unknown): boolean => {
   if (a === null || a === undefined) return b === null || b === undefined;
   return a === b;
 };
-
-const numerico = (v: unknown): number | null =>
-  v instanceof Date ? v.getTime() : typeof v === "number" ? v : typeof v === "string" ? NaN : null;
 
 const compara = (a: unknown, b: unknown): number => {
   if (a instanceof Date || b instanceof Date) {
