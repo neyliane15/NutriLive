@@ -22,7 +22,9 @@ type Usuario = Linha<typeof schema.users>;
 type Assinatura = Linha<typeof schema.subscriptions>;
 type Pagamento = Linha<typeof schema.payments>;
 
-const VALIDADE_PRIMEIRO_ACESSO_H = 48;
+/* A validade real é a de auth/tokens.ts (VALIDADE.primeiro_acesso). Este
+   valor sobrevive só para o plano B e para o texto do e-mail; manter igual. */
+const VALIDADE_PRIMEIRO_ACESSO_H = 72;
 
 /**
  * Emite o token de primeiro acesso e devolve o link pronto.

@@ -35,6 +35,18 @@ export const minutosDeValidade = (p: Proposito): number => Math.round(VALIDADE[p
 
 export type TokenCriado = { token: string; registro: Linha<typeof authTokens>; expiraEm: Date };
 
+/**
+ * Atalho que `billing/acesso.ts` procura por nome ao liberar o acesso depois do
+ * pagamento. Sem ele, aquele módulo caía num plano B que gravava sha256(token)
+ * enquanto `lerToken` procura por `digerir(token)` (HMAC com SESSION_SECRET) —
+ * e o link do e-mail de primeiro acesso nunca era aceito. Este é o ponto único
+ * onde o hash do token é decidido; nenhum outro módulo deve calculá-lo.
+ */
+export async function criarTokenPrimeiroAcesso(usuarioId: string): Promise<string> {
+  const { token } = await criarToken(usuarioId, "primeiro_acesso");
+  return token;
+}
+
 /** Cria o token, invalidando os anteriores do mesmo propósito. */
 export async function criarToken(usuarioId: string, proposito: Proposito): Promise<TokenCriado> {
   await db.remover(authTokens, { userId: usuarioId, purpose: proposito, usedAt: null });

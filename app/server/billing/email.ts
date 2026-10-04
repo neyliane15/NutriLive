@@ -105,11 +105,11 @@ export function emailPrimeiroAcesso(nome: string, planoNome: string, link: strin
     assunto: "Seu acesso ao Nutri&Live está liberado",
     html: casca("Pagamento confirmado. Bem-vindo!", `
       <p style="margin:0 0 16px">Oi, ${primeiroNome}! Seu plano <b>${planoNome}</b> já está ativo.</p>
-      <p style="margin:0 0 24px">Só falta você criar a sua senha. O link abaixo vale por 48 horas e só pode ser usado uma vez.</p>
+      <p style="margin:0 0 24px">Só falta você criar a sua senha. O link abaixo vale por 72 horas e só pode ser usado uma vez.</p>
       ${botao(link, "Criar minha senha")}
       <p style="margin:0;font-size:13px;color:#5B6B61">Se o botão não abrir, copie e cole este endereço:<br>${link}</p>`),
     texto: `Oi, ${primeiroNome}! Pagamento confirmado e seu plano ${planoNome} está ativo.\n` +
-      `Crie a sua senha neste link (vale por 48 horas, uso único):\n${link}\n`
+      `Crie a sua senha neste link (vale por 72 horas, uso único):\n${link}\n`
   };
 }
 
