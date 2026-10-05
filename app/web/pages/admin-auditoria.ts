@@ -17,34 +17,75 @@ type Entrada = AuditoriaDados["entries"][number];
 const ACAO: Record<string, { texto: string; tom: "neutro" | "atencao" | "risco" }> = {
   "user.login": { texto: "entrou na conta", tom: "neutro" },
   "user.logout": { texto: "saiu da conta", tom: "neutro" },
-  "user.created": { texto: "criou um usuário", tom: "neutro" },
-  "user.suspended": { texto: "suspendeu um usuário", tom: "risco" },
-  "user.reactivated": { texto: "reativou um usuário", tom: "atencao" },
-  "user.impersonated": { texto: "entrou como outro usuário", tom: "risco" },
-  "member.invited": { texto: "convidou uma pessoa", tom: "neutro" },
-  "member.removed": { texto: "encerrou um vínculo", tom: "atencao" },
-  "member.bulk_invited": { texto: "importou pessoas em massa", tom: "neutro" },
-  "payment.refunded": { texto: "estornou um pagamento", tom: "risco" },
-  "payment.approved": { texto: "pagamento aprovado", tom: "neutro" },
-  "subscription.canceled": { texto: "cancelou uma assinatura", tom: "atencao" },
-  "plan.sent": { texto: "enviou um plano", tom: "neutro" },
-  "note.added": { texto: "registrou uma anotação", tom: "neutro" },
-  "ai.requested": { texto: "pediu geração à IA", tom: "neutro" }
+  /* As chaves são os nomes que o servidor realmente grava. Elas estiveram
+     erradas (inglês pontuado: "user.impersonated", "payment.refunded") e
+     nenhuma das treze casava com nada: toda linha da auditoria mostrava o
+     código cru em vez da frase, e o contador de "sensíveis" ficava em zero
+     para sempre — justo o número por que esta tela existe. Mexer aqui pede
+     conferir `grep -rhoE 'registrarAuditoria\([^,]+, *[^,]+, *"[a-z_.]+"' server/`. */
+
+  /* nosso time passando por cima da fronteira do cliente */
+  "admin.impersonate": { texto: "entrou como outro usuário", tom: "risco" },
+  "admin.estorno": { texto: "estornou um pagamento", tom: "risco" },
+  "admin.usuario_alterado": { texto: "mudou papel ou estado de um usuário", tom: "atencao" },
+  "admin.le_membro": { texto: "abriu a ficha de um membro", tom: "atencao" },
+
+  /* organização sobre as pessoas dela */
+  "org.convidou": { texto: "cadastrou uma pessoa", tom: "neutro" },
+  "org.encerrou_vinculo": { texto: "encerrou um vínculo", tom: "atencao" },
+  "org.anotou": { texto: "registrou uma anotação clínica", tom: "neutro" },
+  "org.enviou_plano": { texto: "enviou um plano", tom: "neutro" },
+
+  /* autenticação */
+  "auth.login": { texto: "entrou na conta", tom: "neutro" },
+  "auth.primeiro_acesso": { texto: "definiu a primeira senha", tom: "neutro" },
+  "auth.trocou_senha": { texto: "trocou a senha", tom: "neutro" },
+  "auth.esqueci_senha": { texto: "pediu link de redefinição", tom: "neutro" },
+  "auth.redefiniu_senha": { texto: "redefiniu a senha pelo link", tom: "atencao" },
+
+  /* dinheiro e assinatura, gravados pelo próprio fluxo de cobrança */
+  "checkout_criado": { texto: "assinou um plano", tom: "neutro" },
+  "pagamento_estornado": { texto: "pagamento estornado", tom: "risco" },
+  "pagamento_recusado": { texto: "pagamento recusado", tom: "atencao" },
+  "assinatura_cancelada": { texto: "cancelou a assinatura", tom: "atencao" },
+  "assinatura_cancelada_provedor": { texto: "assinatura cancelada no provedor", tom: "atencao" },
+  "comissao_gerada": { texto: "comissão gerada", tom: "neutro" },
+  "comissao_cancelada": { texto: "comissão cancelada por estorno", tom: "atencao" },
+
+  /* IA */
+  "ia.plano_pedido": { texto: "pediu um plano à IA", tom: "neutro" },
+  "ia.plano_bloqueado": { texto: "IA recusou um plano fora de faixa segura", tom: "atencao" },
+
+  "seed.carregado": { texto: "carregou os dados de demonstração", tom: "neutro" }
 };
 
+
+/* Mesma regra das ações: as chaves são o que o servidor grava, e aqui ele
+   grava o nome da TABELA ("users", "ai_jobs"), não o singular. Os singulares
+   ficam porque três inserts diretos usam essa forma. */
 const ENTIDADE: Record<string, string> = {
-  user: "Usuário", users: "Usuário", payment: "Pagamento", subscription: "Assinatura",
-  organization: "Organização", care_link: "Vínculo", meal_plan: "Plano alimentar",
-  clinical_note: "Anotação", ai_job: "Execução de IA", invitation: "Convite",
-  webhook_event: "Evento de webhook", session: "Sessão"
+  users: "Usuário", user: "Usuário",
+  payment: "Pagamento", payments: "Pagamento",
+  subscription: "Assinatura", subscriptions: "Assinatura",
+  commission: "Comissão", commissions: "Comissão",
+  meal_plans: "Plano alimentar", meal_plan: "Plano alimentar",
+  clinical_notes: "Anotação", clinical_note: "Anotação",
+  ai_jobs: "Execução de IA", ai_job: "Execução de IA",
+  care_links: "Vínculo", care_link: "Vínculo",
+  organizations: "Organização", organization: "Organização",
+  invitations: "Convite", invitation: "Convite",
+  webhook_events: "Evento de webhook", sessions: "Sessão",
+  sistema: "Sistema"
 };
 
 const FILTROS = [
   { value: "", label: "Todas as ações" },
-  { value: "user.impersonated", label: "Entrar como usuário" },
-  { value: "payment.refunded", label: "Estorno de pagamento" },
-  { value: "user.suspended", label: "Suspensão de usuário" },
-  { value: "member.removed", label: "Encerramento de vínculo" }
+  { value: "admin.impersonate", label: "Entrar como usuário" },
+  { value: "admin.estorno", label: "Estorno de pagamento" },
+  { value: "admin.usuario_alterado", label: "Papel ou estado alterado" },
+  { value: "org.encerrou_vinculo", label: "Encerramento de vínculo" },
+  { value: "auth.redefiniu_senha", label: "Senha redefinida por link" },
+  { value: "ia.plano_bloqueado", label: "Plano bloqueado pela IA" }
 ];
 
 export function linhaAuditoria(e: Entrada): string {

@@ -298,7 +298,30 @@ export function criarSimulado(): ProvedorPagamento {
 
     async estornar(providerPaymentId: string, valorCents?: number): Promise<void> {
       const estado = pagamentos.get(providerPaymentId);
-      if (!estado) throw new AppError("nao_encontrado", "Pagamento não encontrado no provedor.");
+
+      /* Pagamento que este processo não viu nascer NÃO é pagamento
+         inexistente. O mapa acima vive na memória do processo, então ele
+         esquece tudo a cada reinício — e o seed grava pagamentos sem passar
+         por aqui. Recusar com "não encontrado no provedor" quebrava todo
+         estorno da demonstração e todo estorno de cobrança feita antes do
+         último reinício, que é a coisa mais comum de se querer estornar.
+         Quem manda sobre o que existe é o nosso banco; a rota já conferiu
+         que o pagamento está aprovado antes de chegar aqui. Então o
+         provedor simulado registra e segue. */
+      if (!estado) {
+        pagamentos.set(providerPaymentId, {
+          id: providerPaymentId,
+          referencia: providerPaymentId,
+          metodo: "credito",
+          valorCents: valorCents ?? 0,
+          status: "estornado",
+          pagoEm: undefined
+        });
+        log.warn(`estorno de ${providerPaymentId}: cobrança anterior a este processo, registrada como estornada`);
+        notificar("payment.refunded", providerPaymentId);
+        return;
+      }
+
       if (estado.status !== "aprovado" && estado.status !== "estornado") {
         throw new AppError("conflito", "Só dá para estornar um pagamento aprovado.");
       }

@@ -2,16 +2,9 @@
    Admin — IA.
    Execuções, tempo médio, erros com a mensagem e consumo de tokens.
 
-   ATENÇÃO — PENDÊNCIA DE CONTRATO
-   `shared/contract.ts` só expõe o resumo da IA dentro de
-   `admin.overview.out.aiJobs` (`{ last24h, errorRate }`). Falta a listagem.
-   O formato `IaDados` abaixo espelha a tabela `ai_jobs` do schema e é o que
-   esta tela precisa em `GET /api/admin/ai?page=`.
-
-   Enquanto esse endpoint não existir, a tela degrada: os dois números do
-   contrato (execuções em 24h e taxa de erro) vêm de
-   `GET /api/admin/overview` — que está no contrato — e o resto fica em
-   estado vazio explicado. Nenhuma rota fora do contrato é chamada.
+   O formato `IaDados` espelha `GET /api/admin/ai?page=`, que existe no
+   contrato. Sem ele respondido, a tela degrada para os dois números do
+   resumo (`admin.overview.aiJobs`) e explica o que falta.
    ========================================================================= */
 import { shell, type ShellUser } from "../layout.js";
 import { panel, table, esc, vazio, dataHoraBR, pill } from "../components/index.js";
@@ -22,7 +15,7 @@ import {
 /** Resumo que já existe no contrato (admin.overview.out.aiJobs). */
 export type IaResumo = { last24h: number; errorRate: number };
 
-/** Formato que esta tela precisa. Veja a pendência no topo do arquivo. */
+/** Formato que a rota de execuções da IA devolve. */
 export type IaDados = {
   total: number;
   page: number;
@@ -158,10 +151,10 @@ export function adminIa(o: { user: ShellUser; dados: IaDados | null; resumo: IaR
   const body = `
 ${estilosFE2}
 ${d ? "" : aviso(
-    `<b>Detalhamento da IA indisponível.</b> O contrato só publica o resumo
-     (<code class="fe2-code">admin.overview.aiJobs</code>), que está nos números abaixo.
-     Execuções, tempo médio por tipo, mensagem de erro e tokens precisam de
-     <code class="fe2-code">GET /api/admin/ai</code> — avisado no relatório, nada chamado fora do contrato.`,
+    `<b>Detalhamento da IA indisponível agora.</b> O resumo abaixo vem de
+     <code class="fe2-code">GET /api/admin/overview</code>, que respondeu. As execuções, o tempo médio
+     por tipo e os tokens vêm de <code class="fe2-code">GET /api/admin/ai</code>, que não respondeu
+     nesta carga — a tela tenta de novo sozinha.`,
     "amber", "alert")}
 ${panel({ title: "Saúde da IA", sub: s ? "no período" : "resumo do contrato", body: `<div data-fe2-resumo>${resumo}</div>` })}
 <div class="grid-2col" style="margin-top:var(--sp-5)">

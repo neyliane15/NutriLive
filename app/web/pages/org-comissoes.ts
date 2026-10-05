@@ -3,14 +3,10 @@
    Comissão por período: quanto está previsto, quanto foi apurado, quanto foi
    pago, e o detalhamento por aluno.
 
-   ATENÇÃO — PENDÊNCIA DE CONTRATO
-   `shared/contract.ts` ainda não tem endpoint de comissão. O formato abaixo
-   (`ComissoesDados`) espelha a tabela `commissions` do schema e é o que esta
-   tela precisa em `GET /api/org/commissions?period=YYYY-MM`. Enquanto o
-   endpoint não existir, a tela é renderizada com `dados: null` e degrada:
-   mostra o aviso, o seletor de período (que navega por querystring, sem
-   chamar API nenhuma) e os totais zerados. Nenhuma rota fora do contrato é
-   chamada por esta tela.
+   `ComissoesDados` espelha a tabela `commissions` e é o que
+   `GET /api/org/commissions?period=AAAA-MM` devolve. Sem resposta, a tela
+   degrada: aviso, seletor de período (que navega por querystring) e totais
+   zerados, nunca um número inventado.
    ========================================================================= */
 import { shell, type ShellUser } from "../layout.js";
 import { panel, table, pessoa, esc, vazio, brl, dataBR } from "../components/index.js";
@@ -18,7 +14,7 @@ import {
   termos, estilosFE2, estadoPill, periodoLongo, periodoCurto, aviso
 } from "./org-ui.js";
 
-/** Formato que esta tela consome. Veja a pendência no topo do arquivo. */
+/** Formato que esta tela consome, igual ao da rota de comissões. */
 export type ComissoesDados = {
   /** Períodos com movimento, mais recente primeiro: "2026-03". */
   periods: string[];
@@ -111,9 +107,9 @@ export function orgComissoes(o: { user: ShellUser; dados: ComissoesDados | null;
   const body = `
 ${estilosFE2}
 ${d ? "" : aviso(
-    `<b>Comissões indisponíveis agora.</b> O cálculo de comissão ainda não está publicado no contrato da API
-     (<code class="fe2-code">GET /api/org/commissions</code>). A tela já está pronta e preenche sozinha
-     quando o endpoint existir — nada foi chamado fora do contrato.`,
+    `<b>Comissões indisponíveis agora.</b> <code class="fe2-code">GET /api/org/commissions</code> não
+     respondeu nesta carga. Nada do seu repasse foi perdido — é só a leitura desta tela, e ela
+     tenta de novo sozinha.`,
     "amber", "alert")}
 ${panel({ body: `${seletor}${seletor ? `<div class="sep"></div>` : ""}${resumo}` })}
 ${panel({

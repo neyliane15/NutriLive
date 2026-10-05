@@ -145,13 +145,175 @@
     else fn();
   }
 
+
+  /* ====================================================================== */
+  /*  ui — peças que as telas de organização e de admin usam igual          */
+  /* ====================================================================== */
+  /*  Vive aqui, e não numa das ilhas, porque as duas precisam das mesmas
+      coisas: <dialog>, erro dentro do diálogo, filtro que navega por
+      querystring, paginação e o recado que precisa sobreviver a uma
+      recarga. Duas cópias disso divergiriam na primeira correção. */
+
+  function esc(v) {
+    return String(v === null || v === undefined ? "" : v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function limparErro(raiz) {
+    $$("[data-fe2-erro]", raiz).forEach(function (p) { p.textContent = ""; });
+    limparErros(raiz);
+  }
+
+  /** Erro de campo vai para o campo; o resto vai para a linha de erro do
+      próprio diálogo — avisar num toast atrás do modal é não avisar. */
+  function erroNoDialogo(raiz, erro) {
+    var linha = $("[data-fe2-erro]", raiz);
+    if (erro && erro.fields) {
+      mostrarErros(raiz, { fields: erro.fields, message: "" });
+      if (linha) linha.textContent = "";
+      return;
+    }
+    var texto = (erro && erro.message) || "Não foi possível continuar.";
+    if (linha) linha.textContent = texto;
+    else aviso(texto, "erro");
+  }
+
+  function abrir(id) {
+    var d = document.getElementById(id);
+    if (!d) return null;
+    limparErro(d);
+    if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
+    var primeiro = $(".input:not([disabled]), input[type=checkbox]", d);
+    if (primeiro) setTimeout(function () { primeiro.focus(); }, 30);
+    return d;
+  }
+  function fechar(d) {
+    if (!d) return;
+    if (typeof d.close === "function") d.close(); else d.removeAttribute("open");
+  }
+
+  /** Botão em espera enquanto a promessa não volta, sempre destravado no fim. */
+  async function enviando(botao, tarefa) {
+    if (botao) { botao.classList.add("is-loading"); botao.setAttribute("aria-busy", "true"); botao.disabled = true; }
+    try { return await tarefa(); }
+    finally { if (botao) { botao.classList.remove("is-loading"); botao.removeAttribute("aria-busy"); botao.disabled = false; } }
+  }
+
+  /** Formulário de diálogo (data-fe2-form), que o ligarFormularios acima
+      não pega de propósito: estes precisam do erro dentro do modal. */
+  function ligarForm(seletor, aoEnviar) {
+    var form = $(seletor);
+    if (!form) return;
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      limparErro(form);
+      var botao = $('[type="submit"]', form);
+      try { await enviando(botao, function () { return aoEnviar(form); }); }
+      catch (erro) { erroNoDialogo(form, erro); }
+    });
+  }
+
+  var campoTexto = function (form, nome) {
+    var el = form.elements[nome];
+    return el ? String(el.value || "").trim() : "";
+  };
+
+  /** Uma tentativa de recuperação, não um laço: se a API continua fora,
+      insistir só gasta bateria e deixa "tentando buscar de novo" para
+      sempre na tela. Uma falha e a tela admite que falhou. */
+  async function recuperar(rota) {
+    if (!$("[data-fe2-recarregando]")) return;
+    await new Promise(function (r) { setTimeout(r, 1200); });
+    try { await api(rota); location.reload(); }
+    catch (e) {
+      $$("[data-fe2-recarregando]").forEach(function (el) {
+        el.textContent = "Não conseguimos buscar agora. Recarregue a página em alguns instantes.";
+      });
+    }
+  }
+
+  /** Recado guardado antes de uma recarga: é como a confirmação de uma
+      escrita sobrevive ao reload que ela mesma disparou. */
+  function guardarRecado(texto, tom) {
+    try { sessionStorage.setItem(tom === "erro" ? "nl-recado-erro" : "nl-recado", texto); } catch (e) {}
+  }
+  function mostrarRecado() {
+    try {
+      var ok = sessionStorage.getItem("nl-recado");
+      var ruim = sessionStorage.getItem("nl-recado-erro");
+      if (ok) { sessionStorage.removeItem("nl-recado"); aviso(ok); }
+      if (ruim) { sessionStorage.removeItem("nl-recado-erro"); aviso(ruim, "erro"); }
+    } catch (e) {}
+  }
+
+  /** Filtros que navegam por querystring. Sem JS a página ainda responde ao
+      ?q= na URL, então isto é atalho, não requisito. `campos` é um objeto
+      {idDoElemento: nomeDoParametro}; valor vazio ou "todos" não entra. */
+  function ligarFiltros(base, campos, extras) {
+    var ids = Object.keys(campos);
+    var ir = function () {
+      var p = new URLSearchParams();
+      ids.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var v = String(el.value || "").trim();
+        if (v && v !== "todos") p.set(campos[id], v);
+      });
+      Object.keys(extras || {}).forEach(function (k) { if (extras[k]) p.set(k, extras[k]); });
+      var busca = p.toString();
+      location.href = base + (busca ? "?" + busca : "");
+    };
+    ids.forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (el.tagName === "SELECT") { el.addEventListener("change", ir); return; }
+      /* Enter busca na hora; digitar espera o dedo parar, senão cada letra
+         vira uma navegação. */
+      var tempo = null;
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); clearTimeout(tempo); ir(); }
+      });
+      el.addEventListener("input", function () { clearTimeout(tempo); tempo = setTimeout(ir, 650); });
+    });
+    return ir;
+  }
+
+  /** Botões de página (data-fe2-pagina) preservando os filtros atuais. */
+  function ligarPaginacao() {
+    document.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-fe2-pagina]");
+      if (!b || b.disabled) return;
+      e.preventDefault();
+      var destino = Number(b.getAttribute("data-fe2-pagina"));
+      if (!destino || destino < 1) return;
+      var p = new URLSearchParams(location.search);
+      p.set("pagina", String(destino));
+      p.delete("page");
+      location.href = location.pathname + "?" + p.toString();
+    });
+  }
+
+  /* Abrir e fechar diálogo funcionam em qualquer tela, sem a ilha pedir. */
+  document.addEventListener("click", function (e) {
+    var ab = e.target.closest("[data-fe2-abrir]");
+    if (ab) { e.preventDefault(); abrir(ab.getAttribute("data-fe2-abrir")); return; }
+    var fe = e.target.closest("[data-fe2-fechar]");
+    if (fe) { e.preventDefault(); fechar(fe.closest("dialog")); }
+  });
+
   window.NL = {
     boot: boot, api: api, aviso: aviso, $: $, $$: $$,
     mascara: mascara, soDigitos: so, aplicarMascaras: aplicarMascaras,
     limparErros: limparErros, mostrarErros: mostrarErros,
     esperarJob: esperarJob, pronto: pronto,
+    ui: {
+      esc: esc, abrir: abrir, fechar: fechar, limparErro: limparErro,
+      erroNoDialogo: erroNoDialogo, enviando: enviando, ligarForm: ligarForm,
+      campoTexto: campoTexto, recuperar: recuperar, guardarRecado: guardarRecado,
+      ligarFiltros: ligarFiltros, ligarPaginacao: ligarPaginacao
+    },
     brl: function (c) { return "R$ " + (c / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   };
 
-  pronto(function () { aplicarMascaras(); ligarFormularios(); });
+  pronto(function () { aplicarMascaras(); ligarFormularios(); mostrarRecado(); });
 })();

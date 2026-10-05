@@ -390,11 +390,10 @@ r.get("/admin", comSessao(ADMIN, async (c, _u, user) =>
 
 r.get("/admin/usuarios", comSessao(ADMIN, async (c, _u, user) => {
   const q = c.req.query();
-  const busca = new URLSearchParams();
+  const busca = new URLSearchParams({ page: String(pagina(c)) });
   for (const chave of ["q", "role", "status"]) if (q[chave]) busca.set(chave, q[chave]!);
-  const sufixo = busca.toString() ? `?${busca}` : "";
   return adminUsuarios({
-    user, dados: await pedir(c, `/api/admin/users${sufixo}`),
+    user, dados: await pedir(c, `/api/admin/users?${busca}`),
     q: q["q"], role: q["role"], status: q["status"]
   });
 }));
