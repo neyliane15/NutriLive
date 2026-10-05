@@ -9,7 +9,7 @@
    ========================================================================= */
 import { serve } from "@hono/node-server";
 import app from "./app.js";
-import { conferirAmbienteDeProducao, env } from "./lib/env.js";
+import { avisosDeProducao, conferirAmbienteDeProducao, env } from "./lib/env.js";
 import { log } from "./lib/log.js";
 
 /* ------------------------- conferência de subida ------------------------ */
@@ -23,6 +23,8 @@ if (faltas.length) {
   for (const f of faltas) log.error(`  · ${f}`);
   process.exit(1);
 }
+
+for (const aviso of avisosDeProducao()) log.warn(aviso);
 
 const port = Number(env.PORT || 8787);
 if (env.NODE_ENV !== "test") {

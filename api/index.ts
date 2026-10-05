@@ -12,7 +12,8 @@
    Tudo o mais — `/api/*` e as telas do app — cai nesta função.
    ========================================================================= */
 import app from "../app/server/app.js";
-import { conferirAmbienteDeProducao } from "../app/server/lib/env.js";
+import { avisosDeProducao, conferirAmbienteDeProducao } from "../app/server/lib/env.js";
+import { log } from "../app/server/lib/log.js";
 
 export const config = {
   /* Node, e não Edge: o sistema usa Argon2 (binário nativo) para senha e o
@@ -36,6 +37,7 @@ export const config = {
    Calculado uma vez por instância: a configuração não muda no meio do voo.
    ------------------------------------------------------------------------ */
 const faltas = conferirAmbienteDeProducao();
+for (const aviso of avisosDeProducao()) log.warn(aviso);
 
 export default async function handler(req: Request): Promise<Response> {
   if (faltas.length) {

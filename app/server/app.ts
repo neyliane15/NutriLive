@@ -12,7 +12,6 @@
    ========================================================================= */
 import { Hono } from "hono";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { env } from "./lib/env.js";
 import { log } from "./lib/log.js";
 import { errorHandler, notFound } from "./lib/http.js";
 import { CABECALHOS, ehEstatico } from "./lib/seguranca.js";
@@ -73,7 +72,13 @@ app.route("/api/subscription", subscriptionRoutes);
 app.route("/api/admin", adminRoutes);
 app.route("/api/cron", cronRoutes);
 
-app.get("/api/health", (c) => c.json({ ok: true, at: new Date().toISOString(), driver: env.DB_DRIVER }));
+/* Health check é rota pública: diz que está de pé e nada mais.
+
+   Antes devolvia `driver: "memory" | "postgres"`, o que entrega a um
+   visitante qualquer se o ambiente está rodando no banco em memória — isto
+   é, com os dados de demonstração e sem persistência. Quem precisa dessa
+   informação tem o log da subida. */
+app.get("/api/health", (c) => c.json({ ok: true, at: new Date().toISOString() }));
 
 /* ----------------------------- páginas ---------------------------------- */
 app.route("/", pageRoutes);

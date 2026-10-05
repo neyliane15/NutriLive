@@ -51,7 +51,29 @@ export const env = {
   COMMISSION_RATE_BP: Number(raw.COMMISSION_RATE_BP ?? 2000)
 };
 
-export const isProd = env.NODE_ENV === "production";
+/**
+ * Está no ar, de verdade?
+ *
+ * Não é só `NODE_ENV === "production"`. Essa única comparação decidia, de
+ * uma vez: se o cookie de sessão leva a flag `Secure`, e se as
+ * conferências de produção abaixo rodam. Esquecer de definir a variável no
+ * painel desligava TUDO junto — cookie de sessão trafegando sem exigir
+ * https, o SESSION_SECRET de exemplo do repositório aceito, e-mail saindo
+ * para o log em vez de para o cliente — e nada disso dá erro: o sistema
+ * sobe e parece funcionar.
+ *
+ * `VERCEL` é definida pela própria plataforma em toda execução, inclusive
+ * em preview. Preview com dado real é produção para quem vaza.
+ *
+ * O erro aqui não é simétrico: tratar desenvolvimento como produção faz um
+ * teste reclamar na hora; o contrário entrega o sistema aberto sem avisar.
+ * Na dúvida, é produção.
+ */
+/** Assumir por escrito que o pagamento é de mentira. Ver PAY_DRIVER abaixo. */
+export const PAGAMENTO_SIMULADO_LIBERADO = raw.PAGAMENTO_SIMULADO_OK === "1";
+
+export const isProd =
+  env.NODE_ENV === "production" || Boolean(raw.VERCEL) || Boolean(raw.VERCEL_ENV);
 
 /* ------------------------------------------------------------------------ */
 /**
@@ -80,7 +102,47 @@ export const isProd = env.NODE_ENV === "production";
  *
  * APP_URL         é o que monta o link do e-mail de primeiro acesso.
  *                 Apontando para localhost, o link não abre em lugar nenhum.
+ *
+ * PAY_DRIVER      sem MP_ACCESS_TOKEN o provedor é o SIMULADO, e ele
+ *                 APROVA QUALQUER CARTÃO: `lerCartaoSimulado` cai em
+ *                 `{ status: "aprovado" }` para todo número que não esteja
+ *                 na lista de recusa, e o Pix pendente vira aprovado só
+ *                 pela passagem do tempo. Em produção isso é o produto de
+ *                 graça para quem digitar um número qualquer — inclusive o
+ *                 plano de nutricionista, com gestão de pacientes. Quem
+ *                 quiser mesmo subir sem cobrar (para só ver o sistema)
+ *                 define PAGAMENTO_SIMULADO_OK=1 e assume isso por
+ *                 escrito; o log avisa em toda subida.
+ *
+ * MP_WEBHOOK_SECRET  com Mercado Pago e sem ele, `conferirAssinatura`
+ *                 recusa TODA notificação em produção. O cliente paga, o
+ *                 dinheiro entra, e a assinatura nunca é ativada porque o
+ *                 aviso do provedor é rejeitado na porta. Falha fechada —
+ *                 ninguém ganha acesso de graça — mas o cliente pagou e
+ *                 não entrou, e nada no sistema reclama.
  */
+/**
+ * O que está no ar e é perigoso, mas foi liberado de propósito.
+ *
+ * Diferente de `conferirAmbienteDeProducao`: isto não impede a subida,
+ * avisa em toda subida. Existe porque uma liberação consciente de hoje
+ * vira um esquecimento de três meses atrás, e nessa hora o único lugar
+ * onde a verdade aparece é o log.
+ */
+export function avisosDeProducao(): string[] {
+  if (!isProd) return [];
+  const avisos: string[] = [];
+  if (env.PAY_DRIVER === "simulado" && PAGAMENTO_SIMULADO_LIBERADO) {
+    avisos.push(
+      "PAGAMENTO SIMULADO LIGADO EM PRODUÇÃO: qualquer cartão é aprovado e " +
+      "qualquer visitante assina de graça. Isto é para você ver o sistema, " +
+      "não para vender. Preencha MP_ACCESS_TOKEN e remova PAGAMENTO_SIMULADO_OK " +
+      "antes de divulgar o endereço."
+    );
+  }
+  return avisos;
+}
+
 export function conferirAmbienteDeProducao(): string[] {
   if (!isProd) return [];
   const faltas: string[] = [];
@@ -104,6 +166,21 @@ export function conferirAmbienteDeProducao(): string[] {
 
   if (/localhost|127\.0\.0\.1/.test(env.APP_URL)) {
     faltas.push(`APP_URL aponta para ${env.APP_URL}: o link do e-mail de primeiro acesso não abriria.`);
+  }
+
+  if (env.PAY_DRIVER === "simulado" && !PAGAMENTO_SIMULADO_LIBERADO) {
+    faltas.push(
+      "MP_ACCESS_TOKEN está vazia, então o provedor de pagamento é o SIMULADO, que aprova " +
+      "qualquer cartão: qualquer visitante assina de graça. Preencha MP_ACCESS_TOKEN, ou " +
+      "defina PAGAMENTO_SIMULADO_OK=1 se a intenção for mesmo subir sem cobrar."
+    );
+  }
+  if (env.PAY_DRIVER === "mercadopago" && !env.MP_WEBHOOK_SECRET) {
+    faltas.push(
+      "MP_WEBHOOK_SECRET está vazia: toda notificação do Mercado Pago será recusada, " +
+      "então o cliente paga e a assinatura nunca é ativada. A chave está em " +
+      "Suas integrações › Webhooks, no painel do Mercado Pago."
+    );
   }
 
   return faltas;

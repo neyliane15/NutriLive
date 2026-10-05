@@ -197,7 +197,7 @@ domínio verificado é obrigatório antes de abrir a venda.
 
 | Variável | Valor |
 |---|---|
-| `NODE_ENV` | `production` |
+| `NODE_ENV` | `production` (a Vercel já define; o sistema também trata `VERCEL` como produção) |
 | `SESSION_SECRET` | o que você gerou |
 | `DATABASE_URL` | a string do Supabase **na porta 6543** |
 | `APP_URL` | `https://seudominio.com.br` |
@@ -214,9 +214,36 @@ domínio verificado é obrigatório antes de abrir a venda.
 **A porta 6543 aqui, não a 5432.** A 5432 na Vercel esgota o limite de
 conexões do Supabase com pouca gente online.
 
-Faltando qualquer uma das quatro primeiras, **o sistema responde 503 dizendo
-qual falta**, em vez de servir um site em que ninguém consegue entrar depois
-de pagar. É de propósito.
+Faltando qualquer uma, **o sistema responde 503 dizendo qual falta**, em vez
+de servir um site em que ninguém consegue entrar depois de pagar. É de
+propósito.
+
+### Por que `MP_ACCESS_TOKEN` não é opcional
+
+Sem ela, o provedor de pagamento é o **simulado** — e ele **aprova qualquer
+cartão**. Em produção isso é o produto de graça para quem digitar um número
+qualquer, inclusive o plano de nutricionista com gestão de pacientes. Por
+isso o sistema se recusa a subir assim.
+
+**Só quer ver o sistema no ar, sem cobrar ninguém?** Então assuma isso por
+escrito:
+
+| Variável | Valor |
+|---|---|
+| `PAGAMENTO_SIMULADO_OK` | `1` |
+
+Com ela o sistema sobe e avisa no log em toda subida. **Não divulgue o
+endereço nesse estado:** qualquer visitante assina sem pagar. Remova a
+variável e preencha `MP_ACCESS_TOKEN` antes de vender.
+
+### E `MP_WEBHOOK_SECRET`
+
+Com Mercado Pago e sem esse segredo, **toda** notificação do provedor é
+recusada na porta — por assinatura inválida. O cliente paga, o dinheiro
+entra na sua conta, e a assinatura nunca é ativada. Falha fechada (ninguém
+entra de graça), mas o cliente pagou e não entrou. Está em **Suas
+integrações → Webhooks**, no painel do Mercado Pago. O sistema também se
+recusa a subir sem ele.
 
 4. **Deploy**.
 
