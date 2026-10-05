@@ -171,6 +171,20 @@ a única porta. Em [resend.com](https://resend.com), verifique o seu domínio
 (registros SPF e DKIM no DNS) e crie uma API key. `EMAIL_FROM` tem de ser um
 endereço do domínio verificado.
 
+### Ainda não tem domínio? Dá para subir hoje
+
+A Resend empresta o domínio `resend.dev` em contas novas:
+
+| | `EMAIL_FROM` | Manda para |
+|---|---|---|
+| **Só para você ver o sistema** | `Nutri&Live <onboarding@resend.dev>` | **só o e-mail da sua conta Resend** |
+| **Para vender** | `Nutri&Live <oi@seudominio.com.br>` | qualquer pessoa |
+
+Com o `resend.dev` o sistema sobe, você entra e navega por tudo. Mas um
+cliente que pagar **não recebe o link e não entra** — a Resend não entrega
+para terceiros por esse domínio. Então ele serve para conhecer o sistema, e o
+domínio verificado é obrigatório antes de abrir a venda.
+
 ---
 
 ## 5. Vercel
