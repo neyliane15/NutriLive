@@ -103,6 +103,15 @@ export const jsonSeguro = (valor: unknown): string =>
 export type ShellUser = { id: string; name: string; email: string; role: Role; orgName?: string | null };
 
 export type ShellOpts = {
+  /** Vai escapado nos três lugares onde aparece (os dois <title> e o <h1>).
+
+      NÃO é sempre texto nosso: `org-pessoa` passa o nome da pessoa
+      atendida, que QUEM É ATENDIDO digita. Sem escape, bastava se
+      cadastrar com `</h1><img src=x onerror=...>` para rodar script na
+      sessão de quem abre a ficha — a profissional, com acesso à carteira
+      inteira e às anotações clínicas. Escapar aqui, e não no chamador, é
+      o que faz a próxima tela com título dinâmico nascer segura.
+      Coberto por test/xss.test.ts. */
   title: string;
   user: ShellUser;
   active: string;
@@ -133,7 +142,7 @@ export function shell(o: ShellOpts): string {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>${o.title} · Nutri&amp;Live</title>
+<title>${escapar(o.title)} · Nutri&amp;Live</title>
 <meta name="theme-color" content="#17603D">
 <meta name="robots" content="noindex">
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-latin.woff2" crossorigin>
@@ -155,7 +164,7 @@ export function shell(o: ShellOpts): string {
 <div class="app-main">
   <header class="app-top">
     <div class="app-top-inner">
-      <h1 class="app-title">${o.title}</h1>
+      <h1 class="app-title">${escapar(o.title)}</h1>
       ${o.action ?? ""}
       <div class="app-who">
         <span class="app-who-text">
@@ -190,7 +199,7 @@ export function publicShell(o: { title: string; body: string; islands?: string[]
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>${o.title} · Nutri&amp;Live</title>
+<title>${escapar(o.title)} · Nutri&amp;Live</title>
 <meta name="theme-color" content="#17603D">
 <meta name="robots" content="noindex">
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-latin.woff2" crossorigin>
