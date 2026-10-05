@@ -210,22 +210,22 @@ interface Modelo {
 }
 
 const PROTEINAS_PRINCIPAIS = [
-  "frango_peito_grelhado", "tilapia_grelhada", "patinho_moido_cozido", "ovo_cozido",
-  "lombo_suino_assado", "frango_coxa_assada", "sardinha_assada", "acem_cozido",
-  "atum_conserva", "lentilha_cozida", "grao_de_bico_cozido", "tofu"
+  "frango_peito_grelhado", "abadejo_grelhado", "patinho_grelhado", "ovo_cozido",
+  "lombo_suino_assado", "frango_coxa_cozida", "sardinha_assada", "acem_cozido",
+  "atum_conserva", "lentilha_cozida", "grao_de_bico_cru", "tofu"
 ];
 const PROTEINAS_LEVES = [
   "iogurte_natural_desnatado", "ovo_cozido", "leite_desnatado", "queijo_minas_frescal",
   "iogurte_natural_integral", "leite_integral", "tofu", "queijo_mussarela", "atum_conserva",
-  "grao_de_bico_cozido"
+  "grao_de_bico_cru"
 ];
 const CARBOS_PRINCIPAIS = [
   "arroz_branco_cozido", "arroz_integral_cozido", "batata_doce_cozida", "batata_cozida",
-  "macarrao_cozido", "mandioca_cozida", "quinoa_cozida", "cuscuz_milho"
+  "macarrao_cru", "mandioca_cozida", "cuscuz_milho"
 ];
-const LEGUMINOSAS = ["feijao_carioca_cozido", "feijao_preto_cozido", "lentilha_cozida", "grao_de_bico_cozido"];
+const LEGUMINOSAS = ["feijao_carioca_cozido", "feijao_preto_cozido", "lentilha_cozida", "grao_de_bico_cru"];
 const CARBOS_MATINAIS = [
-  "pao_integral", "tapioca_goma", "aveia_flocos", "pao_frances", "cuscuz_milho", "batata_doce_cozida"
+  "pao_integral", "polvilho_doce", "aveia_flocos", "pao_frances", "cuscuz_milho", "batata_doce_cozida"
 ];
 const GORDURAS_BOAS = ["azeite_oliva", "abacate", "castanha_do_para", "linhaca", "amendoim_torrado", "oleo_soja"];
 
@@ -248,7 +248,7 @@ function modelosDoDia(kcalMeta: number): Modelo[] {
         { papel: "carboidrato", peso: 0.42, preferir: CARBOS_MATINAIS },
         { papel: "proteina", peso: 0.36, preferir: PROTEINAS_LEVES },
         { papel: "fruta", peso: 0.22 },
-        { papel: "livre", peso: 0, preferir: ["cafe_sem_acucar", "cha_sem_acucar"], opcional: true }
+        { papel: "livre", peso: 0, preferir: ["cafe_sem_acucar", "cha_preto"], opcional: true }
       ]
     },
     {
@@ -300,7 +300,7 @@ function modelosDoDia(kcalMeta: number): Modelo[] {
     const extras: Partial<Record<TipoRefeicao, Vaga[]>> = {
       cafe: [
         { papel: "gordura", peso: 0.20, preferir: ["abacate", "castanha_do_para", "amendoim_torrado", "linhaca"], opcional: true },
-        { papel: "carboidrato", peso: 0.25, preferir: ["aveia_flocos", "tapioca_goma", "banana_prata"], opcional: true }
+        { papel: "carboidrato", peso: 0.25, preferir: ["aveia_flocos", "polvilho_doce", "banana_prata"], opcional: true }
       ],
       lanche_manha: [
         { papel: "carboidrato", peso: 0.45, preferir: CARBOS_MATINAIS, opcional: true }
@@ -318,7 +318,7 @@ function modelosDoDia(kcalMeta: number): Modelo[] {
         { papel: "fruta", peso: 0.10, opcional: true }
       ],
       ceia: [
-        { papel: "carboidrato", peso: 0.40, preferir: ["aveia_flocos", "pao_integral", "tapioca_goma"], opcional: true }
+        { papel: "carboidrato", peso: 0.40, preferir: ["aveia_flocos", "pao_integral", "polvilho_doce"], opcional: true }
       ]
     };
     for (const modelo of base) {
@@ -810,8 +810,8 @@ const MODELOS_RECEITA: ModeloReceita[] = [
   {
     nome: "Bowl frio", timeMin: 15,
     vagas: [
-      { papel: "proteina", peso: 0.36, preferir: ["grao_de_bico_cozido", "atum_conserva", "ovo_cozido", "tofu", "lentilha_cozida"] },
-      { papel: "carboidrato", peso: 0.28, preferir: ["quinoa_cozida", "arroz_integral_cozido", "batata_doce_cozida"] },
+      { papel: "proteina", peso: 0.36, preferir: ["grao_de_bico_cru", "atum_conserva", "ovo_cozido", "tofu", "lentilha_cozida"] },
+      { papel: "carboidrato", peso: 0.28, preferir: [ "arroz_integral_cozido", "batata_doce_cozida"] },
       { papel: "vegetal", peso: 0.22 },
       { papel: "gordura", peso: 0.14, preferir: GORDURAS_BOAS }
     ]
@@ -820,7 +820,7 @@ const MODELOS_RECEITA: ModeloReceita[] = [
     nome: "Sopa de legumes", timeMin: 35,
     vagas: [
       { papel: "vegetal", peso: 0.30 },
-      { papel: "proteina", peso: 0.36, preferir: ["lentilha_cozida", "frango_peito_grelhado", "grao_de_bico_cozido", "tofu"] },
+      { papel: "proteina", peso: 0.36, preferir: ["lentilha_cozida", "frango_peito_grelhado", "grao_de_bico_cru", "tofu"] },
       { papel: "carboidrato", peso: 0.24, preferir: ["batata_cozida", "mandioca_cozida", "abobora_cozida", "arroz_branco_cozido"] },
       { papel: "gordura", peso: 0.10, preferir: GORDURAS_BOAS }
     ]
@@ -830,7 +830,7 @@ const MODELOS_RECEITA: ModeloReceita[] = [
     vagas: [
       { papel: "fruta", peso: 0.40 },
       { papel: "proteina", peso: 0.36, preferir: PROTEINAS_LEVES },
-      { papel: "carboidrato", peso: 0.14, preferir: ["aveia_flocos", "tapioca_goma"] },
+      { papel: "carboidrato", peso: 0.14, preferir: ["aveia_flocos", "polvilho_doce"] },
       { papel: "gordura", peso: 0.10, preferir: ["linhaca", "castanha_do_para", "amendoim_torrado", "abacate"] }
     ]
   }
