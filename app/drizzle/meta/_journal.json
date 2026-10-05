@@ -15,6 +15,13 @@
       "when": 1791221398531,
       "tag": "0001_supabase_rls",
       "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791241386551,
+      "tag": "0002_rate_limits",
+      "breakpoints": true
     }
   ]
 }

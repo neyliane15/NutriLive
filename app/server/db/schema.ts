@@ -87,6 +87,26 @@ export const sessions = pgTable("sessions", {
   userIdx: index("sessions_user_idx").on(t.userId)
 }));
 
+/* Tentativas falhas, para o limite de força bruta.
+   ------------------------------------------------------------------------
+   Mora no banco, e não em memória do processo, porque na Vercel cada
+   requisição pode cair numa instância nova: um contador em memória conta
+   até um e recomeça, e o limite de 5 tentativas por e-mail simplesmente
+   não existe. Era o caso aqui.
+
+   Uma linha por falha, em vez de um contador que se incrementa: append-only
+   não tem corrida. Duas tentativas simultâneas inserem duas linhas e a
+   contagem fica certa; com UPDATE de contador, as duas leriam 4 e
+   gravariam 5. */
+export const rateLimits = pgTable("rate_limits", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** `politica:chave` — ex. `login_email:maria@exemplo.com.br`. */
+  bucket: varchar("bucket", { length: 400 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+}, (t) => ({
+  bucketIdx: index("rate_limits_bucket_idx").on(t.bucket, t.createdAt)
+}));
+
 /* Token de uso único: primeiro acesso, redefinição de senha, convite. */
 export const authTokens = pgTable("auth_tokens", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -369,9 +389,22 @@ export const auditLog = pgTable("audit_log", {
   entityIdx: index("audit_log_entity_idx").on(t.entity, t.entityId)
 }));
 
+/**
+ * Registro das tabelas. Mantido à mão e, por isso, conferido por teste.
+ *
+ * Quem usa: a conferência do banco (`npm run db:conferir`) deriva daqui a
+ * lista de tabelas que PRECISAM existir, o motor em memória monta uma
+ * coleção por entrada, e `db.limpar()` só limpa o que está aqui. Tabela de
+ * fora deste objeto existe no banco e é invisível para tudo isso — foi o
+ * que aconteceu com `rateLimits`: o conferir dizia "as 21 tabelas estão
+ * lá" num banco de 22, e teria aprovado um banco sem ela.
+ *
+ * test/schema.test.ts compara este objeto com os `pgTable` exportados do
+ * arquivo e reprova quando um fica de fora.
+ */
 export const schema = {
   organizations, users, sessions, authTokens, plans, subscriptions, payments,
   webhookEvents, profiles, measurements, mealPlans, foodLogs, waterLogs,
   recipes, shoppingLists, careLinks, clinicalNotes, invitations, commissions,
-  aiJobs, auditLog
+  aiJobs, auditLog, rateLimits
 };

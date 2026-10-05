@@ -36,7 +36,7 @@ import {
 } from "../auth/sessao.js";
 import type { Usuario } from "../auth/sessao.js";
 import { criarToken, lerToken, minutosDeValidade, usarToken } from "../auth/tokens.js";
-import { conferirLimite, limparTentativas, registrarFalha } from "../auth/limite.js";
+import { conferirLimite, faxinaDeTentativas, limparTentativas, registrarFalha } from "../auth/limite.js";
 import {
   assinaturaDeAcesso, registrarAuditoria, requireUser, usuarioAtual, type Ambiente
 } from "../auth/guard.js";
@@ -165,15 +165,15 @@ r.post("/login", async (c) => {
   const ip = clientIp(c);
 
   /* Antes de conferir a senha: bloqueado não chega a ser medido pelo tempo. */
-  conferirLimite("login_ip", ip);
-  conferirLimite("login_email", email);
+  await conferirLimite("login_ip", ip);
+  await conferirLimite("login_email", email);
 
   const usuario = await db.primeiro(users, { email, deletedAt: null });
   const senhaOk = await conferirSenha(usuario?.passwordHash, entrada.password);
 
   if (!usuario || !senhaOk) {
-    registrarFalha("login_email", email);
-    registrarFalha("login_ip", ip);
+    await registrarFalha("login_email", email);
+    await registrarFalha("login_ip", ip);
     /* Uma mensagem só para conta inexistente e senha errada. */
     throw new AppError("credenciais_invalidas", "E-mail ou senha não conferem.", {
       password: "Confira o e-mail e a senha."
@@ -184,12 +184,17 @@ r.post("/login", async (c) => {
     throw new AppError("sem_permissao", "Esta conta está suspensa. Fale com o suporte.");
   }
 
-  limparTentativas("login_email", email);
+  await limparTentativas("login_email", email);
   await criarSessao(c, usuario.id);
   await registrarAuditoria(c, usuario.id, "auth.login", "users", usuario.id, { role: usuario.role });
 
   /* Faxina oportunista: sessão vencida não precisa de cron para sair. */
-  if (Math.random() < 0.05) void faxinaDeSessoes().catch((e) => log.warn(`faxina de sessões falhou: ${e}`));
+  if (Math.random() < 0.05) {
+    void faxinaDeSessoes().catch((e) => log.warn(`faxina de sessões falhou: ${e}`));
+    /* A tabela de tentativas só cresce: sem faxina, cada login falho do
+       ano passado continua ocupando linha. */
+    void faxinaDeTentativas().catch((e) => log.warn(`faxina de tentativas falhou: ${e}`));
+  }
 
   return c.json(conforme(contract.auth.login.out, {
     ok: true as const,
@@ -222,7 +227,7 @@ r.get("/me", requireUser, async (c) => {
 r.post("/first-access", async (c) => {
   const entrada = await body(c, contract.auth.firstAccess.in);
   const ip = clientIp(c);
-  conferirLimite("token_ip", ip);
+  await conferirLimite("token_ip", ip);
 
   /* Confere SEM consumir: senha fora da política não pode queimar o link,
      senão a pessoa erra uma vez e precisa pedir outro e-mail. */
@@ -232,7 +237,7 @@ r.post("/first-access", async (c) => {
     /* O mesmo mecanismo serve ao pós-pagamento e ao convite do profissional. */
     registro = await lerToken(entrada.token, [...PROPOSITOS]);
   } catch (e) {
-    registrarFalha("token_ip", ip);
+    await registrarFalha("token_ip", ip);
     throw e;
   }
 
@@ -267,11 +272,11 @@ r.post("/forgot", async (c) => {
   const email = normalizarEmail(entrada.email);
   const ip = clientIp(c);
 
-  conferirLimite("esqueci_ip", ip);
-  conferirLimite("esqueci_email", email);
+  await conferirLimite("esqueci_ip", ip);
+  await conferirLimite("esqueci_email", email);
   /* Pedir link é a "tentativa" aqui: contamos todas, acerte ou não. */
-  registrarFalha("esqueci_ip", ip);
-  registrarFalha("esqueci_email", email);
+  await registrarFalha("esqueci_ip", ip);
+  await registrarFalha("esqueci_email", email);
 
   const usuario = await db.primeiro(users, { email, deletedAt: null });
 
@@ -316,13 +321,13 @@ r.post("/forgot", async (c) => {
 r.post("/reset", async (c) => {
   const entrada = await body(c, contract.auth.reset.in);
   const ip = clientIp(c);
-  conferirLimite("token_ip", ip);
+  await conferirLimite("token_ip", ip);
 
   let registro;
   try {
     registro = await lerToken(entrada.token, ["redefinicao"]);
   } catch (e) {
-    registrarFalha("token_ip", ip);
+    await registrarFalha("token_ip", ip);
     throw e;
   }
 
@@ -336,7 +341,7 @@ r.post("/reset", async (c) => {
   /* Senha nova derruba tudo que estava aberto, inclusive quem invadiu. */
   await encerrarTodasAsSessoes(usuario.id);
   await encerrarSessao(c);
-  limparTentativas("login_email", usuario.email);
+  await limparTentativas("login_email", usuario.email);
   await avisarSenhaAlterada(usuario);
   await registrarAuditoria(c, usuario.id, "auth.redefiniu_senha", "users", usuario.id, null);
 

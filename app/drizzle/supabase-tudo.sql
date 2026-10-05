@@ -14,7 +14,7 @@
 -- "type already exists" e o BEGIN/COMMIT desfaz tudo — nada muda, nada
 -- duplica. Testado. Se já rodou uma vez, não precisa rodar de novo.
 --
--- Migrações incluídas: 0000_minor_nebula, 0001_supabase_rls
+-- Migrações incluídas: 0000_minor_nebula, 0001_supabase_rls, 0002_rate_limits
 -- =========================================================================
 
 BEGIN;
@@ -465,6 +465,28 @@ BEGIN
 END $$;
 
 -- ----------------------------------------------------------------------
+-- 0002_rate_limits
+-- ----------------------------------------------------------------------
+CREATE TABLE "rate_limits" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"bucket" varchar(400) NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE INDEX "rate_limits_bucket_idx" ON "rate_limits" USING btree ("bucket","created_at");
+--> statement-breakpoint
+-- A tabela nasce FECHADA, igual às 21 da migração 0001.
+--
+-- No Supabase, toda tabela do schema "public" é publicada numa API REST
+-- alcançável com a chave anônima. Sem RLS, esta tabela em particular deixa
+-- qualquer pessoa APAGAR as linhas de tentativa — isto é, zerar o limite de
+-- força bruta e voltar a ter tentativas infinitas de senha. Ligar RLS sem
+-- criar política nenhuma é o que fecha: `anon` não vê nem escreve linha
+-- alguma, e o servidor conecta direto no Postgres, com BYPASSRLS.
+ALTER TABLE "public"."rate_limits" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "public"."rate_limits" FORCE ROW LEVEL SECURITY;
+
+-- ----------------------------------------------------------------------
 -- Registro de controle do Drizzle
 --
 -- O hash é o sha256 do arquivo .sql; o created_at é o campo "when" do
@@ -487,5 +509,9 @@ WHERE NOT EXISTS (SELECT 1 FROM "drizzle"."__drizzle_migrations" WHERE hash = 'f
 INSERT INTO "drizzle"."__drizzle_migrations" (hash, created_at)
 SELECT '34cbb46a766179da8dbf2e43d1623ff8cbc333fdf4cd8254135a1f72b17d46eb', 1791221398531
 WHERE NOT EXISTS (SELECT 1 FROM "drizzle"."__drizzle_migrations" WHERE hash = '34cbb46a766179da8dbf2e43d1623ff8cbc333fdf4cd8254135a1f72b17d46eb');  -- 0001_supabase_rls
+
+INSERT INTO "drizzle"."__drizzle_migrations" (hash, created_at)
+SELECT '0b03e019fb4130d982bbdda22eabf29e46930f9f17ed7876fc04f549f0a17c98', 1791241386551
+WHERE NOT EXISTS (SELECT 1 FROM "drizzle"."__drizzle_migrations" WHERE hash = '0b03e019fb4130d982bbdda22eabf29e46930f9f17ed7876fc04f549f0a17c98');  -- 0002_rate_limits
 
 COMMIT;

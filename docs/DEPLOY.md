@@ -63,7 +63,7 @@ fim, que é o que permite uma migração futura continuar da 0002 em vez de
 tentar recriar as tabelas.
 
 Conferido num Postgres 16: o banco criado pelos dois caminhos tem o **mesmo
-schema, linha por linha** (524 linhas de `pg_dump`), 21 tabelas, 21 com RLS,
+schema, linha por linha** (`pg_dump` idêntico), 22 tabelas, 22 com RLS,
 0 políticas, 0 privilégios para `anon` — e um `npm run db:migrate` depois do
 caminho A não refaz nada.
 
@@ -81,7 +81,7 @@ DATABASE_URL="postgresql://postgres.xxx:SENHA@aws-0-sa-east-1.pooler.supabase.co
   npm run db:migrate
 ```
 
-Os dois caminhos aplicam as mesmas duas migrações:
+Os dois caminhos aplicam as mesmas três migrações:
 
 **`0000`** — 21 tabelas, 13 tipos enumerados, 31 índices.
 
@@ -107,11 +107,19 @@ a API REST: conecta direto no Postgres com o papel `postgres`, que tem
 Conferido em Postgres de verdade antes de escrever isto:
 
 ```
-21 tabelas · 21 com RLS ligado · 0 políticas · 0 privilégios para anon
+22 tabelas · 22 com RLS ligado · 0 políticas · 0 privilégios para anon
 anon tentando ler users    -> ERROR: permission denied for table users
 anon tentando ler sessions -> ERROR: permission denied for table sessions
 anon tentando escrever     -> ERROR: permission denied for table users
 ```
+
+**`0002`** — a tabela `rate_limits`, que guarda as tentativas de senha
+erradas. Ela existe porque o limite de 5 tentativas por e-mail morava na
+memória do processo, e na Vercel cada requisição pode cair numa instância
+nova: o contador contava até um e recomeçava. O limite não existia onde
+ele é necessário. Esta tabela também nasce com RLS ligado — sem isso,
+qualquer pessoa com a chave anônima APAGARIA as linhas de tentativa, que é
+o mesmo que desligar o limite.
 
 > Se o painel do Supabase mostrar o aviso **"RLS disabled in public"**, a
 > migração 0001 não rodou. Não ignore esse aviso.
@@ -128,7 +136,7 @@ DATABASE_URL="postgresql://postgres.xxx:SENHA@aws-0-sa-east-1.pooler.supabase.co
 ```
 
 Ele não escreve nada e pode rodar quantas vezes quiser. Confere ligação e
-porta, as 21 tabelas, RLS em cada uma, políticas, privilégios de `anon` e
+porta, as 22 tabelas, RLS em cada uma, políticas, privilégios de `anon` e
 `authenticated`, e se ainda há usuários de demonstração. Termina em uma linha:
 
 ```
@@ -307,7 +315,7 @@ curl https://seudominio.com.br/api/health
 `driver` tem de dizer **postgres**. Se disser `memory`, o `DATABASE_URL` não
 chegou na função, e os dados somem no próximo deploy.
 
-No painel do Supabase, **Table Editor**: as 21 tabelas têm de aparecer, e
+No painel do Supabase, **Table Editor**: as 22 tabelas têm de aparecer, e
 nenhuma com o aviso de RLS desligado.
 
 Depois, pelo navegador:
