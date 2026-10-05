@@ -62,7 +62,16 @@ export const MeOut = z.object({
   }).nullable(),
   subscription: z.object({
     planKey: z.string(), planName: z.string(), status: SubStatus,
-    priceCents: cents, method: PayMethod, currentPeriodEnd: isoDate.nullable()
+    priceCents: cents, method: PayMethod, currentPeriodEnd: isoDate.nullable(),
+    /* false quando o acesso vem da assinatura da organização, não da
+       pessoa: paciente, aluno e nutricionista funcionária de clínica. Sem
+       esta marca, a tela de Conta mostrava a mensalidade do consultório
+       como se fosse a do paciente — "você paga R$ 149,90" para quem não
+       paga nada. O valor é a verdade sobre o acesso; de quem é a conta é
+       outra verdade, e a tela precisa das duas. */
+    ownedByMe: z.boolean(),
+    /** Nome de quem paga, quando não é a própria pessoa. */
+    paidByName: z.string().nullable()
   }).nullable()
 });
 

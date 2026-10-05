@@ -60,6 +60,8 @@ async function montarMe(usuario: Usuario) {
   const org = usuario.orgId ? await db.primeiro(organizations, { id: usuario.orgId }) : null;
   const assinatura = usuario.role === "admin" ? null : await assinaturaDeAcesso(usuario);
   const plano = assinatura ? await db.primeiro(plans, { key: assinatura.planKey }) : null;
+  const propria = assinatura ? assinatura.userId === usuario.id : false;
+  const pagante = assinatura && !propria ? await db.primeiro(users, { id: assinatura.userId }) : null;
 
   return {
     user: {
@@ -87,6 +89,8 @@ async function montarMe(usuario: Usuario) {
           status: assinatura.status,
           priceCents: assinatura.priceCents,
           method: assinatura.method,
+          ownedByMe: propria,
+          paidByName: propria ? null : (org?.name ?? pagante?.name ?? null),
           currentPeriodEnd: iso(assinatura.currentPeriodEnd)
         }
       : null

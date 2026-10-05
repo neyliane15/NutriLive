@@ -93,38 +93,27 @@ export const PLANOS: PlanoCatalogo[] = [
     ]
   },
 
-  /* -------------------------------- academia ----------------------------- */
+  /* -------------------------------- academia -----------------------------
+     A academia NÃO compra plano. O programa de parceria (academias.html) é
+     de indicação: ela se cadastra por formulário, nós aprovamos, e ela
+     recebe comissão por cada aluno que assina pelo link dela.
+
+     Então existe um registro só, e ele é `active: false` DE PROPÓSITO:
+     `exigirPlano` recusa plano inativo, e é isso que fecha o checkout
+     público para o segmento academia. A assinatura de parceria é criada por
+     nós ao aprovar o parceiro, nunca por quem chega pela URL. Preço zero
+     porque é exatamente isso que a academia paga. O `seatLimit` alto é o
+     teto operacional do vínculo, não uma faixa de preço — quem paga é o
+     aluno, cada um pelo plano pessoal dele. */
   {
-    key: "studio", segment: "academia", name: "Studio",
-    description: "Estúdios e boxes até 150 alunos.",
-    priceCents: 24900, seatLimit: 150, featured: false, active: true, sortOrder: 1,
+    key: "parceria", segment: "academia", name: "Parceria",
+    description: "Programa de indicação: a academia não paga e recebe comissão por aluno assinante.",
+    priceCents: 0, seatLimit: 2000, featured: false, active: false, sortOrder: 1,
     features: [
-      "Até 150 alunos ativos",
-      "1 unidade",
-      "Painel de engajamento",
+      "Sem mensalidade para a academia",
+      "Comissão recorrente por aluno que assina pelo link da unidade",
+      "Painel de engajamento dos alunos vinculados",
       "Convite em massa por link e QR"
-    ]
-  },
-  {
-    key: "academia", segment: "academia", name: "Academia",
-    description: "A operação completa de uma academia de bairro ou de rua.",
-    priceCents: 54900, seatLimit: 600, featured: true, active: true, sortOrder: 2,
-    features: [
-      "Até 600 alunos ativos",
-      "Até 3 unidades na mesma conta",
-      "Tudo do Studio",
-      "Marca própria no app, e-mail e PDF"
-    ]
-  },
-  {
-    key: "rede", segment: "academia", name: "Rede",
-    description: "Redes e franquias a partir de 4 unidades.",
-    priceCents: 119000, seatLimit: 100000, featured: false, active: true, sortOrder: 3,
-    features: [
-      "Alunos e unidades ilimitados",
-      "Tudo do Academia",
-      "API, webhooks e exportação para BI",
-      "SSO e gestão centralizada de acessos"
     ]
   }
 ];

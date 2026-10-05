@@ -123,6 +123,19 @@ async function academiaIndicadora(codigo?: string): Promise<string | null> {
 }
 
 export async function contratar(entrada: EntradaContratacao, ip: string | null): Promise<SaidaContratacao> {
+  /* Academia não assina: o programa é de parceria por indicação, aprovado
+     por nós depois do formulário. Sem este recado, quem chegasse com
+     ?seg=academia receberia "Plano inválido" — tecnicamente verdade (o
+     plano de parceria é inativo justamente para fechar esta porta) e
+     inútil para quem só quer saber como entrar. */
+  if (entrada.segment === "academia") {
+    throw new AppError(
+      "dados_invalidos",
+      "Academia não assina plano: o programa é de parceria, com comissão por aluno. Faça o cadastro em academias.html e nós respondemos.",
+      { segment: "Use o formulário de parceria." }
+    );
+  }
+
   const plano = await exigirPlano(entrada.planKey, entrada.segment);
   const cupom = acharCupom(entrada.coupon);
   const { primeiraCents, recorrenteCents } = precificar(plano.priceCents, cupom);
@@ -131,9 +144,9 @@ export async function contratar(entrada: EntradaContratacao, ip: string | null):
   const cpf = soDigitos(entrada.customer.cpf);
   const telefone = soDigitos(entrada.customer.phone);
 
-  if ((entrada.segment === "nutricionista" || entrada.segment === "academia") && !entrada.org?.name) {
+  if (entrada.segment === "nutricionista" && !entrada.org?.name) {
     throw new AppError("dados_invalidos", "Informe o nome da organização.", {
-      "org.name": entrada.segment === "academia" ? "Nome da academia." : "Nome do consultório."
+      "org.name": "Nome do consultório."
     });
   }
   if (entrada.method !== "pix" && !entrada.cardToken) {
@@ -173,7 +186,9 @@ export async function contratar(entrada: EntradaContratacao, ip: string | null):
 
   const orgIndicadora = await academiaIndicadora(entrada.coupon);
   const papel = PAPEL_DO_SEGMENTO[entrada.segment];
-  const precisaOrg = entrada.segment === "nutricionista" || entrada.segment === "academia";
+  /* Só a nutricionista abre organização pelo checkout. A da academia é
+     criada quando aprovamos a parceria, fora deste caminho. */
+  const precisaOrg = entrada.segment === "nutricionista";
   const slug = precisaOrg ? await slugLivre(entrada.org?.name ?? entrada.customer.name) : null;
 
   /* ---- 2. grava tudo junto ------------------------------------------ */
@@ -191,7 +206,7 @@ export async function contratar(entrada: EntradaContratacao, ip: string | null):
     let org: Linha<typeof schema.organizations> | null = null;
     if (precisaOrg && slug) {
       org = await u.inserir(schema.organizations, {
-        type: entrada.segment === "academia" ? "academia" : "nutricionista",
+        type: "nutricionista",
         name: (entrada.org?.name ?? entrada.customer.name).trim(),
         slug,
         ownerUserId: usuario.id,

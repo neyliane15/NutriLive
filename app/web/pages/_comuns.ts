@@ -17,6 +17,7 @@ const TRACOS: Record<string, string> = {
   certo: `<path d="M4.8 12.6 9.3 17l9.9-10"/>`,
   faisca: `<path d="M12 3.2 13.6 8l4.8 1.6-4.8 1.6L12 16l-1.6-4.8L5.6 9.6 10.4 8z"/><path d="M18.6 15.4l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>`,
   seta: `<path d="M5 12h14M13 6l6 6-6 6"/>`,
+  info: `<circle cx="12" cy="12" r="9.2"/><path d="M12 10.8v6"/><path d="M12 7.6h.01"/>`,
   alerta: `<circle cx="12" cy="12" r="9"/><path d="M12 7.6v5M12 15.9v.6"/>`,
   cadeado: `<rect x="4.6" y="10.4" width="14.8" height="10" rx="2.4"/><path d="M8.4 10.4V7.8a3.6 3.6 0 0 1 7.2 0v2.6"/>`
 };

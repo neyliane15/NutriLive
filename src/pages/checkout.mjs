@@ -8,6 +8,11 @@ import { content, order } from "../data/segments.mjs";
 const catalogue = () => {
   const out = {};
   for (const k of order) {
+    /* Academia não compra plano: entra no programa de parceria por
+       formulário (academias.html) e recebe comissão por aluno assinante.
+       Deixar os planos de academia aqui abriria um checkout pago por URL
+       digitada à mão, para um produto que não vendemos mais. */
+    if (k === "academia") continue;
     out[k] = {
       label: content[k].navLabel,
       plans: content[k].plans.map((p) => ({

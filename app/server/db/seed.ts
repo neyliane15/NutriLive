@@ -31,6 +31,8 @@ import { gerarHash } from "../auth/senha.js";
 import { digerir } from "../auth/sessao.js";
 import { calcularMetas, estimarRefeicao } from "../lib/metas.js";
 import { chaveDoDia, inicioDaSemana, inicioDoDia, somarDias } from "../lib/datas.js";
+import { competencia } from "../billing/nucleo.js";
+import { PLANOS } from "../billing/planos.js";
 import { env } from "../lib/env.js";
 import { log } from "../lib/log.js";
 
@@ -43,128 +45,12 @@ const DIAS_DE_HISTORICO = 60;
 /*  Catálogo de planos — espelho de src/data/segments.mjs                   */
 /* ======================================================================== */
 
-export const CATALOGO = [
-  /* ---------------------------- pessoa física --------------------------- */
-  {
-    key: "essencial", segment: "pessoal", name: "Essencial",
-    description: "Para organizar a alimentação do dia a dia.",
-    priceCents: 1990, seatLimit: 1, sortOrder: 10, featured: false,
-    features: [
-      "Diário alimentar e de hidratação",
-      "Score diário de saúde",
-      "3 receitas inteligentes por dia",
-      "Metas de peso e medidas",
-      "Histórico de 90 dias"
-    ]
-  },
-  {
-    key: "plus", segment: "pessoal", name: "Plus",
-    description: "O plano completo — e o que quase todo mundo escolhe.",
-    priceCents: 3990, seatLimit: 1, sortOrder: 20, featured: true,
-    features: [
-      "Tudo do Essencial",
-      "Plano alimentar ilimitado de 1, 3 ou 7 dias",
-      "Receitas inteligentes ilimitadas",
-      "Lista de compras com preço estimado",
-      "Evolução completa: medidas, fotos e gráficos",
-      "Exportação em PDF para o seu nutri",
-      "Histórico ilimitado"
-    ]
-  },
-  {
-    key: "familia", segment: "pessoal", name: "Família",
-    description: "Até 5 perfis, cada um com o seu plano.",
-    priceCents: 5990, seatLimit: 5, sortOrder: 30, featured: false,
-    features: [
-      "Tudo do Plus, para 5 pessoas",
-      "Perfis independentes e privados",
-      "Lista de compras unificada da casa",
-      "Perfil infantil com porções ajustadas",
-      "Uma única cobrança no mês"
-    ]
-  },
-  /* --------------------------- nutricionista ---------------------------- */
-  {
-    key: "inicio", segment: "nutricionista", name: "Início",
-    description: "Para quem está montando o consultório.",
-    priceCents: 7990, seatLimit: 15, sortOrder: 10, featured: false,
-    features: [
-      "Até 15 pacientes ativos",
-      "Planos alimentares ilimitados",
-      "Prontuário e antropometria",
-      "App do paciente incluso",
-      "Suporte por e-mail"
-    ]
-  },
-  {
-    key: "profissional", segment: "nutricionista", name: "Profissional",
-    description: "Para o consultório que já lotou a agenda.",
-    priceCents: 14990, seatLimit: 60, sortOrder: 20, featured: true,
-    features: [
-      "Até 60 pacientes ativos",
-      "Tudo do Início",
-      "Relatórios de adesão e de risco de abandono",
-      "Agenda com lembrete de retorno",
-      "Mensagens dentro do app",
-      "Suporte por WhatsApp em até 4 h"
-    ]
-  },
-  {
-    key: "clinica", segment: "nutricionista", name: "Clínica",
-    description: "Para times com mais de um profissional.",
-    priceCents: 29990, seatLimit: 9999, sortOrder: 30, featured: false,
-    features: [
-      "Pacientes ilimitados",
-      "Até 5 nutricionistas na mesma conta",
-      "Tudo do Profissional",
-      "Permissões por papel e trilha de auditoria",
-      "Relatórios consolidados da clínica",
-      "API e integração com o seu sistema",
-      "Gerente de conta dedicado"
-    ]
-  },
-  /* ------------------------------ academia ------------------------------ */
-  {
-    key: "studio", segment: "academia", name: "Studio",
-    description: "Estúdios e boxes até 150 alunos.",
-    priceCents: 24900, seatLimit: 150, sortOrder: 10, featured: false,
-    features: [
-      "Até 150 alunos ativos",
-      "1 unidade",
-      "Painel de engajamento",
-      "Convite em massa por link e QR",
-      "Suporte por e-mail e WhatsApp"
-    ]
-  },
-  {
-    key: "academia", segment: "academia", name: "Academia",
-    description: "A operação completa de uma academia de bairro ou de rua.",
-    priceCents: 54900, seatLimit: 600, sortOrder: 20, featured: true,
-    features: [
-      "Até 600 alunos ativos",
-      "Até 3 unidades na mesma conta",
-      "Tudo do Studio",
-      "Marca própria no app, e-mail e PDF",
-      "Integração com o sistema de gestão",
-      "Alerta de risco de cancelamento",
-      "Implantação assistida no primeiro mês"
-    ]
-  },
-  {
-    key: "rede", segment: "academia", name: "Rede",
-    description: "Redes e franquias a partir de 4 unidades.",
-    priceCents: 119000, seatLimit: 99999, sortOrder: 30, featured: false,
-    features: [
-      "Alunos e unidades ilimitados",
-      "Tudo do Academia",
-      "API, webhooks e exportação para BI",
-      "SSO e gestão centralizada de acessos",
-      "SLA contratual e ambiente de homologação",
-      "Gerente de conta e revisão trimestral",
-      "Faturamento consolidado com rateio"
-    ]
-  }
-] as const;
+/*  O catálogo NÃO é redefinido aqui. Ele morava duplicado neste arquivo, e a
+    cópia tinha vida própria: quando `billing/planos.ts` passou a marcar o
+    plano de parceria como inativo (é o que fecha o checkout público para
+    academia), a cópia daqui continuava gravando tudo com `active: true` e
+    reabria a porta no banco de demonstração. Uma lista só, importada. */
+export const CATALOGO = PLANOS;
 
 /* ======================================================================== */
 /*  Gerador pseudoaleatório determinístico (mulberry32)                     */
@@ -346,7 +232,7 @@ export async function semear(db: Dados, opcoes: OpcoesSemente = {}): Promise<voi
     const valores = {
       key: p.key, segment: p.segment, name: p.name, description: p.description,
       priceCents: p.priceCents, seatLimit: p.seatLimit, features: [...p.features],
-      featured: p.featured, active: true, sortOrder: p.sortOrder
+      featured: p.featured, active: p.active, sortOrder: p.sortOrder
     };
     if (existe) await db.atualizar(plans, { key: p.key }, valores);
     else await db.inserir(plans, valores);
@@ -652,11 +538,20 @@ export async function semear(db: Dados, opcoes: OpcoesSemente = {}): Promise<voi
   });
   diga(`semente: ${PACIENTES_BIA.length} pacientes na ${bia.org.name} (serve para provar o isolamento entre carteiras)`);
 
-  /* ------------------------- 7. academia ------------------------------- */
-  const planoAcademia = CATALOGO.find((p) => p.key === "academia")!;
+  /* ------------------------- 7. academia -------------------------------
+     A academia é PARCEIRA, não cliente: não paga mensalidade e ganha
+     comissão por aluno que assina pelo link dela. O seed reproduz esse
+     modelo, e não o contrário — a versão anterior dava à academia uma
+     assinatura de R$ 549 e, por cima, comissão de 20% sobre o próprio
+     pagamento dela, que é justamente o caso que `organizacaoIndicadora`
+     recusa ("a academia assinando o próprio plano não gera comissão para
+     ela mesma"). O painel mostrava um número que o código de produção
+     nunca geraria. */
+  const planoParceria = CATALOGO.find((p) => p.key === "parceria")!;
+  const planoDoAluno = CATALOGO.find((p) => p.key === "plus")!;
   const orgAcademia = await db.inserir(organizations, {
     type: "academia", name: "Academia Corpo & Movimento", slug: "corpo-e-movimento",
-    seatLimit: planoAcademia.seatLimit, cityState: "Curitiba/PR", createdAt: emDias(-64)
+    seatLimit: planoParceria.seatLimit, cityState: "Curitiba/PR", createdAt: emDias(-64)
   });
   const gestor = await db.inserir(users, {
     email: "rodrigo@corpoemovimento.com.br", passwordHash: hash, name: "Rodrigo Menezes Alencar",
@@ -665,11 +560,27 @@ export async function semear(db: Dados, opcoes: OpcoesSemente = {}): Promise<voi
     emailVerifiedAt: emDias(-64), createdAt: emDias(-64), lastLoginAt: emDias(0, 9, 5)
   });
   await db.atualizar(organizations, { id: orgAcademia.id }, { ownerUserId: gestor.id });
-  const assinaturaAcademia = await assinar(gestor.id, orgAcademia.id, "academia", "pix", -64);
+  /* Registro de parceria: preço zero, sem fatura. Existe para o gestor ter
+     acesso ao painel (o guarda de assinatura exige um vínculo vivo) e para
+     o teto de alunos sair de algum lugar — não para cobrar nada. */
+  await db.inserir(subscriptions, {
+    userId: gestor.id, orgId: orgAcademia.id, planKey: "parceria", status: "ativa",
+    method: "pix", provider: "parceria", providerSubId: `parceria-${orgAcademia.slug}`,
+    priceCents: 0, currentPeriodEnd: null, createdAt: emDias(-64, 10, 5)
+  });
+
+  /* Comissão por aluno, do jeito que a produção gera: cada aluno ativo tem
+     a assinatura pessoal DELE, com `org_id` apontando para a academia que
+     indicou, e a comissão sai de cada pagamento aprovado dessa assinatura. */
+  const assinaturasDeAlunos: { id: string; quandoDias: number }[] = [];
 
   for (const [i, p] of ALUNOS.entries()) {
     const entrouEm = emDias(-60 + i * 5);
     const aluno = await criarPessoa(p, "aluno", orgAcademia.id, entrouEm);
+    if (!p.pendente) {
+      const assinatura = await assinar(aluno.usuario.id, orgAcademia.id, "plus", r.de(["credito", "pix", "debito"]), -60 + i * 5);
+      assinaturasDeAlunos.push({ id: assinatura.id, quandoDias: -60 + i * 5 });
+    }
     await db.inserir(careLinks, {
       orgId: orgAcademia.id, professionalUserId: gestor.id, memberUserId: aluno.usuario.id,
       status: p.pendente ? "pendente" : "ativo", startedAt: entrouEm,
@@ -688,18 +599,27 @@ export async function semear(db: Dados, opcoes: OpcoesSemente = {}): Promise<voi
   }
   diga(`semente: ${ALUNOS.length} alunos na ${orgAcademia.name}`);
 
-  /* Comissão da academia sobre os três últimos meses. */
-  for (let m = 2; m >= 0; m--) {
-    const quando = somarDias(hoje, -m * 30);
-    const base = planoAcademia.priceCents;
-    await db.inserir(commissions, {
-      orgId: orgAcademia.id, subscriptionId: assinaturaAcademia.id,
-      period: `${quando.getUTCFullYear()}-${String(quando.getUTCMonth() + 1).padStart(2, "0")}`,
-      baseCents: base, rateBp: env.COMMISSION_RATE_BP,
-      amountCents: Math.round((base * env.COMMISSION_RATE_BP) / 10_000),
-      status: m === 0 ? "prevista" : "paga", paidAt: m === 0 ? null : emDias(-m * 30 + 5, 12),
-      createdAt: emDias(-m * 30, 1)
-    });
+  /* Uma linha de comissão por pagamento aprovado de aluno, nos três últimos
+     meses. A competência usa `competencia()`, a mesma função da produção:
+     escrever o AAAA-MM à mão em UTC fazia o mês virar um dia antes da hora
+     em fuso negativo, e a tela de comissão perdia o período corrente. */
+  const base = planoDoAluno.priceCents;
+  const taxa = env.COMMISSION_RATE_BP;
+  for (const a of assinaturasDeAlunos) {
+    for (let ciclo = 0; ciclo < 3; ciclo++) {
+      const quandoDias = a.quandoDias + ciclo * 30;
+      if (quandoDias > 0) break;                     /* cobrança no futuro não existe */
+      const pago = quandoDias < -30;                 /* repasse sai no mês seguinte */
+      await db.inserir(commissions, {
+        orgId: orgAcademia.id, subscriptionId: a.id,
+        period: competencia(emDias(quandoDias, 10, 7)),
+        baseCents: base, rateBp: taxa,
+        amountCents: Math.round((base * taxa) / 10_000),
+        status: pago ? "paga" : "apurada",
+        paidAt: pago ? emDias(quandoDias + 35, 12) : null,
+        createdAt: emDias(quandoDias, 10, 8)
+      });
+    }
   }
 
   /* ------------------------- 8. IA e auditoria ------------------------- */

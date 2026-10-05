@@ -271,12 +271,31 @@ r.get("/hoje", comSessao(null, async (c, _u, usuario) => {
   return paginaHoje({ usuario, hoje });
 }));
 
+/* `GET /api/me/profile` devolve o perfil PLANO (os campos na raiz), não
+   embrulhado em `{ profile }`. Três telas liam `.profile` daqui e abriam
+   vazias sem nenhum erro aparente — o formulário sem valor e a assinatura
+   em branco eram o único sintoma. Este é o formato de verdade. */
+type PerfilApi = {
+  name: string; email: string; role: string;
+  birthDate: string | null; sex: string | null; heightCm: number | null;
+  goal: string | null; activityLevel: string | null; dietStyle: string | null;
+  restrictions: string[]; dislikes: string[];
+  kcalTarget: number; proteinTargetG: number; waterTargetMl: number;
+  weightKg: number | null; lastMeasuredAt: string | null; updatedAt: string | null;
+};
+
 r.get("/plano", comSessao(null, async (c, u, usuario) => {
   const [plano, perfil] = await juntos([
     planoAtivo(u.id),
-    pedir<{ profile: NonNullable<Parameters<typeof paginaPlano>[0]["perfil"]> }>(c, "/api/me/profile")
+    pedir<PerfilApi>(c, "/api/me/profile")
   ] as const);
-  return paginaPlano({ usuario, plano, perfil: perfil?.profile ?? null, semServidor: !perfil });
+  return paginaPlano({
+    usuario, plano, semServidor: !perfil,
+    perfil: perfil ? {
+      dietStyle: perfil.dietStyle, kcalTarget: perfil.kcalTarget,
+      proteinTargetG: perfil.proteinTargetG, restrictions: perfil.restrictions
+    } : null
+  });
 }));
 
 r.get("/receitas", comSessao(null, async (_c, u, usuario) =>
@@ -291,32 +310,42 @@ r.get("/evolucao", comSessao(null, async (c, _u, usuario) => {
   const faixa = faixaValida(c.req.query("faixa"));
   const [progresso, perfil] = await juntos([
     pedir<Parameters<typeof paginaEvolucao>[0]["progresso"]>(c, `/api/me/progress?range=${faixa}`),
-    pedir<{ profile: { heightCm?: number | null } | null }>(c, "/api/me/profile")
+    pedir<PerfilApi>(c, "/api/me/profile")
   ] as const);
-  return paginaEvolucao({ usuario, progresso, faixa, alturaCm: perfil?.profile?.heightCm ?? null });
+  return paginaEvolucao({ usuario, progresso, faixa, alturaCm: perfil?.heightCm ?? null });
 }));
 
 r.get("/conta", comSessao(null, async (c, u, usuario) => {
-  const [perfil, faturas] = await juntos([
+  /* Três fontes, porque são três assuntos: quem a pessoa é e o que ela
+     assinou saem da sessão (`/api/auth/me`), o perfil e as metas saem de
+     `/api/me/profile`, e as faturas de `/api/subscription/invoices`. */
+  const [sessao, perfil, faturas] = await juntos([
     pedir<{
       user: Parameters<typeof paginaConta>[0]["user"];
-      profile: Parameters<typeof paginaConta>[0]["profile"];
       subscription: Parameters<typeof paginaConta>[0]["subscription"];
-      targets: Parameters<typeof paginaConta>[0]["metas"];
-    }>(c, "/api/me/profile"),
+    }>(c, "/api/auth/me"),
+    pedir<PerfilApi>(c, "/api/me/profile"),
     pedir<{ invoices: NonNullable<Parameters<typeof paginaConta>[0]["invoices"]> }>(c, "/api/subscription/invoices")
   ] as const);
 
   return paginaConta({
     usuario,
-    /* Sem o perfil, a tela ainda identifica quem está logado pela sessão:
-       é pouco, mas é verdade, e evita um formulário com o nome em branco. */
-    user: perfil?.user ?? { id: u.id, name: u.name, email: u.email, role: u.role, status: u.status, orgId: u.orgId },
-    profile: perfil?.profile ?? null,
-    subscription: perfil?.subscription ?? null,
+    /* Sem a sessão respondida, a tela ainda identifica quem está logado pelo
+       cookie já resolvido: é pouco, mas é verdade, e evita um formulário com
+       o nome em branco. */
+    user: sessao?.user ?? { id: u.id, name: u.name, email: u.email, role: u.role, status: u.status, orgId: u.orgId },
+    profile: perfil ? {
+      birthDate: perfil.birthDate, sex: perfil.sex, heightCm: perfil.heightCm,
+      goal: perfil.goal, activityLevel: perfil.activityLevel, dietStyle: perfil.dietStyle,
+      restrictions: perfil.restrictions, dislikes: perfil.dislikes
+    } : null,
+    subscription: sessao?.subscription ?? null,
     invoices: faturas?.invoices ?? null,
-    metas: perfil?.targets ?? null,
-    semServidor: !perfil
+    metas: perfil ? {
+      kcalTarget: perfil.kcalTarget, proteinTargetG: perfil.proteinTargetG,
+      waterTargetMl: perfil.waterTargetMl
+    } : null,
+    semServidor: !perfil || !sessao
   });
 }));
 

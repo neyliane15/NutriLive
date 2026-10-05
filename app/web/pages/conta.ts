@@ -26,6 +26,10 @@ export type PerfilConta = {
 export type Assinatura = {
   planKey: string; planName: string; status: string;
   priceCents: number; method: string; currentPeriodEnd: string | null;
+  /** false quando o acesso vem da assinatura da organização. */
+  ownedByMe?: boolean;
+  /** Nome de quem paga, quando não é a própria pessoa. */
+  paidByName?: string | null;
 };
 
 export type Fatura = {
@@ -251,24 +255,57 @@ const blocoAssinatura = (d: DadosConta): string => {
   }
   const estado = String(s.status).toLowerCase();
   const cancelada = estado === "cancelada" || estado === "expirada";
-  return panel({
-    title: "Assinatura",
-    id: "painel-assinatura",
-    action: pill(ROTULO_ESTADO[estado] ?? s.status, TOM_ESTADO[estado] ?? "neutro"),
-    body: `
-<dl class="nl-kv">
+
+  /* Duas situações em que este painel NÃO deve mostrar um preço:
+
+     1. Academia parceira: não paga mensalidade. A coluna `method` do banco
+        guarda um valor qualquer do enum, e exibir "Pix" para quem não é
+        cobrado é mentira. Preço zero é o sinal.
+     2. Paciente, aluno e nutricionista funcionária: o acesso vem da
+        assinatura da organização. Mostrar "R$ 149,90 no cartão de crédito"
+        para o paciente é dizer que ele paga aquilo — ele não paga nada, e
+        não há botão de cancelar que faça sentido na mão dele. */
+  const semCobranca = s.priceCents === 0;
+  const viaOrganizacao = s.ownedByMe === false;
+  const minha = !semCobranca && !viaOrganizacao;
+  const quemPaga = s.paidByName ?? "a organização que cadastrou você";
+
+  const linhas = viaOrganizacao
+    ? `
   <div><dt>Plano</dt><dd>${esc(s.planName || s.planKey)}</dd></div>
-  <div><dt>Valor</dt><dd>${esc(brl(s.priceCents))}</dd></div>
-  <div><dt>Forma de pagamento</dt><dd>${esc(ROTULO_METODO[s.method] ?? s.method)}</dd></div>
-  <div><dt>${cancelada ? "Acesso até" : "Próxima cobrança"}</dt>
-       <dd data-nl="proxima-cobranca">${esc(dataBR(s.currentPeriodEnd))}</dd></div>
-</dl>
-${cancelada
+  <div><dt>Quem mantém</dt><dd>${esc(quemPaga)}</dd></div>
+  <div><dt>Você paga</dt><dd>Nada — o acesso é pela organização</dd></div>
+  <div><dt>Acesso</dt><dd data-nl="proxima-cobranca">${cancelada
+      ? `até ${esc(dataBR(s.currentPeriodEnd))}`
+      : "liberado enquanto o vínculo estiver ativo"}</dd></div>`
+    : `
+  <div><dt>Plano</dt><dd>${esc(s.planName || s.planKey)}</dd></div>
+  <div><dt>Valor</dt><dd>${semCobranca ? "Sem mensalidade" : esc(brl(s.priceCents))}</dd></div>
+  <div><dt>Forma de pagamento</dt>
+       <dd>${semCobranca ? "Não há cobrança" : esc(ROTULO_METODO[s.method] ?? s.method)}</dd></div>
+  <div><dt>${semCobranca ? "Modelo" : cancelada ? "Acesso até" : "Próxima cobrança"}</dt>
+       <dd data-nl="proxima-cobranca">${semCobranca ? "Comissão por aluno assinante" : esc(dataBR(s.currentPeriodEnd))}</dd></div>`;
+
+  const rodape = viaOrganizacao
+    ? `<p class="notice" style="margin-top:var(--sp-5)" role="status">${ic("info", 18)}
+       <span>Quem cuida desta assinatura é <b>${esc(quemPaga)}</b>. Para sair, fale com
+       ${esc(quemPaga)} — aqui você só gerencia os seus dados e a sua senha.</span></p>`
+    : cancelada
       ? `<p class="notice" style="margin-top:var(--sp-5)" role="status">${ic("alerta", 18)}
          <span>Assinatura cancelada. O acesso continua até <b>${esc(dataBR(s.currentPeriodEnd))}</b>.</span></p>`
-      : `<div class="nl-acoes">
-         <button class="btn btn-ghost" type="button" data-nl="abrir-cancelar">Cancelar assinatura</button>
-       </div>`}`
+      : minha
+        ? `<div class="nl-acoes">
+           <button class="btn btn-ghost" type="button" data-nl="abrir-cancelar">Cancelar assinatura</button>
+         </div>`
+        : "";
+
+  return panel({
+    title: viaOrganizacao ? "Seu acesso" : "Assinatura",
+    id: "painel-assinatura",
+    action: pill(ROTULO_ESTADO[estado] ?? s.status, TOM_ESTADO[estado] ?? "neutro"),
+    body: `<dl class="nl-kv">${linhas}
+</dl>
+${rodape}`
   });
 };
 
