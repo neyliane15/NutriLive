@@ -170,6 +170,25 @@ export const billing = {
   webhook: { in: z.any(), out: z.object({ ok: z.literal(true) }) },
   /** POST /api/subscription/cancel */
   cancel: { in: z.object({ reason: z.string().max(400).optional() }), out: z.object({ ok: z.literal(true), accessUntil: isoDate.nullable() }) },
+  /** GET /api/subscription/renewal — a cobrança de renovação em aberto.
+      Existe porque Pix no Mercado Pago é cobrança avulsa: não há recorrência
+      para o provedor cobrar sozinho, então a gente emite e a pessoa paga.
+      `null` quer dizer que não há nada a pagar agora. */
+  renewal: {
+    in: z.object({}),
+    out: z.object({
+      renewal: z.object({
+        paymentId: uuid,
+        amountCents: cents,
+        planName: z.string(),
+        /** BR Code copia-e-cola. */
+        qrCode: z.string(),
+        expiresAt: isoDate.nullable(),
+        /** Fim do período já pago: até quando o acesso está garantido. */
+        accessUntil: isoDate.nullable()
+      }).nullable()
+    })
+  },
   /** GET /api/subscription/invoices */
   invoices: {
     in: z.object({}),

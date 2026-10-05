@@ -308,6 +308,14 @@ const blocoAssinatura = (d: DadosConta): string => {
   <div><dt>${semCobranca ? "Modelo" : cancelada ? "Acesso até" : "Próxima cobrança"}</dt>
        <dd data-nl="proxima-cobranca">${semCobranca ? "Comissão por aluno assinante" : esc(dataBR(s.currentPeriodEnd))}</dd></div>`;
 
+  /* Pix não renova sozinho: quem assinou assim precisa saber onde pagar, e
+     o lugar natural de perguntar isso é esta tela. */
+  const avisoPix = String(s.method).toLowerCase() === "pix" && !viaOrganizacao && !semCobranca
+    ? `<p class="notice" style="margin-top:var(--sp-5)" role="status">${ic("info", 18)}
+       <span>No Pix a cobrança não é automática: a gente gera o código cinco dias antes do
+       vencimento e manda por e-mail. <a class="link" href="/renovar">Ver o Pix da renovação</a>.</span></p>`
+    : "";
+
   const rodape = viaOrganizacao
     ? `<p class="notice" style="margin-top:var(--sp-5)" role="status">${ic("info", 18)}
        <span>Quem cuida desta assinatura é <b>${esc(quemPaga)}</b>. Para sair, fale com
@@ -327,7 +335,7 @@ const blocoAssinatura = (d: DadosConta): string => {
     action: pill(ROTULO_ESTADO[estado] ?? s.status, TOM_ESTADO[estado] ?? "neutro"),
     body: `<dl class="nl-kv">${linhas}
 </dl>
-${rodape}`
+${avisoPix}${rodape}`
   });
 };
 

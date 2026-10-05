@@ -31,6 +31,7 @@ import type { Context } from "hono";
 import { lerSessao, encerrarSessao, type Usuario } from "../auth/sessao.js";
 import { assinaturaDeAcesso } from "../auth/guard.js";
 import { acessoVigente } from "../billing/acesso.js";
+import { qrSvg } from "../billing/pix.js";
 import { db } from "../db/index.js";
 import { mealPlans, organizations, plans, recipes, users } from "../db/schema.js";
 import { lerToken, type Proposito } from "../auth/tokens.js";
@@ -49,6 +50,7 @@ import paginaReceitas, { type Receita } from "../../web/pages/receitas.js";
 import paginaCompras from "../../web/pages/compras.js";
 import paginaEvolucao, { faixaValida } from "../../web/pages/evolucao.js";
 import paginaConta from "../../web/pages/conta.js";
+import paginaRenovar from "../../web/pages/renovar.js";
 import orgPainel from "../../web/pages/org-painel.js";
 import orgPessoas from "../../web/pages/org-pessoas.js";
 import orgPessoa from "../../web/pages/org-pessoa.js";
@@ -382,6 +384,22 @@ r.get("/conta", comSessao(null, async (c, u, usuario) => {
       waterTargetMl: perfil.waterTargetMl
     } : null,
     semServidor: !perfil || !sessao
+  });
+}, { exigeAcesso: false }));
+
+/* Pagar a renovação do Pix. NÃO exige acesso vigente de propósito: quem
+   está vencido é exatamente quem precisa desta tela. Trancar a porta por
+   onde se volta a pagar seria o pior resultado possível. */
+r.get("/renovar", comSessao(null, async (c, _u, usuario) => {
+  const resposta = await pedir<{ renewal: Parameters<typeof paginaRenovar>[0]["renovacao"] }>(
+    c, "/api/subscription/renewal"
+  );
+  const renovacao = resposta?.renewal ?? null;
+  return paginaRenovar({
+    usuario,
+    renovacao,
+    qrSvg: renovacao ? qrSvg(renovacao.qrCode, "QR Code do Pix da renovação") : null,
+    semServidor: !resposta
   });
 }, { exigeAcesso: false }));
 

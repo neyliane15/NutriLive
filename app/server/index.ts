@@ -17,6 +17,7 @@ import checkoutRoutes from "./routes/checkout.js";
 import webhookRoutes from "./routes/webhooks.js";
 import subscriptionRoutes from "./routes/subscription.js";
 import adminRoutes from "./routes/admin.js";
+import cronRoutes from "./routes/cron.js";
 import pageRoutes from "./routes/pages.js";
 
 const app = new Hono();
@@ -37,6 +38,7 @@ app.route("/api", checkoutRoutes);          // /api/plans, /api/checkout
 app.route("/api/webhooks", webhookRoutes);
 app.route("/api/subscription", subscriptionRoutes);
 app.route("/api/admin", adminRoutes);
+app.route("/api/cron", cronRoutes);
 
 app.get("/api/health", (c) => c.json({ ok: true, at: new Date().toISOString(), driver: env.DB_DRIVER }));
 
