@@ -238,20 +238,42 @@ const blocoMetas = (d: DadosConta): string => {
 const blocoAssinatura = (d: DadosConta): string => {
   const s = d.subscription;
   if (!s) {
-    return panel({
-      title: "Assinatura",
-      id: "painel-assinatura",
-      body: d.user.orgId
+    /* Qual recado dar depende do FATO, não do papel.
+       ------------------------------------------------------------------
+       Esta decisão era `d.user.orgId ? "o seu acesso vem da organização"
+       : "sem assinatura ativa"`. Um aluno de academia tem `orgId`, então
+       lia "não há cobrança nem assinatura no seu nome" — com as três
+       faturas dele, no nome dele, logo abaixo na mesma tela. A academia é
+       parceira: ela não paga por ninguém; o aluno pagava e teve o
+       pagamento estornado.
+
+       Fatura no nome da pessoa é prova de que já houve assinatura dela.
+       Quem tem fatura precisa do caminho de volta; quem nunca teve e
+       depende de uma organização precisa saber com quem falar. */
+    const jaPagou = (d.invoices ?? []).length > 0;
+    const corpo = jaPagou
+      ? vazio({
+          titulo: "Seu acesso está encerrado",
+          texto: "Não há assinatura ativa no seu nome agora. Assine de novo para liberar o app completo — seus registros, seu histórico e suas medidas continuam salvos.",
+          acao: `<a class="btn btn-primary" href="/checkout.html">Ver planos</a>`,
+          icone: ic("cadeado", 24)
+        })
+      : d.user.orgId
         ? `<p class="nl-legenda" style="font-size:var(--fs-sm)">
-             O seu acesso vem da organização que acompanha você. Não há cobrança nem assinatura no seu nome.
-           </p>`
+             O seu acesso vem da organização que acompanha você, e ele está encerrado no momento.
+             Fale com quem cuida dela para liberar — ou assine um plano no seu nome.
+           </p>
+           <div class="nl-acoes" style="margin-top:var(--sp-4)">
+             <a class="btn btn-secondary btn-sm" href="/checkout.html">Ver planos</a>
+           </div>`
         : vazio({
             titulo: "Sem assinatura ativa",
             texto: "Você está sem um plano pago no momento. Escolha um plano para liberar o app completo.",
             acao: `<a class="btn btn-primary" href="/checkout.html">Ver planos</a>`,
             icone: ic("cadeado", 24)
-          })
-    });
+          });
+
+    return panel({ title: "Assinatura", id: "painel-assinatura", body: corpo });
   }
   const estado = String(s.status).toLowerCase();
   const cancelada = estado === "cancelada" || estado === "expirada";

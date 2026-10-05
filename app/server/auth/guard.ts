@@ -38,6 +38,28 @@ export type Ambiente = {
 };
 
 /* Papéis que pagam e que, portanto, têm assinatura própria. */
+/**
+ * Vínculo que ABRE o prontuário. Não é o mesmo conjunto que ocupa assento.
+ *
+ * `pendente` significa convidada, não consentida: a pessoa foi cadastrada e
+ * ainda não aceitou. Enquanto esse status abria o prontuário, bastava
+ * conhecer o e-mail de alguém para ler tudo dela — `convidar` reaproveita o
+ * usuário que já existe, e quem não pertencia a nenhuma organização
+ * (qualquer assinante `pessoal`, e o admin) era adotado em silêncio: sem
+ * aviso, sem aprovação, sem nem mudar de `orgId`. Com um vínculo pendente a
+ * profissional lia o prontuário inteiro, gerava plano no nome da pessoa,
+ * ARQUIVAVA o plano ativo dela e gravava nota clínica.
+ *
+ * O consentimento é o aceite: `aceitarConvites` passa o vínculo de
+ * `pendente` para `ativo` quando a pessoa define a senha pelo link do
+ * convite, ou quando aceita o convite já tendo conta. Até lá a profissional
+ * vê a pessoa na lista — com o nome que ela mesma digitou — e nada além.
+ *
+ * O assento continua contado por `VINCULO_VIVO`: convite feito já reserva a
+ * vaga, senão a conta estoura no dia em que todos aceitarem.
+ */
+export const VINCULO_COM_ACESSO = ["ativo"] as const;
+
 export const PAPEIS_PAGANTES: Role[] = ["pessoal", "nutricionista", "academia"];
 /* Papéis que acessam pelo vínculo com uma organização. */
 export const PAPEIS_VINCULADOS: Role[] = ["paciente", "aluno"];
@@ -122,17 +144,65 @@ const MENSAGEM_SEM_ASSINATURA: Record<string, string> = {
 };
 
 /** A assinatura que paga o acesso desta pessoa (a dela ou a da organização). */
+/**
+ * Dias de folga depois do fim do período pago.
+ *
+ * `ativa` e `atrasada` liberavam o acesso SEM olhar `current_period_end`, e
+ * nada no sistema muda `ativa` para `expirada` — não há cron nem rotina que
+ * faça isso; só o webhook do provedor, quando ele vem. Então um mês pago
+ * valia acesso para sempre, e no Pix nem existe o webhook (a cobrança é
+ * avulsa, sem `preapproval`): R$ 39,90 uma vez e pronto.
+ *
+ * A folga existe porque cobrança falha por motivo bobo — cartão trocado,
+ * limite do dia — e cortar na hora é a forma mais rápida de perder cliente
+ * que ia pagar. Depois dela, acabou.
+ */
+export const CARENCIA_POS_VENCIMENTO_DIAS = 7;
+
+/** O período pago desta assinatura ainda cobre hoje (com a folga)? */
+function vigente(s: Assinatura, agora = Date.now()): boolean {
+  /* Sem data de fim, não há o que vencer: é o registro de parceria (preço
+     zero) e a assinatura que ainda espera o primeiro webhook. */
+  if (!s.currentPeriodEnd) return true;
+  return s.currentPeriodEnd.getTime() + CARENCIA_POS_VENCIMENTO_DIAS * 86_400_000 > agora;
+}
+
 export async function assinaturaDeAcesso(usuario: Usuario): Promise<Assinatura | null> {
   const propria = await db.buscar(subscriptions, { userId: usuario.id }, { ordem: { campo: "createdAt", dir: "desc" } });
-  const viva = propria.find((s) => (STATUS_QUE_LIBERAM as readonly string[]).includes(s.status));
+  const viva = propria.find((s) => (STATUS_QUE_LIBERAM as readonly string[]).includes(s.status) && vigente(s));
   if (viva) return viva;
 
-  /* Paciente e aluno não pagam: quem paga é a organização que os cadastrou.
-     Vale também para a nutricionista funcionária de uma clínica. */
+  /* Paciente coberto pelo plano do consultório.
+     ---------------------------------------------------------------------
+     Aqui morava um furo de receita grande, porque `subscriptions.org_id`
+     tem DOIS significados no código:
+
+       - no checkout e na comissão, é "a academia que INDICOU esta venda";
+       - aqui, era lido como "a organização que PAGA pelos membros dela".
+
+     Como todo aluno tem `users.org_id` = academia, este trecho achava
+     qualquer assinatura viva com aquele `org_id` — a assinatura PESSOAL de
+     um colega — e liberava o acesso. Resultado: a academia convidava gente
+     (até 2000 assentos) e cada convidado usava o app pago de graça, sem
+     gerar comissão; e aluno que parava de pagar continuava dentro, porque
+     a assinatura de outro aluno o cobria. Pior ainda depois do registro de
+     parceria: ele é uma assinatura viva de preço ZERO com `org_id` da
+     academia, então liberava todos os alunos sem ninguém pagar nada.
+
+     Duas condições fecham isso: só organização que PAGA por assento
+     (consultório; academia é parceira, cada aluno paga o dele) e só a
+     assinatura DO DONO da organização, nunca a de um membro. */
   if (usuario.orgId) {
-    const daOrg = await db.buscar(subscriptions, { orgId: usuario.orgId }, { ordem: { campo: "createdAt", dir: "desc" } });
-    const vivaOrg = daOrg.find((s) => (STATUS_QUE_LIBERAM as readonly string[]).includes(s.status));
-    if (vivaOrg) return vivaOrg;
+    const org = await db.primeiro(organizations, { id: usuario.orgId });
+    if (org && org.type === "nutricionista" && org.ownerUserId) {
+      const doDono = await db.buscar(
+        subscriptions,
+        { userId: org.ownerUserId },
+        { ordem: { campo: "createdAt", dir: "desc" } }
+      );
+      const vivaOrg = doDono.find((s) => (STATUS_QUE_LIBERAM as readonly string[]).includes(s.status));
+      if (vivaOrg && vigente(vivaOrg)) return vivaOrg;
+    }
   }
 
   /* Cancelada mas ainda dentro do período pago continua valendo. */
@@ -191,7 +261,7 @@ export async function canAccessMember(professionalId: string, memberId: string):
   const direto = await db.primeiro(careLinks, {
     professionalUserId: professionalId,
     memberUserId: memberId,
-    status: { in: VINCULO_VIVO }
+    status: { in: VINCULO_COM_ACESSO }
   });
   if (direto) return direto;
 
@@ -201,7 +271,7 @@ export async function canAccessMember(professionalId: string, memberId: string):
   const daOrg = await db.primeiro(careLinks, {
     orgId: profissional.orgId,
     memberUserId: memberId,
-    status: { in: VINCULO_VIVO }
+    status: { in: VINCULO_COM_ACESSO }
   });
   if (daOrg) return daOrg;
 
@@ -220,7 +290,7 @@ export async function acessoAoMembro(
 ): Promise<Vinculo | null> {
   if (ator.role !== "admin") return canAccessMember(ator.id, memberId);
 
-  const vinculo = await db.primeiro(careLinks, { memberUserId: memberId, status: { in: VINCULO_VIVO } });
+  const vinculo = await db.primeiro(careLinks, { memberUserId: memberId, status: { in: VINCULO_COM_ACESSO } });
   await registrarAuditoria(c, ator.id, "admin.le_membro", "users", memberId, { via: "guard" });
   return vinculo;
 }

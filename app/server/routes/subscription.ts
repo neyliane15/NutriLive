@@ -13,22 +13,45 @@
 import { Hono } from "hono";
 import contract from "../../shared/contract.js";
 import type { Ambiente } from "../auth/guard.js";
-import { requireRole, requireUser, usuarioAtual } from "../auth/guard.js";
-import { body } from "../lib/http.js";
+import { requireUser, usuarioAtual } from "../auth/guard.js";
+import { AppError, body } from "../lib/http.js";
+import { db } from "../db/index.js";
+import { subscriptions } from "../db/schema.js";
 import { cancelarAssinatura, faturasDoUsuario } from "../billing/assinatura.js";
 
 const r = new Hono<Ambiente>();
 
-/* Só quem assina cancela. Paciente e aluno não pagam: quem paga é a
-   organização que os cadastrou, e quem cancela é ela. */
-const PAGANTES = requireRole("pessoal", "nutricionista", "academia", "admin");
-
 /* ======================================================================== */
 /*  POST /api/subscription/cancel                                           */
 /* ======================================================================== */
-r.post("/cancel", PAGANTES, async (c) => {
+/*  Quem cancela é QUEM PAGA, e isso é uma pergunta sobre a assinatura, não
+    sobre o papel.
+
+    A regra era por papel (`pessoal`, `nutricionista`, `academia`, `admin`) e
+    discordava da tela, que decide pelo dono da assinatura. Um aluno que
+    assinou pelo link da própria academia tem assinatura própria, é cobrado
+    todo mês, via o botão "Cancelar assinatura" na tela — e recebia 403
+    "Sua conta não tem acesso a esta área". Não havia caminho no produto
+    para ele parar de pagar. Mesma armadilha para o paciente que compra
+    plano pessoal: o checkout permite e não troca o papel dele.
+
+    Quem não paga nada continua sem cancelar — mas agora com o motivo certo:
+    não é falta de permissão, é que não existe assinatura dele para cancelar. */
+r.post("/cancel", requireUser, async (c) => {
   const { reason } = await body(c, contract.billing.cancel.in);
   const usuario = usuarioAtual(c);
+
+  const propria = await db.primeiro(subscriptions, {
+    userId: usuario.id, status: { in: ["pendente", "ativa", "atrasada"] }
+  });
+  if (!propria) {
+    throw new AppError(
+      "nao_encontrado",
+      "Não há assinatura sua para cancelar. Se o seu acesso vem de um consultório ou de uma academia, fale com quem cuida dele.",
+      { _: "Nenhuma assinatura própria." }
+    );
+  }
+
   const { accessUntil } = await cancelarAssinatura(usuario.id, reason);
   return c.json({ ok: true as const, accessUntil });
 });

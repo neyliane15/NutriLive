@@ -72,6 +72,34 @@ export const NAV: Record<Role, NavItem[]> = {
 
 const brandMark = `<svg viewBox="0 0 40 40" width="26" height="26" fill="none" aria-hidden="true"><path d="M34.2 5.6c.6 0 1.1.4 1.2 1 .9 6.9-.5 12.9-4.2 17.4-3.8 4.5-9 6.6-15 6.2-.3 1.6-.4 3.3-.4 5.1a1.3 1.3 0 1 1-2.6 0c0-2.1.2-4.1.6-6a24 24 0 0 1 4.6-9.7 1.3 1.3 0 0 1 2 1.6 21.4 21.4 0 0 0-3.8 7.5c4.9.3 9-1.5 12-5.1 2.9-3.5 4.2-8.2 3.8-13.7-6.6.2-11.7 1.6-15.3 4-3.8 2.6-5.7 6-5.7 10.3 0 1.7.4 3.2 1.1 4.5a1.3 1.3 0 0 1-2.2 1.3 12 12 0 0 1-1.5-5.8c0-5.2 2.4-9.5 7-12.5C19.7 8.4 26 6.9 33.6 6.7l.6-1.1Z" fill="currentColor"/></svg>`;
 
+/** Escape de HTML. Igual ao `esc` de components/, repetido aqui porque a
+    casca não importa componentes (seria ciclo): componentes usam a casca. */
+const escapar = (v: unknown): string =>
+  String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+/**
+ * JSON para dentro de `<script type="application/json">`.
+ *
+ * `JSON.stringify` não escapa `<`, então uma string com `</script>` FECHA o
+ * bloco e o resto do valor é interpretado como HTML. Era um XSS armazenado
+ * de verdade: `name` do checkout não restringe caractere e o usuário é
+ * gravado antes de a cobrança sair, então um visitante anônimo plantava
+ * `</script><img src=x onerror=...>` num Pix pendente, e o código rodava na
+ * sessão do admin ao abrir /admin/usuarios — com impersonate e estorno à
+ * mão. A tabela sempre esteve escapada; o vazamento era só por aqui.
+ *
+ * `\u003c` e companhia são JSON válido e idênticos ao original depois do
+ * `JSON.parse`, então nada do lado do cliente muda.
+ */
+export const jsonSeguro = (valor: unknown): string =>
+  JSON.stringify(valor ?? {})
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+
 export type ShellUser = { id: string; name: string; email: string; role: Role; orgName?: string | null };
 
 export type ShellOpts = {
@@ -131,10 +159,10 @@ export function shell(o: ShellOpts): string {
       ${o.action ?? ""}
       <div class="app-who">
         <span class="app-who-text">
-          <b>${o.user.name.split(" ")[0]}</b>
-          <small>${o.user.orgName ?? roleLabel(o.user.role)}</small>
+          <b>${escapar(o.user.name.split(" ")[0] ?? "")}</b>
+          <small>${escapar(o.user.orgName ?? roleLabel(o.user.role))}</small>
         </span>
-        <span class="avatar avatar-sm" aria-hidden="true">${initials(o.user.name)}</span>
+        <span class="avatar avatar-sm" aria-hidden="true">${escapar(initials(o.user.name))}</span>
       </div>
     </div>
   </header>
@@ -144,7 +172,7 @@ export function shell(o: ShellOpts): string {
 
 <nav class="app-tabs" aria-label="Navegação">${nav("app-tab")}</nav>
 
-<script id="nl-boot" type="application/json">${JSON.stringify(o.bootstrap ?? {})}</script>
+<script id="nl-boot" type="application/json">${jsonSeguro(o.bootstrap)}</script>
 <script src="/app-assets/islands/base.js" defer></script>
 ${(o.islands ?? []).map((i) => `<script src="/app-assets/islands/${i}.js" defer></script>`).join("\n")}
 </body>
@@ -174,7 +202,7 @@ export function publicShell(o: { title: string; body: string; islands?: string[]
   <a class="auth-brand" href="/">${brandMark}<span>Nutri<i>&amp;</i>Live</span></a>
   ${o.body}
 </main>
-<script id="nl-boot" type="application/json">${JSON.stringify(o.bootstrap ?? {})}</script>
+<script id="nl-boot" type="application/json">${jsonSeguro(o.bootstrap)}</script>
 <script src="/app-assets/islands/base.js" defer></script>
 ${(o.islands ?? []).map((i) => `<script src="/app-assets/islands/${i}.js" defer></script>`).join("\n")}
 </body>

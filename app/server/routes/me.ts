@@ -25,13 +25,18 @@ import {
 } from "../lib/datas.js";
 import { aderenciaPct, sequenciaAtual } from "../lib/aderencia.js";
 import { calcularMetas, estimarRefeicao, scoreDoDia } from "../lib/metas.js";
-import { requireUser, usuarioAtual, type Ambiente } from "../auth/guard.js";
+import { guardaApp, usuarioAtual, type Ambiente } from "../auth/guard.js";
 import type { Usuario } from "../auth/sessao.js";
 
 const r = new Hono<Ambiente>();
 
-/* Todas as rotas desta área exigem sessão válida. */
-r.use("*", requireUser);
+/* Sessão E acesso pago em dia. Era só `requireUser`, e isso significava que
+   estorno, cancelamento e cobrança vencida não fechavam NADA do que o
+   cliente usa: diário, água, progresso, medidas, lista de compras e perfil
+   seguiam abertos para sempre depois do primeiro mês. A tela de Conta dizia
+   "Escolha um plano para liberar o app completo" enquanto o app completo
+   estava aberto. `guardaApp` é o mesmo guarda que a área de IA já usava. */
+r.use("*", ...guardaApp);
 
 /* ======================================================================== */
 /*  unidades e tabelas de apoio                                             */

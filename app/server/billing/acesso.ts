@@ -13,6 +13,7 @@ import { db, schema } from "../db/index.js";
 import type { Linha } from "../db/index.js";
 import { env } from "../lib/env.js";
 import { log } from "../lib/log.js";
+import { CARENCIA_POS_VENCIMENTO_DIAS } from "../auth/guard.js";
 import { enviarEmail, emailPrimeiroAcesso } from "./email.js";
 import { registrarComissaoSePreciso } from "./comissao.js";
 import { fimDoPeriodo, hashToken, novoToken } from "./nucleo.js";
@@ -173,12 +174,27 @@ export async function nomeDoPlano(planKey: string): Promise<string> {
   return plano?.name ?? planKey;
 }
 
-/** Acesso continua enquanto o período pago não terminou. */
+/**
+ * Acesso continua enquanto o período pago não terminou.
+ *
+ * O nome sempre prometeu isto; o código olhava só o status e devolvia
+ * `true` para toda assinatura `ativa`, mesmo com o período encerrado há
+ * meses — e nada no sistema muda `ativa` para `expirada` por conta própria.
+ * Agora a data manda, com a mesma folga de `auth/guard.ts` para cobrança
+ * que falhou por motivo bobo.
+ */
 export const acessoVigente = (assinatura: Assinatura | null, agora = new Date()): boolean => {
   if (!assinatura) return false;
-  if (assinatura.status === "ativa" || assinatura.status === "atrasada") return true;
+  const fim = assinatura.currentPeriodEnd;
+  if (assinatura.status === "ativa" || assinatura.status === "atrasada") {
+    /* Sem data de fim não há o que vencer: parceria (preço zero) e
+       assinatura que ainda espera o primeiro webhook. */
+    if (!fim) return true;
+    return fim.getTime() + CARENCIA_POS_VENCIMENTO_DIAS * 86_400_000 > agora.getTime();
+  }
   if (assinatura.status === "cancelada") {
-    return !!assinatura.currentPeriodEnd && assinatura.currentPeriodEnd > agora;
+    /* Cancelada não tem folga: a pessoa pediu para sair na data. */
+    return !!fim && fim > agora;
   }
   return false;
 };

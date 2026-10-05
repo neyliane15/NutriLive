@@ -58,7 +58,7 @@ export function orgComissoes(o: { user: ShellUser; dados: ComissoesDados | null;
 <dl class="fe2-strip">
   <div>
     <dt>Total do período</dt>
-    <dd>${brl(total)}<small>${periodo ? periodoLongo(periodo) : "sem período"}</small></dd>
+    <dd>${brl(total)}<small>${periodo ? esc(periodoLongo(periodo)) : "sem período"}</small></dd>
   </div>
   <div>
     <dt>Prevista</dt>
@@ -114,7 +114,7 @@ ${d ? "" : aviso(
 ${panel({ body: `${seletor}${seletor ? `<div class="sep"></div>` : ""}${resumo}` })}
 ${panel({
     title: "Detalhamento por " + t.pessoa,
-    sub: itens.length ? `${itens.length} ${itens.length === 1 ? "linha" : "linhas"} em ${periodoCurto(periodo)}` : undefined,
+    sub: itens.length ? `${itens.length} ${itens.length === 1 ? "linha" : "linhas"} em ${esc(periodoCurto(periodo))}` : undefined,
     body: detalhe
   })}
 ${panel({

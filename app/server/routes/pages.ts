@@ -30,6 +30,7 @@ import type { Context } from "hono";
 
 import { lerSessao, encerrarSessao, type Usuario } from "../auth/sessao.js";
 import { assinaturaDeAcesso } from "../auth/guard.js";
+import { acessoVigente } from "../billing/acesso.js";
 import { db } from "../db/index.js";
 import { mealPlans, organizations, plans, recipes, users } from "../db/schema.js";
 import { lerToken, type Proposito } from "../auth/tokens.js";
@@ -189,8 +190,10 @@ const html = (c: Context, corpo: string) => c.html(corpo);
  */
 function comSessao(
   papeis: Role[] | null,
-  desenhar: (c: Context, u: Usuario, casca: ShellUser) => Promise<string>
+  desenhar: (c: Context, u: Usuario, casca: ShellUser) => Promise<string>,
+  opcoes: { exigeAcesso?: boolean } = {}
 ) {
+  const exigeAcesso = opcoes.exigeAcesso !== false;
   return async (c: Context) => {
     const sessao = await lerSessao(c);
     if (!sessao) {
@@ -199,6 +202,24 @@ function comSessao(
     }
     const u = sessao.usuario;
     if (papeis && !papeis.includes(u.role as Role)) return c.redirect(rotaInicial(u.role as Role));
+
+    /* Sem acesso pago, a tela do app não deve abrir vazia.
+       -------------------------------------------------------------------
+       Com o paywall ligado na API, `/hoje` continuava respondendo 200 e
+       dizendo "Não conseguimos carregar o seu dia agora — ficou
+       indisponível por um instante. Tentar de novo". Isso é mentira: o
+       motivo não é instante nenhum, é que a assinatura acabou. A pessoa
+       apertaria "tentar de novo" para sempre.
+
+       Então ela vai para /conta, que é onde o painel de assinatura explica
+       a situação e oferece o caminho de volta. /conta e /sair ficam abertas
+       de propósito: trancar a porta por onde se volta a pagar seria o pior
+       resultado possível. */
+    if (exigeAcesso && u.role !== "admin") {
+      const assinatura = await assinaturaDeAcesso(u);
+      if (!acessoVigente(assinatura)) return c.redirect("/conta?acesso=encerrado");
+    }
+
     return html(c, await desenhar(c, u, await paraCasca(u)));
   };
 }
@@ -347,7 +368,7 @@ r.get("/conta", comSessao(null, async (c, u, usuario) => {
     } : null,
     semServidor: !perfil || !sessao
   });
-}));
+}, { exigeAcesso: false }));
 
 /* --------------------------- consultório/academia ----------------------- */
 r.get("/painel", comSessao(PROFISSIONAIS, async (c, _u, user) =>
@@ -376,7 +397,12 @@ r.get("/pacientes/:userId", telaPessoa);
 r.get("/alunos/:userId", telaPessoa);
 
 r.get("/comissoes", comSessao(["academia"], async (c, _u, user) => {
-  const periodo = c.req.query("periodo") ?? c.req.query("period") ?? "";
+  /* A competência é validada AQUI, e não só na API, porque o valor cru da
+     querystring chegava à tela quando a API recusava o formato — e a tela
+     o imprimia. Era um XSS refletido de um clique: ?periodo=<img onerror>.
+     A tela também escapa; isto é a porta, aquilo é a tranca. */
+  const cru = c.req.query("periodo") ?? c.req.query("period") ?? "";
+  const periodo = /^\d{4}-\d{2}$/.test(cru) ? cru : "";
   const sufixo = periodo ? `?period=${encodeURIComponent(periodo)}` : "";
   const dados = await pedir<Parameters<typeof orgComissoes>[0]["dados"]>(c, `/api/org/commissions${sufixo}`);
   return orgComissoes({ user, dados, periodo: periodo || undefined });
