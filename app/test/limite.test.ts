@@ -140,3 +140,40 @@ describe("limite de tentativas", () => {
     assert.ok(!restantes.some((l) => l.id === velha.id), "não apagou a velha");
   });
 });
+
+describe("limite por IP: o balde compartilhado", () => {
+  it("sem IP conhecido, o limite por IP não se aplica", async () => {
+    /* Na Vercel sem TRUST_PROXY, clientIp devolve 0.0.0.0 para TODO
+       mundo. Um limite por IP aí não é defesa: 25 senhas erradas de um
+       visitante qualquer trancariam o login de todos os clientes. */
+    const { IP_DESCONHECIDO } = await import("../server/lib/http.js");
+    const politica = limite.POLITICAS.login_ip;
+
+    for (let i = 0; i < politica.tentativas + 5; i++) {
+      await limite.registrarFalha("login_ip", IP_DESCONHECIDO);
+    }
+    await limite.conferirLimite("login_ip", IP_DESCONHECIDO);   /* não lança */
+
+    const linhas = await db.buscar(schema.rateLimits, {});
+    assert.equal(
+      linhas.filter((l) => l.bucket.includes(IP_DESCONHECIDO)).length, 0,
+      "nem gravar: um balde que tranca todo mundo não deve nem existir"
+    );
+  });
+
+  it("com IP conhecido, o limite por IP vale", async () => {
+    const politica = limite.POLITICAS.login_ip;
+    for (let i = 0; i < politica.tentativas; i++) {
+      await limite.registrarFalha("login_ip", "198.51.100.44");
+    }
+    await assert.rejects(() => limite.conferirLimite("login_ip", "198.51.100.44"), /Muitas tentativas/);
+  });
+
+  it("o limite por e-mail continua valendo mesmo sem IP", async () => {
+    /* É esta a defesa de cada conta; a de IP é só vizinhança. */
+    for (let i = 0; i < limite.POLITICAS.login_email.tentativas; i++) {
+      await limite.registrarFalha("login_email", email);
+    }
+    await assert.rejects(() => limite.conferirLimite("login_email", email), /Muitas tentativas/);
+  });
+});

@@ -28,7 +28,7 @@
    ========================================================================= */
 import { db } from "../db/index.js";
 import { rateLimits } from "../db/schema.js";
-import { AppError } from "../lib/http.js";
+import { AppError, IP_DESCONHECIDO } from "../lib/http.js";
 import { log } from "../lib/log.js";
 
 export type Politica = {
@@ -52,6 +52,24 @@ export type NomeLimite = keyof typeof POLITICAS;
 
 const identidade = (nome: NomeLimite, chave: string) =>
   `${nome}:${chave.toLowerCase().trim()}`.slice(0, 400);
+
+/**
+ * Chave inútil é chave perigosa.
+ *
+ * Quando não se descobre o IP de quem chamou, `clientIp` devolve
+ * IP_DESCONHECIDO — o MESMO valor para todo mundo. Um limite por IP nesse
+ * caso não é defesa: é um balde único e compartilhado, em que 25 senhas
+ * erradas de um visitante qualquer trancam o login de todos os clientes
+ * por 15 minutos. Negação de serviço que nós mesmos causamos.
+ *
+ * Então, sem IP, o limite por IP não se aplica. O limite por E-MAIL
+ * continua valendo, e é ele que protege a conta de cada pessoa — a defesa
+ * por IP é só a de vizinhança.
+ */
+const chaveInutil = (nome: NomeLimite, chave: string): boolean => {
+  const vazia = !chave || chave.trim() === "";
+  return (vazia || chave === IP_DESCONHECIDO) && nome.endsWith("_ip");
+};
 
 const emSegundos = (ms: number) => Math.max(1, Math.ceil(ms / 1000));
 
@@ -92,6 +110,7 @@ async function bloqueioRestante(nome: NomeLimite, chave: string): Promise<number
 
 /** Lança 429 se a chave estiver bloqueada. Chame ANTES de conferir a senha. */
 export async function conferirLimite(nome: NomeLimite, chave: string): Promise<void> {
+  if (chaveInutil(nome, chave)) return;
   const falta = await bloqueioRestante(nome, chave);
   if (falta > 0) {
     throw new AppError(
@@ -103,6 +122,7 @@ export async function conferirLimite(nome: NomeLimite, chave: string): Promise<v
 
 /** Registra uma falha. */
 export async function registrarFalha(nome: NomeLimite, chave: string): Promise<void> {
+  if (chaveInutil(nome, chave)) return;
   try {
     await db.inserir(rateLimits, { bucket: identidade(nome, chave) });
   } catch (e) {

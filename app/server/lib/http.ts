@@ -87,8 +87,24 @@ export async function body<T>(c: Context, schema: { parse: (v: unknown) => T }):
  * não escolhe. Em produção atrás de Cloudflare ou de um balanceador, ligue
  * a variável; sem proxy, deixe desligada.
  */
+/**
+ * IP de quem chamou, ou IP_DESCONHECIDO.
+ *
+ * `TRUST_PROXY` existe porque confiar em `x-forwarded-for` sem proxy na
+ * frente é deixar qualquer pessoa escolher o próprio IP — e com isso furar
+ * o limite de tentativas por IP.
+ *
+ * Na Vercel o cabeçalho é confiável (a plataforma o reescreve) E é a única
+ * fonte: não há socket para ler, porque a função recebe um Request pronto.
+ * Sem este `|| VERCEL`, esquecer TRUST_PROXY no painel fazia TODA
+ * requisição virar o mesmo IP — e, com o contador agora compartilhado no
+ * banco, 25 senhas erradas de qualquer visitante trancariam o login de
+ * todos os clientes por 15 minutos.
+ */
+export const IP_DESCONHECIDO = "0.0.0.0";
+
 export const clientIp = (c: Context): string => {
-  if (process.env.TRUST_PROXY === "1") {
+  if (process.env.TRUST_PROXY === "1" || process.env.VERCEL) {
     const doProxy =
       c.req.header("cf-connecting-ip") ??
       c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
@@ -97,5 +113,5 @@ export const clientIp = (c: Context): string => {
   /* `@hono/node-server` expõe o socket aqui. */
   const direto = (c.env as { incoming?: { socket?: { remoteAddress?: string } } } | undefined)
     ?.incoming?.socket?.remoteAddress;
-  return direto ?? "0.0.0.0";
+  return direto ?? IP_DESCONHECIDO;
 };

@@ -213,7 +213,7 @@ domínio verificado é obrigatório antes de abrir a venda.
 | `RESEND_API_KEY` | a chave da Resend |
 | `EMAIL_FROM` | `Nutri&Live <oi@seudominio.com.br>` |
 | `CRON_SECRET` | o que você gerou |
-| `TRUST_PROXY` | `1` |
+| `TRUST_PROXY` | `1` (na Vercel o sistema já assume; a variável serve para outro host atrás de proxy) |
 | `MP_ACCESS_TOKEN` | o do Mercado Pago (produção) |
 | `MP_PUBLIC_KEY` | idem |
 | `MP_WEBHOOK_SECRET` | idem |
