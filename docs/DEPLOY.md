@@ -93,6 +93,30 @@ anon tentando escrever     -> ERROR: permission denied for table users
 > Se o painel do Supabase mostrar o aviso **"RLS disabled in public"**, a
 > migração 0001 não rodou. Não ignore esse aviso.
 
+### Conferir, em vez de confiar
+
+As duas coisas que mais quebram num banco gerenciado **não dão erro** — elas
+simplesmente não acontecem. A migração 0001 não rodar deixa o banco aberto em
+silêncio; a porta errada só quebra sob carga, depois do lançamento. Então:
+
+```bash
+DATABASE_URL="postgresql://postgres.xxx:SENHA@aws-0-sa-east-1.pooler.supabase.com:5432/postgres" \
+  npm run db:conferir
+```
+
+Ele não escreve nada e pode rodar quantas vezes quiser. Confere ligação e
+porta, as 21 tabelas, RLS em cada uma, políticas, privilégios de `anon` e
+`authenticated`, e se ainda há usuários de demonstração. Termina em uma linha:
+
+```
+O banco está pronto.          -> siga para o passo 5 (Vercel)
+O banco NÃO está pronto.      -> o que falta está marcado com ✗ acima
+```
+
+Se a URL estiver errada, ele diz qual é o erro em português — senha recusada,
+`[YOUR-PASSWORD]` esquecido, host de conexão direta (só IPv6), projeto
+hibernando — em vez de mostrar um erro do Node.
+
 ### Dados de demonstração (opcional)
 
 ```bash
