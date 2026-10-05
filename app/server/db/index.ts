@@ -17,6 +17,7 @@
    precisa de dois conjuntos, ela faz duas buscas e cruza em memória — o
    volume por usuário é pequeno e o código fica legível.
    ========================================================================= */
+import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 import {
   and, asc, desc, eq, ne, gt, gte, lt, lte, like, inArray, isNull, isNotNull,
@@ -260,7 +261,14 @@ const UNICOS: Record<string, string[][]> = {
   profiles: [["userId"]],
   shopping_lists: [["userId", "weekStart"]],
   care_links: [["professionalUserId", "memberUserId"]],
-  invitations: [["tokenHash"]]
+  invitations: [["tokenHash"]],
+  /* `comissao.ts` diz em comentário que "a trava é commissions.payment_id",
+     e a trava não existia em lugar nenhum: nem índice no schema, nem aqui.
+     A idempotência era um "lê e depois escreve" sem exclusão mútua, e dois
+     caminhos chamam `aplicarPagamentoAprovado` para o mesmo pagamento — o
+     webhook e a consulta de status que a tela do Pix faz em laço. Ambos
+     liam "não há comissão" e ambos inseriam, pagando duas vezes. */
+  commissions: [["paymentId"]]
 };
 
 const clonar = <V>(v: V): V => (v === null || typeof v !== "object" ? v : (structuredClone(v) as V));
@@ -319,18 +327,49 @@ function criarMemoria(): Dados {
   };
 
   /* ---- semente preguiçosa -------------------------------------------- */
+  /*  A semente escreve pelo MESMO `db` que as rotas usam, então `preparar`
+      precisa distinguir duas coisas que antes se confundiam:
+
+        - consulta feita DE DENTRO do seed, que não pode esperar por ele
+          (esperaria por si mesma e travaria);
+        - consulta feita por uma REQUISIÇÃO, que precisa esperar.
+
+      A distinção era `if (estado === "semeando") return;`, que valia para
+      todo mundo. Enquanto a semente rodava (~1,5 s: Argon2, 23 usuários,
+      ~10 mil linhas), qualquer consulta lia o banco vazio e NÃO dava erro.
+      Duas consequências reproduzidas:
+
+        - `POST /api/auth/login` respondia "e-mail ou senha não conferem" e
+          ainda registrava falha de força bruta contra o e-mail e o IP de
+          quem tentou;
+        - um checkout com o cupom da academia nessa janela não achava a
+          organização, gravava a assinatura com `org_id` nulo e a academia
+          NUNCA recebia comissão por aquele aluno. Nada recalcula depois.
+
+      `AsyncLocalStorage` resolve de verdade: o contexto marca o que roda
+      dentro de `semear`, e só esse ramo sai sem esperar. */
+  const dentroDaSemente = new AsyncLocalStorage<true>();
   let estado: "virgem" | "semeando" | "pronto" = "virgem";
   let semente: Promise<void> | null = null;
 
   async function preparar(): Promise<void> {
     if (estado === "pronto") return;
-    if (estado === "semeando") return;             /* chamadas vindas de dentro do próprio seed */
+    if (dentroDaSemente.getStore()) return;        /* é o próprio seed consultando */
+    if (estado === "semeando") {
+      await semente;                               /* requisição espera a semente acabar */
+      return;
+    }
     if (process.env.SEED_AUTO === "0") { estado = "pronto"; return; }
     estado = "semeando";
     semente = (async () => {
-      const { semear } = await import("./seed.js");
-      await semear(memoria, { silencioso: true });
-      estado = "pronto";
+      try {
+        const { semear } = await import("./seed.js");
+        await dentroDaSemente.run(true, () => semear(memoria, { silencioso: true }));
+      } finally {
+        /* `pronto` mesmo se a semente falhar no meio: deixar em "semeando"
+           penduraria toda requisição seguinte para sempre. */
+        estado = "pronto";
+      }
     })();
     await semente;
   }

@@ -5,7 +5,7 @@
 import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { env } from "./lib/env.js";
+import { conferirAmbienteDeProducao, env } from "./lib/env.js";
 import { log } from "./lib/log.js";
 import { errorHandler, notFound } from "./lib/http.js";
 
@@ -42,6 +42,18 @@ app.get("/api/health", (c) => c.json({ ok: true, at: new Date().toISOString(), d
 
 /* ----------------------------- páginas ---------------------------------- */
 app.route("/", pageRoutes);
+
+/* ------------------------- conferência de subida ------------------------ */
+/*  Em produção, configuração pela metade não deve virar servidor no ar: o
+    deploy que não sobe se corrige em minutos; o que sobe com segredo de
+    exemplo ou com e-mail indo para o log só aparece quando um cliente paga
+    e não consegue entrar. Em desenvolvimento isto não roda. */
+const faltas = conferirAmbienteDeProducao();
+if (faltas.length) {
+  log.error("Configuração de produção incompleta — o servidor não vai subir:");
+  for (const f of faltas) log.error(`  · ${f}`);
+  process.exit(1);
+}
 
 const port = Number(env.PORT || 8787);
 if (env.NODE_ENV !== "test") {

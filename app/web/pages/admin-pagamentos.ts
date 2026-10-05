@@ -36,7 +36,7 @@ export function linhaPagamento(p: Pagamento): string {
   const estornavel = p.status === "aprovado";
   return `
 <tr data-fe2-pag="${esc(p.id)}" data-fe2-nome="${esc(p.userName)}" data-fe2-valor="${p.amountCents}">
-  <td>${pessoa(p.userName, p.userEmail)}</td>
+  <td>${pessoa(p.userName, p.userEmail ?? "conta apagada")}</td>
   <td class="num"><b>${brl(p.amountCents)}</b></td>
   <td><span class="fe2-mini">${icoMetodo(p.method)}<span>${esc(METODO[p.method] ?? p.method)}</span></span></td>
   <td>${estadoPill(p.status)}</td>

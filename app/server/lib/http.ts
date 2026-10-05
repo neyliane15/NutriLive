@@ -71,7 +71,31 @@ export async function body<T>(c: Context, schema: { parse: (v: unknown) => T }):
   }
 }
 
-export const clientIp = (c: Context): string =>
-  c.req.header("cf-connecting-ip") ??
-  c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
-  "0.0.0.0";
+/**
+ * IP de quem chamou, para o limite de tentativas e para a auditoria.
+ *
+ * `cf-connecting-ip` e `x-forwarded-for` são cabeçalhos que o CLIENTE manda,
+ * e eram lidos sem nenhuma noção de proxy confiável. Quem mandasse um
+ * `X-Forwarded-For` diferente em cada requisição recebia um contador novo em
+ * `auth/limite.ts` — anulando os limites por IP de login (25), de "esqueci a
+ * senha" (15) e de token (20), e sobrava só a trava por e-mail (5). Pior: o
+ * mesmo valor ia para `audit_log.ip`, então a trilha de auditoria registrava
+ * o IP que o atacante escolhesse.
+ *
+ * Agora o cabeçalho só vale quando `TRUST_PROXY=1` diz que existe um proxy
+ * na frente reescrevendo-o. Sem isso, o IP é o da conexão — que o cliente
+ * não escolhe. Em produção atrás de Cloudflare ou de um balanceador, ligue
+ * a variável; sem proxy, deixe desligada.
+ */
+export const clientIp = (c: Context): string => {
+  if (process.env.TRUST_PROXY === "1") {
+    const doProxy =
+      c.req.header("cf-connecting-ip") ??
+      c.req.header("x-forwarded-for")?.split(",")[0]?.trim();
+    if (doProxy) return doProxy;
+  }
+  /* `@hono/node-server` expõe o socket aqui. */
+  const direto = (c.env as { incoming?: { socket?: { remoteAddress?: string } } } | undefined)
+    ?.incoming?.socket?.remoteAddress;
+  return direto ?? "0.0.0.0";
+};

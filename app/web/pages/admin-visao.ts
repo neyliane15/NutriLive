@@ -55,7 +55,11 @@ export function adminVisao(o: { user: ShellUser; dados: VisaoDados | null }): st
   ${metric({
     label: "Canceladas no mês",
     value: d ? milhar(d.canceledThisMonth) : "—",
-    foot: d ? `${milhar(d.trialing)} em teste` : "aguardando dados"
+    /* Dizia "em teste", e o produto não tem teste grátis: o que o campo
+       `trialing` conta é assinatura `pendente` — checkout começado cujo
+       pagamento não fechou, quase sempre Pix abandonado. Três Pix
+       esquecidos viravam "3 em teste" num produto sem trial. */
+    foot: d ? `${milhar(d.trialing)} aguardando pagamento` : "aguardando dados"
   })}
   ${metric({
     label: "Usuários",

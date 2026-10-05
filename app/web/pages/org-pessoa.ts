@@ -29,7 +29,12 @@ const kg = (n: number) => `${n.toLocaleString("pt-BR", { minimumFractionDigits: 
 const nivelAdesao = (p: number): "ok" | "atencao" | "risco" =>
   p >= 75 ? "ok" : p >= 55 ? "atencao" : "risco";
 
-export function orgPessoa(o: { user: ShellUser; userId: string; dados: FichaDados | null }): string {
+export function orgPessoa(o: {
+  user: ShellUser; userId: string; dados: FichaDados | null;
+  /** Por que não há ficha. "pendente" = a pessoa ainda não aceitou o
+      convite, e nesse caso NÃO é falha de serviço: é privacidade. */
+  motivo?: "pendente" | "indisponivel";
+}): string {
   const t = termos(o.user.role);
   const rota = rotaPessoas(o.user.role);
   const d = o.dados;
@@ -196,7 +201,19 @@ ${chaveValor([
 
   const body = `
 ${estilosFE2}
-${d ? "" : indisponivel({ oque: "Ficha", rota: `GET /api/org/members/${esc(o.userId)}` })}
+${d
+    ? ""
+    : o.motivo === "pendente"
+      /* Dizer "o serviço está fora do ar" aqui era mentira: o serviço
+         respondeu, e respondeu 403 porque a pessoa não aceitou o convite.
+         O prontuário só abre com o consentimento dela. */
+      ? aviso(
+          `<b>Esta pessoa ainda não aceitou o convite.</b> O prontuário, a evolução e as anotações
+           só abrem depois que ela define a senha pelo link que enviamos — é o consentimento dela.
+           Enquanto isso você vê o cadastro que fez, e mais nada. Precisa reenviar o convite?
+           Cadastre o mesmo e-mail de novo na lista de ${esc(t.pessoas)}.`,
+          "amber")
+      : indisponivel({ oque: "Ficha", rota: `GET /api/org/members/${esc(o.userId)}` })}
 ${cabecalho}
 <div class="grid-2col" style="margin-top:var(--sp-5)">
   <div>

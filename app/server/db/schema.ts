@@ -326,7 +326,12 @@ export const commissions = pgTable("commissions", {
   paidAt: timestamp("paid_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 }, (t) => ({
-  orgPeriodIdx: index("commissions_org_period_idx").on(t.orgId, t.period)
+  orgPeriodIdx: index("commissions_org_period_idx").on(t.orgId, t.period),
+  /* Uma comissão por pagamento, garantida pelo banco. `comissao.ts` sempre
+     afirmou que esta era a trava da idempotência; ela não existia, e
+     webhook reentregue (ou a consulta de status que a tela do Pix faz em
+     laço) pagava comissão duas vezes pelo mesmo dinheiro. */
+  pagamentoIdx: uniqueIndex("commissions_payment_idx").on(t.paymentId)
 }));
 
 /* ----------------------------------- IA ---------------------------------- */

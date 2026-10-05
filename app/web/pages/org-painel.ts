@@ -46,7 +46,10 @@ export function orgPainel(o: { user: ShellUser; dados: PainelDados | null }): st
   ${metric({
     label: "Adesão média",
     value: d ? pct(d.avgAdherencePct) : "—",
-    foot: d ? `${t.carteira === "turma" ? "da turma" : "da carteira"} nas últimas ${semanas.length || 0} semanas` : "aguardando dados",
+    /* O número é de 28 DIAS (`m.aderencia28d` no servidor); o rodapé dizia
+       "nas últimas 13 semanas", que é o tamanho da SÉRIE do gráfico ao
+       lado, não da média. */
+    foot: d ? `${t.carteira === "turma" ? "da turma" : "da carteira"} nos últimos 28 dias` : "aguardando dados",
     fill: d ? d.avgAdherencePct : undefined,
     ...(variacao !== null
       ? { trend: { dir: variacao >= 0 ? "up" as const : "down" as const, text: `${variacao >= 0 ? "+" : "−"}${Math.abs(variacao)} p.p.` } }

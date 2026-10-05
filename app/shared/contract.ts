@@ -81,7 +81,13 @@ export const MeOut = z.object({
 export const auth = {
   /** POST /api/auth/login */
   login: {
-    in: z.object({ email, password: z.string().min(8).max(200) }),
+    in: z.object({
+      email, password: z.string().min(8).max(200),
+      /** Caminho interno de onde a pessoa foi barrada, para ela voltar
+          exatamente lá. Só caminho relativo é aceito — ver `destinoSeguro`
+          em `routes/auth.ts`. */
+      next: z.string().max(512).optional()
+    }),
     out: z.object({ ok: z.literal(true), redirect: z.string() })
   },
   /** POST /api/auth/logout */
@@ -385,7 +391,15 @@ export const admin = {
   },
   /** GET /api/admin/users?q=&role=&status=&page= */
   listUsers: {
-    in: z.object({ q: z.string().max(120).optional(), role: Role.optional(), status: z.string().optional(), page: z.number().int().min(1).default(1) }),
+    /* `status` era `z.string()`: valor fora do enum ia cru para o filtro.
+       No motor de memória isso devolve lista vazia; no Postgres,
+       `eq(enum, 'naoexiste')` levanta `invalid input value for enum` e a
+       tela do admin vira 500. O enum aqui recusa antes, com 422. */
+    in: z.object({
+      q: z.string().max(120).optional(), role: Role.optional(),
+      status: z.enum(["ativo", "convidado", "suspenso"]).optional(),
+      page: z.number().int().min(1).default(1)
+    }),
     out: z.object({
       total: z.number().int(), page: z.number().int(),
       users: z.array(z.object({
@@ -404,11 +418,19 @@ export const admin = {
   impersonate: { in: z.object({ id: uuid }), out: z.object({ ok: z.literal(true), redirect: z.string() }) },
   /** GET /api/admin/payments?status=&page= */
   listPayments: {
-    in: z.object({ status: z.string().optional(), page: z.number().int().min(1).default(1) }),
+    /* Mesmo motivo de `listUsers`: enum em vez de string crua. */
+    in: z.object({
+      status: z.enum(["pendente", "aprovado", "recusado", "estornado", "cancelado"]).optional(),
+      page: z.number().int().min(1).default(1)
+    }),
     out: z.object({
       total: z.number().int(),
       payments: z.array(z.object({
-        id: uuid, userName: z.string(), userEmail: email, amountCents: cents,
+        id: uuid, userName: z.string(),
+        /* Nulo quando o usuário foi apagado. Era `email` obrigatório, e o
+           servidor preenchia com "removido@nutrielive.com.br" — um endereço
+           inventado, exibido na tela como se fosse o do cliente. */
+        userEmail: email.nullable(), amountCents: cents,
         method: PayMethod, status: z.string(), paidAt: isoDate.nullable(), createdAt: isoDate
       }))
     })

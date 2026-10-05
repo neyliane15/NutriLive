@@ -23,7 +23,7 @@ import { conforme, iso, isoObrigatorio } from "../lib/resposta.js";
 import {
   chaveDoDia, faixa, fimDoDia, inicioDaSemana, inicioDoDia, somarDias
 } from "../lib/datas.js";
-import { aderenciaPct, sequenciaAtual } from "../lib/aderencia.js";
+import { aderenciaPct, diasComRegistro, sequenciaAtual } from "../lib/aderencia.js";
 import { calcularMetas, estimarRefeicao, scoreDoDia } from "../lib/metas.js";
 import { guardaApp, usuarioAtual, type Ambiente } from "../auth/guard.js";
 import type { Usuario } from "../auth/sessao.js";
@@ -267,8 +267,8 @@ r.get("/progress", async (c) => {
       arm: mmParaCm(m.armCm)
     })),
     streakDays: sequenciaAtual(registros),
-    /* `aderenciaPct` já é dias-com-registro ÷ dias da janela. */
-    loggedDays: Math.round((aderenciaPct(registros, janela.dias) / 100) * janela.dias),
+    /* Contado, não derivado do percentual: ver `diasComRegistro`. */
+    loggedDays: diasComRegistro(registros, janela.dias),
     totalDays: janela.dias
   }));
 });

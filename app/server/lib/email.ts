@@ -69,13 +69,34 @@ const rodape = `
 Nutri&Live · comer bem virou a parte fácil do seu dia
 Se não foi você que pediu, ignore esta mensagem.`;
 
+/** Escape de HTML para o corpo da mensagem. */
+const esc = (v: unknown): string =>
+  String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+/**
+ * Monta as duas versões da mensagem a partir do MESMO texto em português.
+ *
+ * Duas coisas estavam erradas aqui, e as duas chegavam na caixa de entrada:
+ *
+ * 1. As chamadas escreviam "Nutri&amp;amp;Live" na mão para o HTML sair
+ *    certo — e a versão TEXTO saía com a entidade crua. Todo e-mail de
+ *    primeiro acesso e de convite chegava em texto puro com
+ *    "Nutri&amp;amp;Live". Agora o texto é escrito em português normal e o
+ *    escape acontece só na montagem do HTML, aqui.
+ *
+ * 2. `titulo` e `linhas` entravam no HTML sem escape, e `emailConvite`
+ *    recebe o nome da organização — escolhido por quem convida. Dava para
+ *    pôr HTML na caixa de entrada de outra pessoa, dentro de uma mensagem
+ *    legítima nossa: um bom material de phishing.
+ */
 const corpo = (titulo: string, linhas: string[], botao?: { rotulo: string; href: string }) => ({
   texto: [titulo, "", ...linhas, botao ? `\n${botao.rotulo}: ${botao.href}` : "", rodape].join("\n"),
   html: `<div style="font-family:system-ui,sans-serif;max-width:520px;line-height:1.6;color:#1a2b23">
-  <h2 style="color:#126e4e">${titulo}</h2>
-  ${linhas.map((l) => `<p>${l}</p>`).join("")}
-  ${botao ? `<p><a href="${botao.href}" style="display:inline-block;background:#1aa06d;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none">${botao.rotulo}</a></p>
-  <p style="font-size:13px;color:#5b6b64">Se o botão não abrir, copie este endereço:<br>${botao.href}</p>` : ""}
+  <h2 style="color:#126e4e">${esc(titulo)}</h2>
+  ${linhas.map((l) => `<p>${esc(l)}</p>`).join("")}
+  ${botao ? `<p><a href="${esc(botao.href)}" style="display:inline-block;background:#1aa06d;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none">${esc(botao.rotulo)}</a></p>
+  <p style="font-size:13px;color:#5b6b64">Se o botão não abrir, copie este endereço:<br>${esc(botao.href)}</p>` : ""}
   <hr style="border:none;border-top:1px solid #e3ebe7">
   <p style="font-size:12px;color:#5b6b64">Nutri&amp;Live · comer bem virou a parte fácil do seu dia</p>
 </div>`
@@ -83,13 +104,13 @@ const corpo = (titulo: string, linhas: string[], botao?: { rotulo: string; href:
 
 export const emailPrimeiroAcesso = (nome: string, link: string, horas: number) =>
   corpo(`Bem-vindo(a), ${nome.split(" ")[0]}!`, [
-    "Seu pagamento foi aprovado e sua conta no Nutri&amp;Live já está pronta.",
+    "Seu pagamento foi aprovado e sua conta no Nutri&Live já está pronta.",
     `Falta só definir sua senha. O link abaixo vale por ${horas} horas.`
   ], { rotulo: "Definir minha senha", href: link });
 
 export const emailConvite = (nome: string, organizacao: string, link: string, horas: number) =>
   corpo(`${nome.split(" ")[0]}, ${organizacao} te convidou`, [
-    `${organizacao} criou seu acesso ao Nutri&amp;Live — plano alimentar, diário e evolução, sem custo para você.`,
+    `${organizacao} criou seu acesso ao Nutri&Live — plano alimentar, diário e evolução, sem custo para você.`,
     `Defina sua senha pelo link abaixo. Ele vale por ${horas} horas.`
   ], { rotulo: "Criar minha senha", href: link });
 

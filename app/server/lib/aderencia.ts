@@ -29,13 +29,30 @@ export type Nivel = "ok" | "atencao" | "risco";
 /** Percentual de dias com registro na janela de N dias. */
 export function aderenciaPct(registros: Date[], dias: number, fim: Date = new Date()): number {
   if (dias <= 0) return 0;
+  return Math.round((diasComRegistro(registros, dias, fim) / dias) * 100);
+}
+
+/**
+ * Quantos dias DIFERENTES da janela têm registro. É o numerador de
+ * `aderenciaPct`, exportado porque quem precisa do número de dias precisa
+ * dele, e não do percentual.
+ *
+ * A tela de Evolução derivava isto de volta do percentual
+ * (`round(pct / 100 * dias)`), o que arredonda duas vezes e dá respostas
+ * diferentes para o MESMO dado em janelas diferentes: 51 dias em 3 meses,
+ * 50 em 6 meses e 51 em 1 ano, para um histórico que cabia inteiro nas
+ * três. Em janela longa o desvio cresce — 2 dias registrados em 365 viravam
+ * 4 na conta antiga.
+ */
+export function diasComRegistro(registros: Date[], dias: number, fim: Date = new Date()): number {
+  if (dias <= 0) return 0;
   const janela = new Set(diasDaFaixa(dias, fim));
   const vistos = new Set<string>();
   for (const d of registros) {
     const k = chaveDoDia(d);
     if (janela.has(k)) vistos.add(k);
   }
-  return Math.round((vistos.size / dias) * 100);
+  return vistos.size;
 }
 
 /** Série semanal de adesão, pronta para o gráfico do contrato. */
@@ -81,6 +98,16 @@ export function avaliarRisco(a: {
   if (atrasoRetorno > 7) return { nivel: "risco", motivo: `Retorno vencido há ${atrasoRetorno} dias.` };
   if (silencio >= 4) return { nivel: "atencao", motivo: `Sem registro há ${silencio} dias.` };
   if (a.aderencia28d < 60) return { nivel: "atencao", motivo: `Adesão de ${a.aderencia28d}% nos últimos 28 dias.` };
-  if (atrasoRetorno >= 0) return { nivel: "atencao", motivo: "Retorno vencido." };
+  /* `diasEntre` devolve 0 quando o retorno é HOJE, e hoje não está vencido.
+     A condição era `>= 0`, então quem tinha retorno marcado para hoje
+     aparecia em "precisam de você" com o motivo "Retorno vencido" — na
+     mesma linha em que a lista escrevia "hoje". */
+  if (atrasoRetorno === 0) return { nivel: "atencao", motivo: "Retorno marcado para hoje." };
+  if (atrasoRetorno > 0) {
+    return {
+      nivel: "atencao",
+      motivo: atrasoRetorno === 1 ? "Retorno venceu ontem." : `Retorno vencido há ${atrasoRetorno} dias.`
+    };
+  }
   return { nivel: "ok", motivo: `Adesão de ${a.aderencia28d}% e registro em dia.` };
 }

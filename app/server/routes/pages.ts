@@ -78,6 +78,21 @@ async function paraCasca(u: Usuario): Promise<ShellUser> {
  * de 2xx devolve `null`, que é o contrato de degradação das telas.
  */
 async function pedir<T>(c: Context, caminho: string): Promise<T | null> {
+  return (await pedirDetalhado<T>(c, caminho)).dados;
+}
+
+/**
+ * Igual a `pedir`, mas devolve o status também.
+ *
+ * Existe porque "sem dados" tem motivos diferentes, e a tela precisa saber
+ * qual. A ficha de um membro recém-convidado responde 403 — a pessoa não
+ * aceitou o convite, o prontuário é dela — e a tela dizia "o serviço
+ * respondeu que está fora do ar". Serviço no ar, resposta correta, recado
+ * errado: a profissional ficaria esperando um serviço voltar.
+ */
+async function pedirDetalhado<T>(
+  c: Context, caminho: string
+): Promise<{ dados: T | null; status: number }> {
   try {
     const url = new URL(caminho, new URL(c.req.url).origin);
     const resp = await (await appInterno()).fetch(
@@ -85,12 +100,12 @@ async function pedir<T>(c: Context, caminho: string): Promise<T | null> {
     );
     if (!resp.ok) {
       log.warn(`página: ${caminho} respondeu ${resp.status}`);
-      return null;
+      return { dados: null, status: resp.status };
     }
-    return (await resp.json()) as T;
+    return { dados: (await resp.json()) as T, status: resp.status };
   } catch (e) {
     log.warn(`página: ${caminho} falhou — ${(e as Error).message}`);
-    return null;
+    return { dados: null, status: 0 };
   }
 }
 
@@ -391,7 +406,16 @@ r.get("/alunos", telaPessoas);
 
 const telaPessoa = comSessao(PROFISSIONAIS, async (c, _u, user) => {
   const userId = c.req.param("userId") ?? "";
-  return orgPessoa({ user, userId, dados: await pedir(c, `/api/org/members/${encodeURIComponent(userId)}`) });
+  const r = await pedirDetalhado<Parameters<typeof orgPessoa>[0]["dados"]>(
+    c, `/api/org/members/${encodeURIComponent(userId)}`
+  );
+  return orgPessoa({
+    user, userId, dados: r.dados,
+    /* 403 aqui quer dizer "ainda não aceitou o convite" ou "não é da sua
+       carteira" — e nos dois casos a resposta certa é a mesma frase, porque
+       confirmar qual dos dois é já contaria algo sobre a outra pessoa. */
+    motivo: r.status === 403 ? "pendente" : "indisponivel"
+  });
 });
 r.get("/pacientes/:userId", telaPessoa);
 r.get("/alunos/:userId", telaPessoa);

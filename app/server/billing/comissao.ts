@@ -81,13 +81,46 @@ export async function registrarComissaoSePreciso(pagamento: Pagamento): Promise<
   return comissao;
 }
 
-/** Estorno derruba a comissão junto: o dinheiro voltou. */
+/**
+ * Estorno derruba a comissão junto: o dinheiro voltou.
+ *
+ * Com uma exceção que é decisão de negócio e não bug: comissão `paga` NÃO é
+ * apagada, porque o repasse já saiu da nossa conta e entrou na do parceiro.
+ * Apagar a linha faria o histórico dele mudar sozinho.
+ *
+ * Mas sair em silêncio era errado. O cliente recebia o dinheiro de volta, a
+ * academia ficava com os 20%, e não havia linha, marca nem registro dizendo
+ * que aquele repasse ficou descasado do pagamento — a tela de Comissões
+ * seguia mostrando o período fechado como se nada tivesse acontecido.
+ * Agora fica em `audit_log`, com o valor e a competência, que é onde se
+ * procura quando a conta não fecha no fim do mês.
+ */
 export async function cancelarComissaoDoPagamento(pagamentoId: string): Promise<void> {
   const comissao = await db.primeiro(schema.commissions, { paymentId: pagamentoId });
-  if (!comissao || comissao.status === "paga") return;
+  if (!comissao) return;
+
+  if (comissao.status === "paga") {
+    log.warn(
+      `estorno de ${pagamentoId}: comissão ${comissao.id} já foi PAGA (${comissao.amountCents} centavos) — ` +
+      "repasse mantido e descasado do pagamento"
+    );
+    await db.inserir(schema.auditLog, {
+      actorUserId: null, action: "comissao_descasada", entity: "commission",
+      entityId: comissao.id,
+      meta: {
+        motivo: "pagamento estornado depois de a comissão já ter sido repassada",
+        orgId: comissao.orgId,
+        period: comissao.period,
+        amountCents: comissao.amountCents,
+        paymentId: pagamentoId
+      }
+    });
+    return;
+  }
+
   await db.remover(schema.commissions, { id: comissao.id });
   await db.inserir(schema.auditLog, {
     actorUserId: null, action: "comissao_cancelada", entity: "commission",
-    entityId: comissao.id, meta: { motivo: "pagamento estornado" }
+    entityId: comissao.id, meta: { motivo: "pagamento estornado", amountCents: comissao.amountCents }
   });
 }

@@ -161,7 +161,7 @@ r.get("/users", async (c) => {
      inteira — quando a base crescer, troque por uma consulta com OR. */
   const todos = await db.buscar(
     schema.users,
-    { deletedAt: null, ...(f.role ? { role: f.role } : {}), ...(f.status ? { status: f.status as never } : {}) },
+    { deletedAt: null, ...(f.role ? { role: f.role } : {}), ...(f.status ? { status: f.status } : {}) },
     { ordem: { campo: "createdAt", dir: "desc" } }
   );
 
@@ -275,7 +275,7 @@ r.post("/users/:id/impersonate", async (c) => {
 r.get("/payments", async (c) => {
   const f = entradaDaUrl(c, contract.admin.listPayments.in);
 
-  const filtro = f.status ? { status: f.status as never } : undefined;
+  const filtro = f.status ? { status: f.status } : undefined;
   const total = await db.contar(schema.payments, filtro);
   const pagamentos = await db.buscar(schema.payments, filtro, {
     ordem: { campo: "createdAt", dir: "desc" },
@@ -291,7 +291,7 @@ r.get("/payments", async (c) => {
       return {
         id: p.id,
         userName: u?.name ?? "(usuário removido)",
-        userEmail: u?.email ?? "removido@nutrielive.com.br",
+        userEmail: u?.email ?? null,
         amountCents: p.amountCents,
         method: p.method,
         status: p.status,

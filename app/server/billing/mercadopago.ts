@@ -207,8 +207,37 @@ export function criarMercadoPago(opcoes: OpcoesMercadoPago = {}): ProvedorPagame
       return r["id"] ? String(r["id"]) : undefined;
     } catch (e) {
       /* A primeira cobrança já passou: não derrubamos a contratação por
-         causa da recorrência. Fica registrado para o admin resolver. */
+         causa da recorrência.
+
+         Antes isto só ia para o log, e o comentário dizia "fica registrado
+         para o admin resolver" — sem lugar nenhum onde resolver: a tela de
+         webhooks lista eventos de webhook, a visão geral não tem contador
+         disso, e nenhuma tela lê `audit_log` filtrando por isso. O
+         resultado: assinatura `ativa` sem `provider_sub_id`, que nunca é
+         cobrada de novo e (antes da conferência de vencimento) nunca
+         vencia. O cliente pagava um mês e usava de graça; ninguém
+         descobria.
+
+         Agora vira linha de auditoria, com tom de risco em /admin/auditoria.
+         A importação é dinâmica porque esta camada não conhece o banco de
+         propósito — ela fala HTTP com o provedor e nada mais. */
       log.error("Mercado Pago: falha ao criar a assinatura recorrente", e);
+      try {
+        const { db, schema } = await import("../db/index.js");
+        await db.inserir(schema.auditLog, {
+          actorUserId: null,
+          action: "recorrencia_nao_criada",
+          entity: "subscription",
+          entityId: pedido.referencia,
+          meta: {
+            motivo: "o provedor recusou criar a assinatura recorrente; a primeira cobrança já foi feita",
+            erro: e instanceof Error ? e.message.slice(0, 400) : String(e).slice(0, 400),
+            acao: "cobrar o próximo ciclo na mão ou refazer a recorrência"
+          }
+        });
+      } catch (falhaAuditoria) {
+        log.error("Mercado Pago: não deu nem para registrar a falha de recorrência", falhaAuditoria);
+      }
       return undefined;
     }
   }

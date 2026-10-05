@@ -18,7 +18,10 @@ export function paginaEntrar(d: DadosEntrar = {}): string {
   return publicShell({
     title: "Entrar",
     islands: ["auth"],
-    bootstrap: { proximo: d.proximo ?? "/hoje" },
+    /* Sem palpite de destino: quem decide é o servidor, que conhece o papel
+       (nutricionista começa em /pacientes, academia em /alunos, admin em
+       /admin). O `proximo` só viaja quando existe, num campo oculto. */
+    bootstrap: { proximo: d.proximo ?? null },
     body: `
 ${estilos()}
 <div class="auth-card">
@@ -27,7 +30,8 @@ ${estilos()}
 
   ${d.recado ? `<div class="notice" role="status" style="margin-top:var(--sp-5)">${ic("certo")}<span>${esc(d.recado)}</span></div>` : ""}
 
-  <form data-rota="/api/auth/login" data-redirect="${esc(d.proximo ?? "/hoje")}" novalidate>
+  <form data-rota="/api/auth/login" novalidate>
+    ${d.proximo ? `<input type="hidden" name="next" value="${esc(d.proximo)}">` : ""}
     ${campo({ id: "email", label: "E-mail", type: "email", autocomplete: "email",
               inputmode: "email", placeholder: "voce@email.com", value: d.email })}
     ${campo({ id: "password", label: "Senha", type: "password", autocomplete: "current-password",

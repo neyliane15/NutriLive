@@ -132,6 +132,29 @@ async function aceitarConvites(usuario: Usuario): Promise<void> {
   await db.atualizar(invitations, { email: usuario.email, acceptedAt: null }, { acceptedAt: new Date() });
 }
 
+/**
+ * Para onde mandar depois de entrar, quando a pessoa foi barrada no meio do
+ * caminho. `pages.ts` já redirecionava com `?proximo=/evolucao` e o
+ * comentário prometia "depois de entrar ela cai lá, não num painel
+ * genérico" — mas o login SEMPRE devolvia `rotaInicial(papel)`, e o `||` do
+ * cliente nunca chegava no valor guardado. Era código morto nos dois lados.
+ *
+ * Só caminho interno é aceito: tem de começar com uma barra e não pode
+ * começar com duas (`//outro.site` é URL absoluta para o navegador) nem
+ * conter `:` ou `\`. Sem isso, um link de login com
+ * `?proximo=https://site-falso` viraria redirecionamento aberto — a pessoa
+ * digita a senha no nosso domínio e aterrissa em outro.
+ */
+export function destinoSeguro(bruto: string | undefined): string | null {
+  if (!bruto) return null;
+  const alvo = bruto.trim();
+  if (!alvo.startsWith("/") || alvo.startsWith("//")) return null;
+  if (alvo.includes(":") || alvo.includes("\\")) return null;
+  /* Voltar para a própria tela de entrar seria um laço. */
+  if (alvo === "/entrar" || alvo.startsWith("/entrar?")) return null;
+  return alvo;
+}
+
 /* ======================================================================== */
 /*  POST /api/auth/login                                                    */
 /* ======================================================================== */
@@ -170,7 +193,7 @@ r.post("/login", async (c) => {
 
   return c.json(conforme(contract.auth.login.out, {
     ok: true as const,
-    redirect: rotaInicial(usuario.role as Role)
+    redirect: destinoSeguro(entrada.next) ?? rotaInicial(usuario.role as Role)
   }));
 });
 

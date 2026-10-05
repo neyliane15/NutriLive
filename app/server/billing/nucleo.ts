@@ -3,6 +3,7 @@
    Datas de período, dinheiro, slug, hash de token e período de competência.
    ========================================================================= */
 import { createHash, randomBytes } from "node:crypto";
+import { chaveDoDia } from "../lib/datas.js";
 
 /** Fim do próximo ciclo mensal. Dia 31 em mês curto cai no último dia do mês. */
 export function fimDoPeriodo(de: Date = new Date()): Date {
@@ -16,11 +17,21 @@ export function fimDoPeriodo(de: Date = new Date()): Date {
 export const somarDias = (de: Date, dias: number): Date =>
   new Date(de.getTime() + dias * 24 * 60 * 60 * 1000);
 
-/** Competência no formato AAAA-MM, que é o que `commissions.period` guarda. */
-export const competencia = (quando: Date = new Date()): string =>
-  `${quando.getFullYear()}-${String(quando.getMonth() + 1).padStart(2, "0")}`;
+/**
+ * Competência no formato AAAA-MM, que é o que `commissions.period` guarda.
+ *
+ * Derivada de `chaveDoDia`, e não de `getFullYear()/getMonth()`, porque
+ * aquelas seguem o fuso do PROCESSO — UTC no contêiner — enquanto o resto do
+ * app usa o fuso do produto (−03:00 fixo, `lib/datas.ts`). A diferença
+ * aparecia nas últimas três horas de todo dia e de todo mês: um pagamento
+ * aprovado às 22:30 de 31/10 no Brasil é 01/11 em UTC, então caía na
+ * competência do mês seguinte — a comissão da academia aparecia um mês
+ * atrasada na tela, e a receita entrava no mês errado no painel do admin.
+ */
+export const competencia = (quando: Date = new Date()): string => chaveDoDia(quando).slice(0, 7);
 
-export const diaIso = (quando: Date): string => competencia(quando) + `-${String(quando.getDate()).padStart(2, "0")}`;
+/** "AAAA-MM-DD" do dia brasileiro em que esse instante caiu. */
+export const diaIso = (quando: Date): string => chaveDoDia(quando);
 
 export const moeda = (cents: number): string =>
   `R$ ${(cents / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

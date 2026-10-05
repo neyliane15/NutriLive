@@ -49,8 +49,10 @@ const ACAO: Record<string, { texto: string; tom: "neutro" | "atencao" | "risco" 
   "pagamento_recusado": { texto: "pagamento recusado", tom: "atencao" },
   "assinatura_cancelada": { texto: "cancelou a assinatura", tom: "atencao" },
   "assinatura_cancelada_provedor": { texto: "assinatura cancelada no provedor", tom: "atencao" },
+  "recorrencia_nao_criada": { texto: "assinatura sem recorrência: o próximo mês não será cobrado", tom: "risco" },
   "comissao_gerada": { texto: "comissão gerada", tom: "neutro" },
   "comissao_cancelada": { texto: "comissão cancelada por estorno", tom: "atencao" },
+  "comissao_descasada": { texto: "estorno sem reverter comissão já repassada", tom: "risco" },
 
   /* IA */
   "ia.plano_pedido": { texto: "pediu um plano à IA", tom: "neutro" },

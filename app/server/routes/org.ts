@@ -529,22 +529,60 @@ r.get("/dashboard", async (c) => {
   const org = orgAtual(c);
   const membros = await carteira(org.id);
 
-  /* A média é sobre quem já aceitou o convite: contar o convidado como 0 %
-     faria o painel acusar queda sempre que entrasse gente nova. */
+  /* A média é sobre quem JÁ REGISTROU alguma coisa, não sobre todo mundo que
+     aceitou o convite.
+     -------------------------------------------------------------------
+     A lista de pessoas é honesta por desenho: quem não registrou nada vem
+     com `adherencePct: null` e a tela escreve "sem registro", porque 0 %
+     seria mentira — a pessoa não falhou, ela acabou de entrar. O painel
+     somava `aderencia28d` de todo membro ativo, e para essa pessoa isso é
+     zero. Com 10 membros e um recém-chegado, o painel anunciava 50 % e a
+     lista ao lado sustentava 56 %: duas respostas para a mesma pergunta, na
+     mesma tela. E cada pessoa nova derrubava a média.
+
+     Agora a média olha quem tem registro. Quem ainda não tem aparece na
+     lista como "sem registro" e em "precisam de você", que é o lugar certo
+     para ele — não diluído num indicador de engajamento. */
   const ativos = membros.filter((m) => m.usuario.status === "ativo");
-  const avgAdherencePct = ativos.length
-    ? Math.round(ativos.reduce((t, m) => t + m.aderencia28d, 0) / ativos.length)
+  const comRegistro = ativos.filter((m) => m.registros.length > 0);
+  const avgAdherencePct = comRegistro.length
+    ? Math.round(comRegistro.reduce((t, m) => t + m.aderencia28d, 0) / comRegistro.length)
     : 0;
 
-  /* Série semanal da organização: média das séries de cada pessoa ativa. */
-  const series = ativos.map((m) => aderenciaPorSemana(m.registros, DIAS_OBSERVADOS));
-  const modelo = series[0] ?? aderenciaPorSemana([], DIAS_OBSERVADOS);
-  const adherenceByWeek = modelo.map((semana, i) => ({
-    weekStart: semana.weekStart,
-    pct: series.length
-      ? Math.round(series.reduce((t, s) => t + (s[i]?.pct ?? 0), 0) / series.length)
-      : 0
+  /* Série semanal da organização: média por semana, contando em cada semana
+     só quem JÁ ESTAVA na carteira.
+     -------------------------------------------------------------------
+     `aderenciaPorSemana` devolve 12-13 semanas para qualquer pessoa, mesmo
+     para quem entrou na semana passada, e a média dividia pelo total de
+     membros. Numa academia de 64 dias com entrada escalonada, o gráfico
+     abria em [0, 0, 0, 17, 43, …]: três semanas de zero e uma queda
+     artificial no começo, sugerindo um histórico de abandono que nunca
+     houve. Semana anterior à entrada da pessoa não é adesão zero dela — é
+     semana em que ela não existia aqui. */
+  const series = comRegistro.map((m) => ({
+    desde: m.vinculo.startedAt.getTime(),
+    pontos: aderenciaPorSemana(m.registros, DIAS_OBSERVADOS)
   }));
+  const modelo = series[0]?.pontos ?? aderenciaPorSemana([], DIAS_OBSERVADOS);
+  const adherenceByWeek = modelo
+    .map((semana, i) => {
+      const fimDaSemana = Date.parse(`${semana.weekStart}T00:00:00.000Z`) + 7 * 86_400_000;
+      const valem = series.filter((s) => s.desde < fimDaSemana);
+      return {
+        weekStart: semana.weekStart,
+        quantos: valem.length,
+        pct: valem.length
+          ? Math.round(valem.reduce((t, s) => t + (s.pontos[i]?.pct ?? 0), 0) / valem.length)
+          : 0
+      };
+    })
+    /* Semana em que a organização ainda não tinha ninguém não entra no
+       gráfico. Mandá-la como 0 % desenhava uma queda que nunca houve: uma
+       academia de 64 dias abria a série com [0, 0, 0, 29, …] e parecia ter
+       perdido a turma inteira no começo. Agora a série começa na primeira
+       semana com gente. */
+    .filter((semana) => semana.quantos > 0)
+    .map(({ weekStart, pct }) => ({ weekStart, pct }));
 
   const precisamDeOlho = membros
     .filter((m) => m.nivel !== "ok")
