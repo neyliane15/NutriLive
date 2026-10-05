@@ -136,8 +136,8 @@ function criarPostgres(): Dados {
     conexao ??= (async () => {
       const { drizzle } = await import("drizzle-orm/postgres-js");
       const postgres = (await import("postgres")).default;
-      const sql = postgres(env.DATABASE_URL, { max: 10, idle_timeout: 20 });
-      log.info("banco: Postgres conectado");
+      const sql = postgres(env.DATABASE_URL, opcoesDeConexao(env.DATABASE_URL));
+      log.info(`banco: Postgres conectado (${descreverConexao(env.DATABASE_URL)})`);
       return { pg: drizzle(sql, { schema }), sql };
     })();
     return conexao;
@@ -242,6 +242,69 @@ function criarPostgres(): Dados {
       await sql.end({ timeout: 5 });
     }
   };
+}
+
+/* ---------------------------------------------------------------------- */
+/**
+ * Como abrir a conexão, conforme o que está do outro lado.
+ *
+ * Isto não é afinação: é a diferença entre funcionar e quebrar.
+ *
+ * POOLER EM MODO TRANSAÇÃO (Supabase na porta 6543, PgBouncer, Supavisor).
+ * A conexão volta para o pool a cada transação, então nada que dependa de
+ * estado de sessão sobrevive — e `postgres.js` usa PREPARED STATEMENTS por
+ * padrão, que são exatamente isso. Sem `prepare: false`, as primeiras
+ * consultas passam e depois começam a falhar com "prepared statement
+ * already exists", de forma intermitente, sob carga. É o pior tipo de
+ * falha: não aparece em teste, aparece com usuário.
+ *
+ * QUANTAS CONEXÕES. Num servidor comum, um punhado reaproveitado. Numa
+ * função sem estado, cada invocação é um processo novo: pedir dez
+ * conexões por invocação esgota o limite do banco com pouca gente online.
+ * Por isso UMA quando há pooler na frente — ele é que divide.
+ */
+export function opcoesDeConexao(url: string): Record<string, unknown> {
+  const comPooler = ehPooler(url);
+  return {
+    max: comPooler ? 1 : 10,
+    idle_timeout: comPooler ? 10 : 20,
+    /* Em modo transação não há sessão para guardar o plano. */
+    prepare: !comPooler,
+    /* Supabase exige TLS; o certificado é de CA pública. */
+    ...(url.includes("supabase.") ? { ssl: "require" } : {})
+  };
+}
+
+/** O endereço é de um pooler em modo transação? */
+export function ehPooler(url: string): boolean {
+  /* O erro aqui não é simétrico, e por isso a regra pende para um lado.
+
+     Tratar um pooler como conexão comum derruba o app sob carga, de forma
+     intermitente, com "prepared statement already exists". Tratar uma
+     conexão comum como pooler só desliga os prepared statements: fica um
+     pouco mais lento e funciona sempre.
+
+     Então na dúvida — endereço que não dá para interpretar, mas tem 6543 ou
+     pgbouncer no meio — a resposta é sim. */
+  if (/\b6543\b|pgbouncer=true/i.test(url)) return true;
+  try {
+    const u = new URL(url);
+    /* Supabase: a 6543 é o Supavisor em modo transação; a 5432 é sessão. O
+       host `pooler.supabase.com` serve às duas, então quem decide é a porta. */
+    return u.port === "6543";
+  } catch {
+    return false;
+  }
+}
+
+/** Uma linha de log que diz o que foi decidido, sem vazar a senha. */
+export function descreverConexao(url: string): string {
+  const comPooler = ehPooler(url);
+  let host = "destino desconhecido";
+  try { host = new URL(url).host; } catch { /* string fora do formato */ }
+  return comPooler
+    ? `${host} · pooler em modo transação, sem prepared statements`
+    : `${host} · conexão direta`;
 }
 
 /* ======================================================================== */

@@ -8,6 +8,13 @@
       "when": 1791221397531,
       "tag": "0000_minor_nebula",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791221398531,
+      "tag": "0001_supabase_rls",
+      "breakpoints": false
     }
   ]
 }

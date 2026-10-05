@@ -1,44 +1,110 @@
-# Pôr no ar na Vercel
+# Pôr no ar: Supabase + Vercel
 
-Landing e sistema no **mesmo projeto**, no mesmo domínio. A landing é estática
-e sai do disco; o app é uma função. Quem decide o quê é `vercel.json`.
+Landing e sistema no **mesmo projeto da Vercel**, no mesmo domínio. A landing
+é estática e sai do disco; o app é uma função. O banco é o Supabase.
 
-Tempo: cerca de 30 minutos, quase todo esperando provisionamento.
+Tempo: cerca de 40 minutos, quase todo esperando provisionamento.
 
 ---
 
-## 1. Banco: Neon
+## Antes de começar: o que o Supabase é aqui
 
-1. Crie conta em [neon.tech](https://neon.tech) e um projeto na região
-   **AWS São Paulo (sa-east-1)** — o banco perto de quem usa.
-2. Copie a connection string **pooled** (a que tem `-pooler` no host) e
-   acrescente `?sslmode=require` se ainda não tiver.
-3. Guarde: é o `DATABASE_URL`.
+O Supabase é usado como **Postgres gerenciado**, e só isso. O sistema tem
+autenticação própria (Argon2 + sessão em cookie, já testada), então o
+**Supabase Auth não é usado** — e não deve ser ligado. Se um dia for, é
+reescrever o login inteiro, não uma configuração.
 
-> Por que a pooled: cada requisição numa função abre conexão nova. Sem pool,
-> o Postgres atinge o limite de conexões antes de atingir o de usuários.
+Isso traz uma consequência de segurança que o passo 2 trata, e que é a parte
+mais importante deste documento.
 
-Crie o esquema, da sua máquina:
+---
+
+## 1. Criar o projeto no Supabase
+
+1. [supabase.com](https://supabase.com) → **New project**.
+2. Região: **South America (São Paulo)** — o banco perto de quem usa.
+3. Guarde a senha do banco que ele pedir para criar. Ela não aparece de novo.
+4. Espere terminar de provisionar (uns 2 minutos).
+
+### As duas strings de conexão
+
+Em **Project Settings → Database → Connection string**, você verá portas
+diferentes. **Elas não são intercambiáveis:**
+
+| Porta | Modo | Para quê |
+|---|---|---|
+| **6543** | transação (Supavisor) | **a Vercel** — muitas conexões curtas |
+| **5432** | sessão | **as migrações**, da sua máquina |
+
+A porta 6543 devolve a conexão ao pool a cada transação, então nada que
+dependa de estado de sessão sobrevive — e isso inclui *prepared statements*,
+que o driver usa por padrão. O sistema **reconhece a 6543 sozinho** e os
+desliga (`app/server/db/index.ts`). Sem isso, as primeiras consultas passam e
+depois começam a falhar com `prepared statement already exists`, de forma
+intermitente, sob carga: não aparece em teste, aparece com usuário.
+
+> Troque `[YOUR-PASSWORD]` pela senha do passo 3 em qualquer uma das duas.
+
+---
+
+## 2. Criar o esquema — e fechar a porta que o Supabase abre sozinho
+
+Da sua máquina, com a string da **porta 5432**:
 
 ```bash
 git clone https://github.com/neyliane15/NutriLive && cd NutriLive
 npm install && npm install --prefix app
-DATABASE_URL="postgres://..." npm run db:migrate
+DATABASE_URL="postgresql://postgres.xxx:SENHA@aws-0-sa-east-1.pooler.supabase.com:5432/postgres" \
+  npm run db:migrate
 ```
 
-Isso aplica `app/drizzle/0000_*.sql`: 21 tabelas, 13 tipos enumerados e os
-índices. Para começar com os dados de demonstração (23 pessoas fictícias,
-útil para conhecer o sistema, **não** para produção de verdade):
+Isso aplica duas migrações:
+
+**`0000`** — 21 tabelas, 13 tipos enumerados, 31 índices.
+
+**`0001`** — e esta é a que importa.
+
+### Por que a 0001 existe
+
+O Supabase publica o schema `public` numa **API REST automática**
+(PostgREST), alcançável com a **chave anônima** — que é pública por desenho:
+ela vai no JavaScript do navegador. O que decide o que essa chave pode fazer
+não é a chave: é o Row Level Security de cada tabela.
+
+Sem a 0001, qualquer pessoa com o endereço do seu projeto e a chave anônima
+lê `users` (com `password_hash`), `sessions` (com o token de sessão),
+`clinical_notes` (prontuário dos pacientes) e `payments` — **e escreve
+neles**.
+
+A 0001 liga RLS nas 21 tabelas e **não cria política nenhuma**. Sem política,
+`anon` e `authenticated` não enxergam linha alguma. O nosso servidor não usa
+a API REST: conecta direto no Postgres com o papel `postgres`, que tem
+`BYPASSRLS`. Então o app continua igual e a porta fecha.
+
+Conferido em Postgres de verdade antes de escrever isto:
+
+```
+21 tabelas · 21 com RLS ligado · 0 políticas · 0 privilégios para anon
+anon tentando ler users    -> ERROR: permission denied for table users
+anon tentando ler sessions -> ERROR: permission denied for table sessions
+anon tentando escrever     -> ERROR: permission denied for table users
+```
+
+> Se o painel do Supabase mostrar o aviso **"RLS disabled in public"**, a
+> migração 0001 não rodou. Não ignore esse aviso.
+
+### Dados de demonstração (opcional)
 
 ```bash
-DATABASE_URL="postgres://..." npm run db:seed
+DATABASE_URL="...:5432/postgres" npm run db:seed
 ```
+
+23 pessoas fictícias, útil para conhecer o sistema. **Não rode em produção
+de verdade** — depois é trabalho separar o que é real do que é demonstração.
 
 ---
 
-## 2. Os segredos
-
-Gere os dois na sua máquina:
+## 3. Os segredos
 
 ```bash
 openssl rand -base64 48   # SESSION_SECRET
@@ -51,29 +117,28 @@ invalida os links que estiverem na caixa de entrada das pessoas.
 
 ---
 
-## 3. E-mail: Resend
+## 4. E-mail: Resend
 
 Sem e-mail funcionando, **quem paga não entra**: o link de primeiro acesso é
 a única porta. Em [resend.com](https://resend.com), verifique o seu domínio
-(registros SPF e DKIM no DNS) e crie uma API key.
-
-`EMAIL_FROM` tem de ser um endereço do domínio verificado.
+(registros SPF e DKIM no DNS) e crie uma API key. `EMAIL_FROM` tem de ser um
+endereço do domínio verificado.
 
 ---
 
-## 4. Vercel
+## 5. Vercel
 
 1. [vercel.com](https://vercel.com) → **Add New** → **Project** → importe
    `neyliane15/NutriLive`.
-2. **Root Directory**: a raiz do repositório (deixe como está).
-3. Framework Preset: **Other**. O `vercel.json` já traz o build.
-4. Em **Environment Variables**, para *Production* e *Preview*:
+2. **Root Directory**: a raiz do repositório. Framework Preset: **Other**.
+   O `vercel.json` já traz o build.
+3. Em **Environment Variables**, para *Production* e *Preview*:
 
 | Variável | Valor |
 |---|---|
 | `NODE_ENV` | `production` |
 | `SESSION_SECRET` | o que você gerou |
-| `DATABASE_URL` | a string pooled da Neon |
+| `DATABASE_URL` | a string do Supabase **na porta 6543** |
 | `APP_URL` | `https://seudominio.com.br` |
 | `EMAIL_PROVIDER` | `resend` |
 | `RESEND_API_KEY` | a chave da Resend |
@@ -85,17 +150,20 @@ a única porta. Em [resend.com](https://resend.com), verifique o seu domínio
 | `MP_WEBHOOK_SECRET` | idem |
 | `COMMISSION_RATE_BP` | `2000` (20%) |
 
+**A porta 6543 aqui, não a 5432.** A 5432 na Vercel esgota o limite de
+conexões do Supabase com pouca gente online.
+
 Faltando qualquer uma das quatro primeiras, **o sistema responde 503 dizendo
 qual falta**, em vez de servir um site em que ninguém consegue entrar depois
 de pagar. É de propósito.
 
-5. **Deploy**.
+4. **Deploy**.
 
 ---
 
-## 5. Mercado Pago
+## 6. Mercado Pago
 
-No painel do Mercado Pago, em Suas integrações → Webhooks, aponte para:
+No painel, em Suas integrações → Webhooks, aponte para:
 
 ```
 https://seudominio.com.br/api/webhooks/mercadopago
@@ -109,9 +177,8 @@ assinatura de cada evento e recusa os que não conferem.
 
 No Mercado Pago, Pix é cobrança **avulsa**: não existe recorrência. Por isso
 o sistema emite a renovação por conta própria, cinco dias antes do
-vencimento, e manda por e-mail (veja `app/server/billing/renovacao.ts`). O
-`vercel.json` já traz o Cron Job que dispara isso todo dia ao meio-dia UTC
-(9h de Brasília):
+vencimento, e manda por e-mail (`app/server/billing/renovacao.ts`). O
+`vercel.json` já traz o Cron Job diário:
 
 ```json
 "crons": [{ "path": "/api/cron/renovacoes", "schedule": "0 12 * * *" }]
@@ -121,27 +188,20 @@ Cron Jobs exigem plano **Pro** na Vercel. No plano Hobby, chame a mesma rota
 de qualquer agendador externo (cron-job.org, GitHub Actions) com o cabeçalho
 `Authorization: Bearer <CRON_SECRET>`.
 
-Quando a sua conta tiver **Pix Automático** habilitado, esse caminho manual
-pode sair.
-
 ---
 
-## 6. IA pelo n8n (opcional)
+## 7. IA pelo n8n (opcional)
 
 Sem `N8N_BASE_URL`, a IA usa o gerador local determinístico — funciona, roda
-sem rede, e é o que gera os planos na demonstração. Para usar o n8n:
-
-1. Suba uma instância (n8n Cloud ou própria).
-2. Importe `n8n/01-plano-alimentar.json` e `n8n/02-receitas.json`.
-3. Defina `NUTRIELIVE_TOKEN` no n8n com o **mesmo valor** de
-   `N8N_WEBHOOK_TOKEN` na Vercel.
-4. Preencha `N8N_BASE_URL` e `N8N_WEBHOOK_TOKEN` e faça um redeploy.
-
-Detalhes em `n8n/README.md` e `docs/IA.md`.
+sem rede, e é o que gera os planos na demonstração. Para usar o n8n: suba uma
+instância, importe `n8n/01-plano-alimentar.json` e `n8n/02-receitas.json`,
+defina `NUTRIELIVE_TOKEN` no n8n com o **mesmo valor** de `N8N_WEBHOOK_TOKEN`
+na Vercel, preencha as duas variáveis e refaça o deploy. Detalhes em
+`n8n/README.md` e `docs/IA.md`.
 
 ---
 
-## 7. Domínio
+## 8. Domínio
 
 Na Vercel, **Settings → Domains**, adicione o seu e siga os registros de DNS
 que ela mostrar. Depois atualize `APP_URL` e refaça o deploy — essa variável
@@ -149,7 +209,7 @@ que ela mostrar. Depois atualize `APP_URL` e refaça o deploy — essa variável
 
 ---
 
-## 8. Conferir que subiu certo
+## 9. Conferir que subiu certo
 
 ```bash
 curl https://seudominio.com.br/api/health
@@ -158,6 +218,9 @@ curl https://seudominio.com.br/api/health
 
 `driver` tem de dizer **postgres**. Se disser `memory`, o `DATABASE_URL` não
 chegou na função, e os dados somem no próximo deploy.
+
+No painel do Supabase, **Table Editor**: as 21 tabelas têm de aparecer, e
+nenhuma com o aviso de RLS desligado.
 
 Depois, pelo navegador:
 
@@ -184,17 +247,37 @@ de verdade.
 
 As rotas do app estão listadas uma a uma em `vercel.json`. **Tela nova exige
 rota nova ali** — senão a Vercel procura um arquivo com aquele nome, não
-acha, e responde 404. É a pegadinha mais provável deste deploy.
+acha, e responde 404. `app/test/vercel.test.ts` compara os dois lados e falha
+antes do deploy.
 
 ---
 
 ## Custo
 
-| | Hobby | Pro |
+| | Grátis | Pago |
 |---|---|---|
-| Vercel | grátis, **sem Cron Jobs** | US$ 20/mês |
-| Neon | grátis até 0,5 GB | US$ 19/mês |
-| Resend | 3.000 e-mails/mês grátis | US$ 20/mês |
+| Supabase | 500 MB, **pausa após 1 semana sem uso** | US$ 25/mês (Pro) |
+| Vercel | Hobby, **sem Cron Jobs** | US$ 20/mês (Pro) |
+| Resend | 3.000 e-mails/mês | US$ 20/mês |
 
-No Hobby dá para começar inteiro de graça, com a renovação do Pix disparada
-por um agendador externo.
+Duas armadilhas do plano grátis do Supabase, que valem saber antes:
+
+- **O projeto pausa** depois de uma semana sem consulta nenhuma. Para um
+  produto com clientes pagantes isso é inaceitável — o plano Pro resolve. Até
+  lá, o Cron Job diário da renovação mantém o banco acordado.
+- **Sem backup automático.** O plano Pro tem backup diário com 7 dias de
+  retenção. Enquanto estiver no grátis, exporte à mão o que não pode perder.
+
+---
+
+## Se alguma coisa der errado
+
+| Sintoma | Causa provável |
+|---|---|
+| `/api/health` diz `driver: memory` | `DATABASE_URL` não chegou na função |
+| 503 com lista de variáveis | é a conferência de produção; preencha o que ela nomear |
+| `prepared statement already exists` | `DATABASE_URL` não está na 6543, ou o pooler mudou de forma — veja `ehPooler` em `app/server/db/index.ts` |
+| `too many connections` | `DATABASE_URL` está na 5432 na Vercel; troque para a 6543 |
+| 404 numa tela do app | falta a rota em `vercel.json` |
+| aviso "RLS disabled in public" | a migração 0001 não rodou |
+| e-mail não chega | domínio não verificado na Resend, ou `EMAIL_FROM` fora dele |
