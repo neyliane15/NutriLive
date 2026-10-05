@@ -10,7 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx server/db/migrate.ts",
     "db:seed": "tsx server/db/seed.ts",
-    "test": "node --import tsx --test test/*.test.ts",
+    "test": "NODE_ENV=test node --import tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
