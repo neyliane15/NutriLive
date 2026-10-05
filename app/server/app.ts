@@ -15,6 +15,7 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { env } from "./lib/env.js";
 import { log } from "./lib/log.js";
 import { errorHandler, notFound } from "./lib/http.js";
+import { CABECALHOS, ehEstatico } from "./lib/seguranca.js";
 
 import authRoutes from "./routes/auth.js";
 import meRoutes from "./routes/me.js";
@@ -31,6 +32,24 @@ const app = new Hono();
 
 app.onError(errorHandler);
 app.notFound(notFound);
+
+/* Cabeçalhos de segurança em TODA resposta, inclusive 404 e erro.
+
+   Ficam aqui, e não só no `vercel.json`, por dois motivos: o `vercel.json`
+   não vale em desenvolvimento nem em outro host, e um cabeçalho que só
+   existe em produção é um cabeçalho que ninguém testa. Em produção os dois
+   emitem a mesma política — test/seguranca.test.ts garante. */
+app.use("*", async (c, next) => {
+  await next();
+  for (const [nome, valor] of Object.entries(CABECALHOS)) {
+    if (!c.res.headers.has(nome)) c.res.headers.set(nome, valor);
+  }
+  /* Tela e API não vão para cache: depois do logout, o botão "voltar" não
+     pode remontar o prontuário que estava aberto. Arquivo estático vai. */
+  if (!ehEstatico(c.req.path) && !c.res.headers.has("Cache-Control")) {
+    c.res.headers.set("Cache-Control", "no-store, private");
+  }
+});
 
 /* Arquivos da landing e do app saem do mesmo lugar: o CSS é compartilhado.
 
