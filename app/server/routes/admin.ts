@@ -7,6 +7,7 @@
      POST  /api/admin/users/:id/impersonate   contract.admin.impersonate
      GET   /api/admin/payments                contract.admin.listPayments
      POST  /api/admin/payments/:id/refund     contract.admin.refund
+     GET   /api/admin/ai                      contract.admin.listAi
      GET   /api/admin/audit                   contract.admin.audit
      GET   /api/admin/webhooks                contract.admin.webhooks
 
@@ -33,6 +34,7 @@ import { criarSessao } from "../auth/sessao.js";
 import { db, schema } from "../db/index.js";
 import type { Linha } from "../db/index.js";
 import { AppError, body } from "../lib/http.js";
+import { conforme } from "../lib/resposta.js";
 import { log } from "../lib/log.js";
 import { rotaInicial } from "../lib/rotas.js";
 import { competencia, diaIso } from "../billing/nucleo.js";
@@ -380,6 +382,87 @@ r.get("/webhooks", async (c) => {
       receivedAt: e.receivedAt.toISOString()
     }))
   });
+});
+
+/* ======================================================================== */
+/*  GET /api/admin/ai?page= — execuções da IA                               */
+/* ======================================================================== */
+/*  Esta tela existe para responder uma pergunta só: a IA está entregando?
+    Por isso o `error` já vem na linha, inteiro, sem um segundo clique — e
+    por isso `summary` e `byKind` olham só as últimas 24 horas, enquanto
+    `jobs` lista o mais recente sem recorte de tempo: a média de ontem não
+    serve para decidir agora, mas o erro de ontem é exatamente o que se
+    procura quando alguém reclama.
+
+    `avgMs` é medido só sobre o que terminou (`finishedAt` preenchido): job
+    ainda na fila entraria como duração zero e derrubaria a média justo
+    quando a fila está travada, que é quando o número precisa acusar. */
+r.get("/ai", async (c) => {
+  const f = entradaDaUrl(c, contract.admin.listAi.in);
+  const desde = new Date(Date.now() - DIA_MS);
+
+  const total = await db.contar(schema.aiJobs);
+  const pagina = await db.buscar(schema.aiJobs, undefined, {
+    ordem: { campo: "createdAt", dir: "desc" },
+    limite: POR_PAGINA,
+    deslocamento: (f.page - 1) * POR_PAGINA
+  });
+
+  /* A janela de 24h é contada sobre tudo, não sobre a página: o resumo
+     mede o serviço, a página só mostra onde o olho está. */
+  const janela = (await db.buscar(schema.aiJobs, undefined, {
+    ordem: { campo: "createdAt", dir: "desc" },
+    limite: 5000
+  })).filter((j) => j.createdAt >= desde);
+
+  const duracao = (j: Linha<typeof schema.aiJobs>): number | null =>
+    j.finishedAt ? Math.max(0, j.finishedAt.getTime() - j.createdAt.getTime()) : null;
+
+  const media = (linhas: Linha<typeof schema.aiJobs>[]): number => {
+    const ms = linhas.map(duracao).filter((v): v is number => v !== null);
+    return ms.length ? Math.round(ms.reduce((t, v) => t + v, 0) / ms.length) : 0;
+  };
+
+  const porTipo = new Map<string, Linha<typeof schema.aiJobs>[]>();
+  for (const j of janela) {
+    const lista = porTipo.get(j.kind) ?? [];
+    lista.push(j);
+    porTipo.set(j.kind, lista);
+  }
+
+  const usuarios = porId(await db.buscar(schema.users));
+
+  return c.json(conforme(contract.admin.listAi.out, {
+    total,
+    page: f.page,
+    summary: {
+      runs: janela.length,
+      errors: janela.filter((j) => j.status === "erro").length,
+      avgMs: media(janela),
+      tokensIn: janela.reduce((t, j) => t + (j.tokensIn ?? 0), 0),
+      tokensOut: janela.reduce((t, j) => t + (j.tokensOut ?? 0), 0)
+    },
+    byKind: [...porTipo.entries()]
+      .map(([kind, linhas]) => ({
+        kind,
+        runs: linhas.length,
+        errors: linhas.filter((j) => j.status === "erro").length,
+        avgMs: media(linhas)
+      }))
+      .sort((a, b) => b.runs - a.runs),
+    jobs: pagina.map((j) => ({
+      id: j.id,
+      kind: j.kind,
+      userName: usuarios.get(j.userId)?.name ?? null,
+      status: j.status,
+      createdAt: j.createdAt.toISOString(),
+      finishedAt: iso(j.finishedAt),
+      durationMs: duracao(j),
+      tokensIn: j.tokensIn,
+      tokensOut: j.tokensOut,
+      error: j.error
+    }))
+  }));
 });
 
 export default r;

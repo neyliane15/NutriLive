@@ -229,8 +229,18 @@ const CARBOS_MATINAIS = [
 ];
 const GORDURAS_BOAS = ["azeite_oliva", "abacate", "castanha_do_para", "linhaca", "amendoim_torrado", "oleo_soja"];
 
-/** Modelos de refeição. A soma das fatias é 1 em cada combinação. */
-function modelosDoDia(comCeia: boolean): Modelo[] {
+/**
+ * Modelos de refeição. A soma das fatias é 1 em cada combinação.
+ *
+ * O número de vagas cresce com a meta, e isso não é enfeite: com 3.500 kcal
+ * por dia e só um carboidrato por refeição, as porções batem no máximo do
+ * alimento (ninguém come 600 g de arroz numa sentada) e o único jeito de
+ * fechar a conta seria empilhar proteína — o que a guarda clínica recusa, com
+ * razão. Mais vagas = mais lugar para a energia caber em medida realista.
+ */
+function modelosDoDia(kcalMeta: number): Modelo[] {
+  const comCeia = kcalMeta >= 2500;
+  const reforcado = kcalMeta >= 2600;
   const base: Modelo[] = [
     {
       tipo: "cafe", rotulo: "Café da manhã", horario: "07:00", fatia: comCeia ? 0.19 : 0.21,
@@ -284,6 +294,44 @@ function modelosDoDia(comCeia: boolean): Modelo[] {
         { papel: "fruta", peso: 0.40, opcional: true }
       ]
     });
+  }
+
+  if (reforcado) {
+    const extras: Partial<Record<TipoRefeicao, Vaga[]>> = {
+      cafe: [
+        { papel: "gordura", peso: 0.20, preferir: ["abacate", "castanha_do_para", "amendoim_torrado", "linhaca"], opcional: true },
+        { papel: "carboidrato", peso: 0.25, preferir: ["aveia_flocos", "tapioca_goma", "banana_prata"], opcional: true }
+      ],
+      lanche_manha: [
+        { papel: "carboidrato", peso: 0.45, preferir: CARBOS_MATINAIS, opcional: true }
+      ],
+      almoco: [
+        { papel: "fruta", peso: 0.10, opcional: true },
+        { papel: "carboidrato", peso: 0.18, preferir: CARBOS_PRINCIPAIS, opcional: true }
+      ],
+      lanche_tarde: [
+        { papel: "carboidrato", peso: 0.45, preferir: CARBOS_MATINAIS, opcional: true },
+        { papel: "gordura", peso: 0.18, preferir: GORDURAS_BOAS, opcional: true }
+      ],
+      jantar: [
+        { papel: "carboidrato", peso: 0.20, preferir: LEGUMINOSAS, opcional: true },
+        { papel: "fruta", peso: 0.10, opcional: true }
+      ],
+      ceia: [
+        { papel: "carboidrato", peso: 0.40, preferir: ["aveia_flocos", "pao_integral", "tapioca_goma"], opcional: true }
+      ]
+    };
+    for (const modelo of base) {
+      const extra = extras[modelo.tipo];
+      if (extra) modelo.vagas = [...modelo.vagas, ...extra];
+    }
+  }
+
+  /* Normaliza os pesos de cada refeição para somarem 1: as vagas extras
+     entram com peso solto e é aqui que a conta volta a fechar. */
+  for (const modelo of base) {
+    const total = modelo.vagas.reduce((x, v) => x + v.peso, 0);
+    if (total > 0) modelo.vagas = modelo.vagas.map((v) => ({ ...v, peso: v.peso / total }));
   }
   return base;
 }
@@ -381,21 +429,10 @@ const totaisDe = (es: Escolha[]): Totais => {
   return { ...m, kcal: energia(m) };
 };
 
-/**
- * Empurra as porções, um passo por vez, até a energia do dia encostar na meta
- * sem estragar a proteína. O custo pesa a caloria três vezes mais que a
- * proteína porque é a caloria que tem tolerância apertada na validação.
- *
- * É uma descida gulosa: a cada volta aplica o único passo que mais reduz o
- * custo e para quando nenhum passo melhora. Determinística (sem sorteio) e
- * limitada por `voltas` para nunca travar.
- */
-function ajustarPorcoes(
-  es: Escolha[], alvoKcal: number, alvoProteina: number, voltas = 900
+/** Descida gulosa de um passo por volta, mexendo só nos índices liberados. */
+function descer(
+  es: Escolha[], moveis: number[], custo: (t: Totais) => number, voltas: number
 ): void {
-  const custo = (t: Totais): number =>
-    3 * Math.abs(t.kcal - alvoKcal) + 4 * Math.abs(t.protein - alvoProteina);
-
   let t = totaisDe(es);
   let atual = custo(t);
 
@@ -404,7 +441,7 @@ function ajustarPorcoes(
     let melhorGramas = 0;
     let melhorCusto = atual;
 
-    for (let i = 0; i < es.length; i++) {
+    for (const i of moveis) {
       const e = es[i]!;
       const antes = macrosDa(e.a, e.gramas);
       for (const direcao of [1, -1]) {
@@ -423,10 +460,90 @@ function ajustarPorcoes(
       }
     }
 
-    if (melhorIdx < 0) break;
+    if (melhorIdx < 0) break;                      /* nenhum passo melhora */
     es[melhorIdx]!.gramas = melhorGramas;
     t = totaisDe(es);
     atual = custo(t);
+  }
+}
+
+/** A proteína é o macro dominante deste alimento? */
+const ehProteico = (a: Alimento): boolean => {
+  const total = kcal100(a);
+  return a.papel === "proteina" || (total > 0 && (a.proteina * 4) / total >= 0.35);
+};
+
+/**
+ * Empurra as porções, um passo por vez, até a energia do dia encostar na meta
+ * sem estragar a proteína.
+ *
+ * Em TRÊS passadas, e a razão de não ser uma só é um poço que custou um teste
+ * vermelho: com um único custo somando caloria e proteína, a descida gulosa
+ * empaca. Para baixar a proteína sem perder caloria é preciso mexer em DOIS
+ * itens ao mesmo tempo (menos frango, mais arroz), e uma descida que anda um
+ * passo por vez nunca enxerga esse par — cada metade do movimento, isolada,
+ * piora o custo. O plano ficava com 3,2 g de proteína por quilo e a guarda
+ * clínica, com razão, recusava.
+ *
+ * Então separamos os papéis:
+ *   1ª passada: só os alimentos proteicos, olhando só a proteína;
+ *   2ª passada: só os demais (carboidrato, gordura, fruta, vegetal), olhando
+ *               só a energia — a proteína já está no lugar e fica parada;
+ *   3ª passada: todos, com o custo combinado, para limpar o resto. Como as
+ *               duas primeiras já deixaram os dois alvos perto, aqui ela só
+ *               tem movimentos pequenos para fazer.
+ *
+ * Determinística (não sorteia nada) e limitada por `voltas` para nunca travar.
+ */
+export interface OpcoesAjuste {
+  /** Faixa em que a proteína do dia PODE andar, em gramas. Limite rígido. */
+  faixaProteina?: { min: number; max: number };
+  voltas?: number;
+}
+
+function ajustarPorcoes(
+  es: Escolha[], alvoKcal: number, alvoProteina: number, opcoes: OpcoesAjuste = {}
+): void {
+  const voltas = opcoes.voltas ?? 400;
+  const faixa = opcoes.faixaProteina
+    ?? { min: Math.round(alvoProteina * 0.6), max: Math.round(alvoProteina * 1.6) };
+  const todos = es.map((_, i) => i);
+  const proteicos = todos.filter((i) => ehProteico(es[i]!.a));
+  const demais = todos.filter((i) => !ehProteico(es[i]!.a));
+
+  if (proteicos.length > 0) {
+    descer(es, proteicos, (t) => Math.abs(t.protein - alvoProteina), voltas);
+  }
+  if (demais.length > 0) {
+    descer(es, demais, (t) => Math.abs(t.kcal - alvoKcal), voltas);
+  }
+  /* Barreira na proteína. Sem ela, a terceira passada troca proteína por
+     caloria de graça: cada grama de proteína vale 4 kcal, então subir 1 g
+     custa 4 na penalidade de proteína e GANHA 12 na de caloria. O plano
+     fechava na meta energética com 3,3 g de proteína por quilo, e a guarda
+     clínica recusava. Passando de 20 % de desvio, cada grama custa 500. */
+  const folga = Math.max(8, alvoProteina * 0.20);
+  const custoProteina = (p: number): number => {
+    const desvio = Math.abs(p - alvoProteina);
+    return 4 * desvio + (desvio > folga ? 500 * (desvio - folga) : 0);
+  };
+  descer(es, todos, (t) => 3 * Math.abs(t.kcal - alvoKcal) + custoProteina(t.protein), voltas);
+
+  /* 4ª passada, só quando a energia ainda não fechou. Dependendo de quais
+     alimentos foram sorteados, as três primeiras passadas podem empacar num
+     poço (alimento no limite da porção, passo grosso). Aqui a caloria passa a
+     mandar — ela é o que tem tolerância apertada na validação — e a proteína
+     vira restrição RÍGIDA: pode andar dentro da faixa segura e nem um grama
+     fora dela. */
+  const parcial = totaisDe(es);
+  if (Math.abs(parcial.kcal - alvoKcal) > alvoKcal * 0.02) {
+    const foraDaFaixa = (p: number): number =>
+      p < faixa.min ? (faixa.min - p) : p > faixa.max ? (p - faixa.max) : 0;
+    descer(
+      es, todos,
+      (t) => Math.abs(t.kcal - alvoKcal) + 1000 * foraDaFaixa(t.protein),
+      voltas
+    );
   }
 }
 
@@ -440,8 +557,27 @@ function ajustarPorcoes(
  * alternativa neutra — assim o plano não é derrubado por uma palavra de
  * enfeite.
  */
-const seguro = (texto: string, bloq: Bloqueio, alternativa: string): string =>
-  textoViola(texto, bloq) ? alternativa : texto;
+function seguro(texto: string, bloq: Bloqueio, alternativa: string): string {
+  if (!textoViola(texto, bloq)) return texto;
+  if (!textoViola(alternativa, bloq)) return alternativa;
+  /* Nem a alternativa passou: devolve o texto mais neutro que existe. */
+  return "Monte a refeição com as medidas indicadas em cada item.";
+}
+
+/**
+ * Medida caseira do item, conferida contra o dicionário clínico.
+ *
+ * Isso parece paranoia e não é: o casamento de plural de `seguranca.ts` aceita
+ * sufixo "es", então a palavra "porcoes" (de "porções") casa com o termo
+ * "porco" da restrição a carne suína. Quem come vegano tem "carne_suina"
+ * bloqueada, e a palavra "porções" no texto derrubaria o plano inteiro. Por
+ * isso nenhum texto gerado aqui usa "porção"/"porções", e o que vem de
+ * `descreverPorcao` cai para gramas puras quando esbarra no dicionário.
+ */
+const porcaoSegura = (a: Alimento, gramas: number, bloq: Bloqueio): string => {
+  const descricao = descreverPorcao(a, gramas);
+  return textoViola(descricao, bloq) ? `${gramas} g` : descricao;
+};
 
 const minuscula = (nome: string): string => nome.charAt(0).toLowerCase() + nome.slice(1);
 
@@ -475,15 +611,15 @@ function preparoDe(es: Escolha[], bloq: Bloqueio): string[] {
   const nomes = es.map((e) => minuscula(e.a.nome));
   const passos: string[] = [];
   passos.push(seguro(
-    `Separe as porções: ${nomes.join(", ")}.`,
-    bloq, "Separe as porções indicadas em cada item."
+    `Separe as medidas: ${nomes.join(", ")}.`,
+    bloq, "Separe as medidas indicadas em cada item."
   ));
 
   const proteina = es.find((e) => e.a.papel === "proteina");
   if (proteina) {
     passos.push(seguro(
       `Prepare ${minuscula(proteina.a.nome)} sem gordura extra, temperando com alho, cebola, sal e ervas a gosto.`,
-      bloq, "Prepare a porção de proteína sem gordura extra, temperando com alho, cebola, sal e ervas a gosto."
+      bloq, "Prepare a proteína da refeição sem gordura extra, temperando com alho, cebola, sal e ervas a gosto."
     ));
   }
   const vegetal = es.find((e) => e.a.papel === "vegetal");
@@ -511,7 +647,7 @@ function refeicaoDe(modelo: Modelo, es: Escolha[], bloq: Bloqueio): Refeicao {
       alimentoId: e.a.id,
       nome: e.a.nome,
       gramas: e.gramas,
-      porcao: descreverPorcao(e.a, e.gramas),
+      porcao: porcaoSegura(e.a, e.gramas, bloq),
       kcal: energia(macros),
       macros
     };
@@ -540,9 +676,9 @@ interface DiaMontado {
 
 function montarDia(
   numero: number, dataIso: string, base: Alimento[], bloq: Bloqueio,
-  metas: MetasCalculadas, rnd: () => number
+  metas: MetasCalculadas, rnd: () => number, perfilPesoKg = 0
 ): DiaMontado {
-  const modelos = modelosDoDia(metas.kcal >= 2500);
+  const modelos = modelosDoDia(metas.kcal);
   const seletor: Seletor = { base, bloq, rnd, usados: new Set() };
 
   /* 1. escolher os alimentos e dar a cada um a porção que cobre a fatia dele */
@@ -568,7 +704,14 @@ function montarDia(
 
   /* 2. ajuste fino sobre o dia inteiro: é o dia que tem que fechar na meta */
   const todas = porRefeicao.flatMap((r) => r.es);
-  ajustarPorcoes(todas, metas.kcal, metas.proteinaG);
+  /* A guarda clínica recusa plano fora de 0,5 a 3,0 g de proteína por quilo.
+     A faixa que entregamos ao ajuste é mais estreita, para o plano nunca
+     encostar na borda da regra. */
+  const kg = metas.proteinaG > 0 && perfilPesoKg > 0 ? perfilPesoKg : 0;
+  const faixaProteina = kg > 0
+    ? { min: Math.max(Math.round(kg * 0.9), Math.round(metas.proteinaG * 0.55)), max: Math.round(kg * 2.6) }
+    : { min: Math.round(metas.proteinaG * 0.6), max: Math.round(metas.proteinaG * 1.6) };
+  ajustarPorcoes(todas, metas.kcal, metas.proteinaG, { faixaProteina });
 
   /* 3. materializar refeições e dia — energia sempre derivada dos macros */
   const refeicoes = porRefeicao.map((r) => refeicaoDe(r.modelo, r.es, bloq));
@@ -701,13 +844,13 @@ function passosReceita(nome: string, es: Escolha[], bloq: Bloqueio): string[] {
     seguro(`Reúna e meça tudo antes de começar: ${nomes.join(", ")}.`, bloq, "Reúna e meça todos os itens antes de começar."),
     proteina
       ? seguro(`Cozinhe ${minuscula(proteina.a.nome)} em fogo médio até ficar no ponto, temperando com alho, cebola e ervas.`, bloq,
-          "Cozinhe a porção de proteína em fogo médio até o ponto, temperando com alho, cebola e ervas.")
+          "Cozinhe a proteína em fogo médio até o ponto, temperando com alho, cebola e ervas.")
       : "Aqueça a panela e comece pelos temperos: alho, cebola e ervas.",
     vegetal
       ? seguro(`Junte ${minuscula(vegetal.a.nome)} e deixe no fogo só o tempo de ficar al dente.`, bloq,
           "Junte os vegetais e deixe no fogo só o tempo de ficarem al dente.")
       : "Junte os demais itens e misture bem.",
-    `Finalize, prove o sal e sirva. Rende uma porção de ${nome.toLowerCase()}.`
+    `Finalize, prove o sal e sirva. Rende uma refeição de ${nome.toLowerCase()}.`
   ];
   return passos;
 }
@@ -716,7 +859,7 @@ function receitaDe(
   modelo: ModeloReceita, es: Escolha[], bloq: Bloqueio, alvoKcal: number, matchPct: number
 ): Receita | null {
   if (es.length === 0) return null;
-  ajustarPorcoes(es, alvoKcal, Math.max(10, Math.round((alvoKcal * 0.30) / 4)), 300);
+  ajustarPorcoes(es, alvoKcal, Math.max(10, Math.round((alvoKcal * 0.30) / 4)), { voltas: 300 });
   const macros = somarMacros(es.map((e) => macrosDa(e.a, e.gramas)));
   const titulo = seguro(
     `${modelo.nome} de ${minuscula(es[0]!.a.nome)}`, bloq, modelo.nome
@@ -726,7 +869,7 @@ function receitaDe(
     timeMin: modelo.timeMin,
     kcal: energia(macros),
     macros,
-    ingredients: es.map((e) => `${e.a.nome} — ${descreverPorcao(e.a, e.gramas)}`),
+    ingredients: es.map((e) => `${e.a.nome} — ${porcaoSegura(e.a, e.gramas, bloq)}`),
     steps: passosReceita(modelo.nome, es, bloq),
     matchPct
   };
@@ -789,7 +932,7 @@ export function gerarPlano(ctx: ContextoGeracao, pedido: PedidoPlano): PlanoAlim
   const dias: DiaDoPlano[] = [];
   for (let n = 1; n <= pedido.days; n++) {
     const data = chaveDoDia(somarDias(dataInicial, n - 1));
-    dias.push(montarDia(n, data, base, bloq, metas, rnd).dia);
+    dias.push(montarDia(n, data, base, bloq, metas, rnd, perfil.weightKg ?? 0).dia);
   }
 
   const kcalMedia = Math.round(dias.reduce((s, d) => s + d.kcal, 0) / dias.length);

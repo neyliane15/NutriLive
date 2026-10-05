@@ -329,6 +329,23 @@ export const org = {
   addNote: { in: z.object({ userId: uuid, body: z.string().min(1).max(4000) }), out: z.object({ id: uuid }) },
   /** POST /api/org/members/:userId/plan — envia um plano ao paciente/aluno */
   sendPlan: { in: z.object({ userId: uuid, planId: uuid }), out: z.object({ ok: z.literal(true) }) },
+  /** GET /api/org/commissions?period=YYYY-MM — só academia.
+      Sem `period`, o servidor devolve a competência corrente. `periods` lista
+      as competências que já tiveram movimento, da mais recente para a mais
+      antiga, para a tela montar o seletor sem uma segunda chamada. */
+  commissions: {
+    in: z.object({ period: z.string().regex(/^\d{4}-\d{2}$/, "Use o formato AAAA-MM.").optional() }),
+    out: z.object({
+      periods: z.array(z.string()),
+      period: z.string(),
+      totals: z.object({ baseCents: cents, previstaCents: cents, apuradaCents: cents, pagaCents: cents }),
+      items: z.array(z.object({
+        userId: uuid, userName: z.string(), planName: z.string(),
+        baseCents: cents, rateBp: z.number().int(), amountCents: cents,
+        status: z.enum(["prevista", "apurada", "paga"]), paidAt: isoDate.nullable()
+      }))
+    })
+  },
   /** GET /api/org/dashboard */
   dashboard: {
     in: z.object({}),
@@ -389,6 +406,32 @@ export const admin = {
   },
   /** POST /api/admin/payments/:id/refund */
   refund: { in: z.object({ id: uuid, reason: z.string().max(400) }), out: z.object({ ok: z.literal(true) }) },
+  /** GET /api/admin/ai?page= — execuções da IA.
+      `summary` e `byKind` cobrem as últimas 24 horas; `jobs` é a listagem
+      paginada mais recente primeiro, sem recorte de tempo, porque é nela que
+      se procura o erro de ontem. `error` já vem na linha: a tela de IA existe
+      para dizer o que falhou, não para pedir um segundo clique. */
+  listAi: {
+    in: z.object({ page: z.number().int().min(1).default(1) }),
+    out: z.object({
+      total: z.number().int(),
+      page: z.number().int(),
+      summary: z.object({
+        runs: z.number().int(), errors: z.number().int(), avgMs: z.number().int(),
+        tokensIn: z.number().int(), tokensOut: z.number().int()
+      }),
+      byKind: z.array(z.object({
+        kind: z.string(), runs: z.number().int(), errors: z.number().int(), avgMs: z.number().int()
+      })),
+      jobs: z.array(z.object({
+        id: uuid, kind: z.string(), userName: z.string().nullable(),
+        status: z.enum(["fila", "processando", "concluido", "erro"]),
+        createdAt: isoDate, finishedAt: isoDate.nullable(), durationMs: z.number().int().nullable(),
+        tokensIn: z.number().int().nullable(), tokensOut: z.number().int().nullable(),
+        error: z.string().nullable()
+      }))
+    })
+  },
   /** GET /api/admin/audit?page= */
   audit: {
     in: z.object({ page: z.number().int().min(1).default(1) }),

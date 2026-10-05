@@ -23,14 +23,15 @@ import type { Context } from "hono";
 import contract from "../../shared/contract.js";
 import { db } from "../db/index.js";
 import {
-  careLinks, clinicalNotes, foodLogs, invitations, mealPlans, measurements,
-  profiles, users, waterLogs
+  careLinks, clinicalNotes, commissions, foodLogs, invitations, mealPlans,
+  measurements, plans, profiles, subscriptions, users, waterLogs
 } from "../db/schema.js";
 import type { Linha } from "../db/index.js";
 import { AppError, body } from "../lib/http.js";
 import { conforme, iso, isoObrigatorio } from "../lib/resposta.js";
 import { env } from "../lib/env.js";
 import { inicioDoDia, somarDias } from "../lib/datas.js";
+import { competencia } from "../billing/nucleo.js";
 import { aderenciaPct, aderenciaPorSemana, avaliarRisco, type Nivel } from "../lib/aderencia.js";
 import { emailConvite, enviarEmail } from "../lib/email.js";
 import { rotaPrimeiroAcesso } from "../lib/rotas.js";
@@ -561,6 +562,83 @@ r.get("/dashboard", async (c) => {
       reason: m.motivo,
       level: m.nivel as "atencao" | "risco"
     }))
+  }));
+});
+
+/* ======================================================================== */
+/*  GET /api/org/commissions?period=AAAA-MM — só academia                   */
+/* ======================================================================== */
+/*  Comissão é do programa de parceria, que existe só para academia. Pedir
+    isto sendo consultório não é "lista vazia", é rota que não lhe pertence —
+    então é 403, igual a qualquer outra fronteira daqui.
+
+    A linha de `commissions` guarda a base e o valor, mas não guarda o nome
+    de quem gerou: isso vem da assinatura (`subscription_id` -> aluno, plano).
+    Comissão cuja assinatura já foi apagada ainda aparece, com o nome em
+    branco preenchido por "Aluno removido" — esconder a linha mudaria o total
+    e faria o parceiro desconfiar do número, que é o pior resultado possível
+    para esta tela. */
+r.get("/commissions", async (c) => {
+  const org = orgAtual(c);
+  if (org.type !== "academia") {
+    throw new AppError("sem_permissao", "Comissão existe no programa de parceria, que é só para academia.");
+  }
+
+  /* `period` vem da query. Vazio é "sem filtro", não é formato inválido:
+     o seletor da tela manda `?period=` quando ninguém escolheu nada. */
+  const cru = { ...c.req.query() };
+  if (!cru["period"]) delete cru["period"];
+  const filtro = await corpoComCaminho(c, contract.org.commissions.in, cru);
+
+  /* Toda a competência da academia de uma vez: é o volume de um mês de
+     repasse, e dele saem tanto o seletor quanto os totais. */
+  const todas = await db.buscar(commissions, { orgId: org.id }, {
+    ordem: { campo: "createdAt", dir: "desc" }
+  });
+
+  const periodos = [...new Set(todas.map((l) => l.period))].sort().reverse();
+  const periodo = filtro.period ?? periodos[0] ?? competencia();
+  const doPeriodo = todas.filter((l) => l.period === periodo);
+
+  /* Nome do aluno e do plano: duas buscas, cruzadas em memória. */
+  const idsAssinatura = [...new Set(doPeriodo.map((l) => l.subscriptionId).filter((v): v is string => !!v))];
+  const assinaturas = idsAssinatura.length
+    ? await db.buscar(subscriptions, { id: { in: idsAssinatura } })
+    : [];
+  const porAssinatura = new Map(assinaturas.map((a) => [a.id, a]));
+
+  const idsAluno = [...new Set(assinaturas.map((a) => a.userId))];
+  const alunos = idsAluno.length ? await db.buscar(users, { id: { in: idsAluno } }) : [];
+  const nomeDoAluno = new Map(alunos.map((u) => [u.id, u.name]));
+
+  const planos = await db.buscar(plans);
+  const nomeDoPlano = new Map(planos.map((p) => [p.key, p.name]));
+
+  const totais = { baseCents: 0, previstaCents: 0, apuradaCents: 0, pagaCents: 0 };
+  for (const l of doPeriodo) {
+    totais.baseCents += l.baseCents;
+    if (l.status === "paga") totais.pagaCents += l.amountCents;
+    else if (l.status === "apurada") totais.apuradaCents += l.amountCents;
+    else totais.previstaCents += l.amountCents;
+  }
+
+  return c.json(conforme(contract.org.commissions.out, {
+    periods: periodos.length ? periodos : [periodo],
+    period: periodo,
+    totals: totais,
+    items: doPeriodo.map((l) => {
+      const assinatura = l.subscriptionId ? porAssinatura.get(l.subscriptionId) : undefined;
+      return {
+        userId: assinatura?.userId ?? org.id,
+        userName: (assinatura && nomeDoAluno.get(assinatura.userId)) ?? "Aluno removido",
+        planName: (assinatura && nomeDoPlano.get(assinatura.planKey)) ?? "—",
+        baseCents: l.baseCents,
+        rateBp: l.rateBp,
+        amountCents: l.amountCents,
+        status: l.status,
+        paidAt: iso(l.paidAt)
+      };
+    })
   }));
 });
 

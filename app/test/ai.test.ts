@@ -20,16 +20,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { ALIMENTOS, kcalDe } from "../server/ai/alimentos.ts";
+import { ALIMENTOS, kcalDe } from "../server/ai/alimentos.js";
 import {
   montarBloqueio, textoViola, detectarSinaisDeCautela, ViolacaoClinica
-} from "../server/ai/seguranca.ts";
+} from "../server/ai/seguranca.js";
 import {
   gerarPlano, gerarReceitas, metasDoPerfil, baseSegura, TOLERANCIA_KCAL
-} from "../server/ai/local.ts";
+} from "../server/ai/local.js";
 import type {
   ContextoGeracao, PerfilNutricional, PlanoAlimentar
-} from "../server/ai/tipos.ts";
+} from "../server/ai/tipos.js";
 
 /* ----------------------------- apoio ----------------------------------- */
 
@@ -56,6 +56,8 @@ const contexto = (perfil: PerfilNutricional, extra: Partial<ContextoGeracao> = {
   dataBase: "2026-10-05",
   ...extra
 });
+
+const TOKEN_WEBHOOK = "token-de-teste-1234567890";
 
 const itens = (p: PlanoAlimentar) => p.dias.flatMap((d) => d.refeicoes.flatMap((r) => r.itens));
 
@@ -185,7 +187,7 @@ test("macros batem com as calorias em item, refeição e dia (4/4/9)", () => {
 /* ======================================================================== */
 
 test("perfil com sinal de cautela não gera plano automático", async () => {
-  const { orientacaoSePreciso } = await import("../server/ai/provedor.ts");
+  const { orientacaoSePreciso } = await import("../server/ai/provedor.js");
 
   const casos: { nome: string; perfil: PerfilNutricional; sinal: string }[] = [
     { nome: "gestante", perfil: perfilBase({ pregnant: true }), sinal: "gestacao" },
@@ -290,17 +292,21 @@ test("com nutricionista vinculada o plano nasce rascunho; sem ela, ativo e educa
 });
 
 test("rotas: job de plano é criado, processado e gravado; callback exige token e é idempotente", async () => {
-  process.env.N8N_WEBHOOK_TOKEN = "token-de-teste-1234567890";
+  /* `env` é lido uma vez, na carga do módulo; aqui a gente injeta o segredo
+     do webhook direto no objeto, que é o que a rota consulta. */
+  const { env } = await import("../server/lib/env.js");
+  (env as { N8N_WEBHOOK_TOKEN: string }).N8N_WEBHOOK_TOKEN = TOKEN_WEBHOOK;
 
-  const { db, bancoPronto } = await import("../server/db/index.ts");
-  const { aiJobs, mealPlans, profiles, sessions, shoppingLists, users } = await import("../server/db/schema.ts");
-  const { digerir, COOKIE_SESSAO } = await import("../server/auth/sessao.ts");
-  const app = (await import("../server/index.ts")).default;
+  const { db, bancoPronto } = await import("../server/db/index.js");
+  const { aiJobs, mealPlans, profiles, sessions, shoppingLists, users } = await import("../server/db/schema.js");
+  const { digerir, COOKIE_SESSAO } = await import("../server/auth/sessao.js");
+  const app = (await import("../server/index.js")).default;
   await bancoPronto();
 
   /* usuário pessoal, assinatura ativa, restrição a lactose */
-  const { subscriptions, plans } = await import("../server/db/schema.ts");
-  const plano = (await db.buscar(plans, {}, { limite: 1 }))[0]!;
+  const { subscriptions, plans } = await import("../server/db/schema.js");
+  const catalogo = (await db.buscar(plans, { segment: "pessoal" }, { limite: 1 }))[0]
+    ?? (await db.buscar(plans, {}, { limite: 1 }))[0]!;
   const usuario = await db.inserir(users, {
     email: `teste.ia.${Date.now()}@exemplo.com.br`, name: "Mariana de Teste",
     role: "pessoal", status: "ativo", passwordHash: "x"
@@ -311,7 +317,8 @@ test("rotas: job de plano é criado, processado e gravado; callback exige token 
     restrictions: ["lactose"], dislikes: []
   });
   await db.inserir(subscriptions, {
-    userId: usuario.id, planId: plano.id, status: "ativa",
+    userId: usuario.id, planKey: catalogo.key, status: "ativa", method: "credito",
+    priceCents: catalogo.priceCents,
     currentPeriodEnd: new Date(Date.now() + 30 * 86_400_000)
   });
 
@@ -380,7 +387,7 @@ test("rotas: job de plano é criado, processado e gravado; callback exige token 
   const antes = (await db.buscar(mealPlans, { userId: usuario.id })).length;
   const repetido = await app.fetch(new Request("http://local/api/ai/callback", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-nutrielive-token": "token-de-teste-1234567890" },
+    headers: { "content-type": "application/json", "x-nutrielive-token": TOKEN_WEBHOOK },
     body: JSON.stringify({ jobId: criado.jobId, status: "concluido", output: { tipo: "lixo" }, tokensIn: 10, tokensOut: 20 })
   }));
   assert.equal(repetido.status, 200);
@@ -405,7 +412,7 @@ test("rotas: job de plano é criado, processado e gravado; callback exige token 
   });
   const reprovado = await app.fetch(new Request("http://local/api/ai/callback", {
     method: "POST",
-    headers: { "content-type": "application/json", "x-nutrielive-token": "token-de-teste-1234567890" },
+    headers: { "content-type": "application/json", "x-nutrielive-token": TOKEN_WEBHOOK },
     body: JSON.stringify({
       jobId: outro.id, status: "concluido",
       output: {
