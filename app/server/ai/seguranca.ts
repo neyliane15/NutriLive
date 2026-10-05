@@ -406,6 +406,33 @@ export function textoViola(texto: string, bloq: Bloqueio): Achado | null {
   return null;
 }
 
+/**
+ * Todos os termos que `textoViola` procura, numa lista só.
+ *
+ * Existe para o payload do n8n poder carregar essa lista: um fluxo externo
+ * que não sabe quais palavras são proibidas escreve "Iogurte com fruta" no
+ * título de uma refeição sem lactose — escolhendo um substituto correto — e
+ * o plano inteiro é recusado por causa do título. Com a lista em mão, o
+ * fluxo troca o título antes de mandar, e o prompt diz ao modelo o que
+ * nunca escrever.
+ *
+ * É a mesma fonte que a validação usa, então as duas nunca divergem.
+ */
+export function termosBloqueados(bloq: Bloqueio): string[] {
+  const fora = new Set<string>();
+  for (const etiqueta of bloq.etiquetas) {
+    for (const termo of DICIONARIO[etiqueta].termos) {
+      const n = normalizar(termo);
+      if (n) fora.add(n);
+    }
+  }
+  for (const termo of bloq.termos) {
+    const n = normalizar(termo);
+    if (n) fora.add(n);
+  }
+  return [...fora].sort();
+}
+
 /** O alimento da base pode entrar no plano desta pessoa? */
 export function alimentoPermitido(a: Alimento, bloq: Bloqueio): boolean {
   for (const e of a.etiquetas) if (bloq.etiquetas.has(e)) return false;

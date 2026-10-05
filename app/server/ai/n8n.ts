@@ -25,7 +25,7 @@ import { env } from "../lib/env.js";
 import { log } from "../lib/log.js";
 import { AppError } from "../lib/http.js";
 import { kcal100 } from "./alimentos.js";
-import { montarBloqueio } from "./seguranca.js";
+import { montarBloqueio, termosBloqueados } from "./seguranca.js";
 import { baseSegura, metasDoPerfil, macrosMeta, TOLERANCIA_KCAL } from "./local.js";
 import type { ContextoGeracao, PedidoPlano, PedidoReceitas, PlanoAlimentar, SaidaReceitas } from "./tipos.js";
 import type { Disparo, ProvedorIA } from "./provedor.js";
@@ -86,12 +86,23 @@ export interface PayloadN8n {
     etiquetasBloqueadas: string[];
     rotulos: string[];
     evitar: string[];
+    /** Palavras que o servidor varre em título, item e preparo. O fluxo
+        higieniza o texto com elas antes de devolver, e o prompt manda o
+        modelo não escrevê-las: sem isso, um título como "Iogurte com
+        fruta" num plano sem lactose derruba o plano inteiro — mesmo com
+        o alimento escolhido correto. */
+    termosProibidos: string[];
   };
-  /** Somente o que esta pessoa pode comer. O modelo escolhe DAQUI. */
+  /** Somente o que esta pessoa pode comer. O modelo escolhe DAQUI.
+      `nomeDeCompra` e `centavosPorKg` vão junto porque o fluxo precisa
+      montar a lista de compras COM PREÇO: sem eles, a única saída seria
+      mandar `cents: 0`, e a tela de compras exibiria "R$ 0,00" como se a
+      feira fosse de graça. Preço inventado pelo modelo seria pior. */
   alimentosPermitidos: {
     id: string; nome: string; papel: string; setor: string;
     kcal100: number; proteina100: number; carbo100: number; gordura100: number;
     min: number; max: number; passo: number; medida: string;
+    nomeDeCompra: string; centavosPorKg: number;
   }[];
   pedido: Record<string, unknown>;
   /** Para o fluxo datar o plano sem depender do relógio dele. */
@@ -132,14 +143,17 @@ function montarPayload(ctx: ContextoGeracao, kind: TipoJob, jobId: string, pedid
       declaradas: bloq.declaradas,
       etiquetasBloqueadas: [...bloq.etiquetas],
       rotulos: bloq.rotulos,
-      evitar: bloq.evitar
+      evitar: bloq.evitar,
+      termosProibidos: termosBloqueados(bloq)
     },
     alimentosPermitidos: permitidos.map((a) => ({
       id: a.id, nome: a.nome, papel: a.papel, setor: a.setor,
       kcal100: Math.round(kcal100(a)),
       proteina100: a.proteina, carbo100: a.carbo, gordura100: a.gordura,
       min: a.min, max: a.max, passo: a.passo,
-      medida: `${a.medida.gramas} g = 1 ${a.medida.rotulo}`
+      medida: `${a.medida.gramas} g = 1 ${a.medida.rotulo}`,
+      nomeDeCompra: a.compra ?? a.nome,
+      centavosPorKg: a.centavosPorKg
     })),
     pedido,
     dataBase: ctx.dataBase,

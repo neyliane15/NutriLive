@@ -1,0 +1,308 @@
+{
+  "name": "Nutri&Live — plano alimentar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nutrielive-plano-alimentar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "nutrielive-plano-alimentar"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Primeiro nó depois do webhook: confere o segredo compartilhado e segue com\n   o corpo do pedido. O token vai no header e nunca na URL — URL aparece em\n   log de proxy. Sem `NUTRIELIVE_TOKEN` configurado no n8n, o fluxo PARA:\n   aceitar qualquer chamada deixaria qualquer um gravar plano alheio. */\nconst esperado = $env.NUTRIELIVE_TOKEN;\nif (!esperado) throw new Error('NUTRIELIVE_TOKEN não está configurado neste n8n.');\n\nconst recebido = $input.first().json.headers?.['x-nutrielive-token'];\nif (!recebido || recebido !== esperado) throw new Error('Token do webhook inválido.');\n\nreturn [{ json: $input.first().json.body }];"
+      },
+      "id": "conferir-token",
+      "name": "Conferir token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ recebido: true, executionId: $execution.id }) }}",
+        "options": {}
+      },
+      "id": "responder-recebi",
+      "name": "Responder recebi",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        440,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* O pedido vai com a tabela de alimentos permitidos dentro. O modelo\n   escolhe DAQUI em vez de inventar, e o nó seguinte confere de novo. */\nconst e = $input.first().json;\nreturn [{ json: { pedido: [\n  `Monte um plano de ${e.pedido.dias} dia(s).`,\n  `Meta por dia: ${e.metas.kcal} kcal, ${e.metas.macros.protein} g de proteína, ${e.metas.macros.carb} g de carboidrato, ${e.metas.macros.fat} g de gordura.`,\n  `Tolerância de calorias: ${e.metas.toleranciaKcalPct}% para mais ou para menos.`,\n  `Pessoa: objetivo ${e.perfil.objetivo}, atividade ${e.perfil.atividade ?? 'não informada'}, estilo alimentar ${e.perfil.estiloAlimentar ?? 'sem restrição'}.`,\n  e.restricoes.declaradas.length ? `Restrições já aplicadas na lista: ${e.restricoes.declaradas.join(', ')}.` : 'Sem restrições declaradas.',\n  e.restricoes.termosProibidos.length ? `NUNCA escreva estas palavras em título nem em preparo, nem como sinônimo: ${e.restricoes.termosProibidos.join(', ')}.` : '',\n  e.restricoes.evitar.length ? `Não gosta de (evite, mas não é proibido): ${e.restricoes.evitar.join(', ')}.` : '',\n  e.pedido.observacoes ? `Orientação de quem pediu: ${e.pedido.observacoes}` : '',\n  '',\n  'ALIMENTOS PERMITIDOS (use só estes ids):',\n  e.alimentosPermitidos.map((a) => `${a.id} | ${a.nome} | ${a.papel} | ${a.kcal100} kcal/100g | P${a.proteina100} C${a.carbo100} G${a.gordura100} | ${a.min}-${a.max}g passo ${a.passo}`).join('\\n')\n].filter(Boolean).join('\\n') } }];\n"
+      },
+      "id": "montar-prompt",
+      "name": "Montar prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.pedido }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você monta cardápios brasileiros do dia a dia. Devolva SOMENTE JSON, sem cercas de código.\n\nREGRA QUE NÃO SE QUEBRA: use apenas `alimentoId` que esteja na lista de alimentos permitidos abaixo. Essa lista já foi filtrada pelas restrições e alergias desta pessoa no sistema. Qualquer id fora dela é descartado e pode invalidar o plano inteiro.\n\nNÃO calcule calorias nem macros: quem calcula é o sistema, a partir dos gramas que você escolher. Escolha os alimentos e a quantidade em gramas, respeitando `min`, `max` e `passo` de cada um.\n\nDistribua o dia assim, como fração das calorias da meta: café 21%, lanche da manhã 10%, almoço 31%, lanche da tarde 11%, jantar 27%. Inclua ceia (7%) só se pedirem 7 dias.\n\nCardápio de casa brasileira: arroz e feijão no almoço, fruta no lanche, nada de ingrediente importado ou difícil de achar em mercado de bairro. Varie entre os dias — ninguém come a mesma coisa a semana toda. `titulo` de cada refeição é o prato em poucas palavras (\"Frango grelhado com arroz e salada\"). `preparo` tem no máximo 3 passos curtos.\n\nFORMATO EXATO:\n{\"titulo\":\"...\",\"dias\":[{\"refeicoes\":[{\"tipo\":\"cafe\",\"titulo\":\"...\",\"preparo\":[\"...\"],\"itens\":[{\"alimentoId\":\"...\",\"gramas\":80}]}]}]}\n\n`tipo` só pode ser: cafe, lanche_manha, almoco, lanche_tarde, jantar, ceia."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "modelo",
+      "name": "Modelo",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        660,
+        440
+      ],
+      "notes": "Ligue aqui a credencial do seu provedor de LLM. Qualquer modelo serve: a saída é JSON curto."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Modelo às vezes embrulha o JSON em cerca de código, mesmo mandado não\n   fazer. Em vez de falhar o fluxo por causa de três acentos graves,\n   descasca e tenta de novo. */\nconst t = String($input.first().json.text ?? $input.first().json.output ?? '').trim();\nconst limpo = t.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();\ntry { return [{ json: JSON.parse(limpo) }]; }\ncatch (e) { throw new Error('O modelo não devolveu JSON válido: ' + e.message); }\n"
+      },
+      "id": "ler-json-do-modelo",
+      "name": "Ler JSON do modelo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        440
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* =========================================================================\n   Monta o PlanoAlimentar completo a partir do que o modelo escolheu.\n\n   O modelo devolve SÓ escolha e quantidade:\n     { dias: [ { refeicoes: [ { tipo, titulo, preparo: [..],\n                                itens: [ { alimentoId, gramas } ] } ] } ] }\n\n   Tudo o que é número sai daqui, da tabela que veio no payload:\n   kcal e macros de cada item, de cada refeição e de cada dia; os totais do\n   resumo; e o preço da lista de compras. Modelo erra soma e inventa preço;\n   `kcal100 * gramas / 100` não erra.\n\n   Se o modelo devolver um alimento que não está na lista permitida, o item é\n   DESCARTADO aqui, antes de sair do fluxo. O servidor recusaria o plano\n   inteiro por violação de restrição (`validarPlano`), e perder um plano\n   bom por causa de um item inventado é desperdício.\n   ========================================================================= */\nconst entrada = $('Conferir token').first().json;\nconst bruto = $input.first().json;\n\nconst porId = new Map(entrada.alimentosPermitidos.map((a) => [a.id, a]));\n\nconst HORARIO = {\n  cafe: ['Café da manhã', '07:00'],\n  lanche_manha: ['Lanche da manhã', '10:00'],\n  almoco: ['Almoço', '12:30'],\n  lanche_tarde: ['Lanche da tarde', '16:00'],\n  jantar: ['Jantar', '19:30'],\n  ceia: ['Ceia', '21:30']\n};\nconst ORDEM = ['cafe', 'lanche_manha', 'almoco', 'lanche_tarde', 'jantar', 'ceia'];\n\n/* ---------------------- higiene de texto livre --------------------------\n   O servidor varre título, nome de item e passo de preparo contra os termos\n   das restrições, e descarta o PLANO INTEIRO se achar um. O modelo erra\n   justamente aqui: escolhe o alimento certo e escreve \"Iogurte com fruta\"\n   no título de um plano sem lactose. Então o texto é limpo antes de sair.\n   `termosProibidos` é a mesma lista que a validação usa (`termosBloqueados`\n   em seguranca.ts), então não há como as duas discordarem. */\nconst proibidos = (entrada.restricoes.termosProibidos || []).filter(Boolean);\nconst semAcento = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();\nconst violaTexto = (t) => {\n  const n = semAcento(t);\n  return proibidos.some((p) => new RegExp('(^|[^a-z0-9])' + p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + '([^a-z0-9]|$)').test(n));\n};\nconst textoSeguro = (t, reserva) => (t && !violaTexto(t) ? String(t) : reserva);\n\nconst r1 = (n) => Math.round(n * 10) / 10;\nconst somaMacros = (lista) => lista.reduce(\n  (t, x) => ({ protein: r1(t.protein + x.macros.protein), carb: r1(t.carb + x.macros.carb), fat: r1(t.fat + x.macros.fat) }),\n  { protein: 0, carb: 0, fat: 0 }\n);\n\n/* kcal SEMPRE derivada dos macros (4/4/9), nunca do `kcal100` do alimento.\n   O servidor confere item por item se `kcal` bate com `4P + 4C + 9G` com\n   tolerância de 1 kcal (`validarPlano`, tolItem). Somar `kcal100 * g / 100`\n   dá um número parecido e não idêntico — e um plano inteiro seria recusado\n   por uma diferença de arredondamento. O `kcal100` do payload serve para o\n   modelo escolher porção, não para fechar conta. */\nconst energia = (m) => Math.round(m.protein * 4 + m.carb * 4 + m.fat * 9);\n\n/* data do dia N, contada a partir da dataBase que o app mandou: o fluxo não\n   usa o relógio do n8n, que pode estar em outro fuso. */\nconst dataDoDia = (n) => {\n  const base = new Date(entrada.dataBase + 'T12:00:00.000Z');\n  base.setUTCDate(base.getUTCDate() + (n - 1));\n  return base.toISOString().slice(0, 10);\n};\n\n/* ----------------------- calibragem do dia ------------------------------\n   Esta é a parte que decide se o fluxo serve para algo.\n\n   O servidor recusa o plano INTEIRO quando um dia sai da tolerância de\n   calorias (`validarPlano`, `toleranciaKcal`, 5% por padrão). E um modelo de\n   linguagem pedido para \"fechar em 1780 kcal escolhendo gramas\" erra de 10%\n   a 20% com naturalidade — nos nossos testes, 1519, 1917 e 2021 kcal para\n   uma meta de 1780. Sem calibrar, quase todo plano gerado seria descartado e\n   a pessoa veria \"a IA não conseguiu\" na maioria das tentativas.\n\n   Então o modelo decide O QUE comer e o fluxo acerta QUANTO: multiplica os\n   gramas pelo fator que falta, respeitando `min`, `max` e `passo` de cada\n   alimento. Alimento que bateu no teto para de ajudar, daí repetir algumas\n   vezes em vez de uma conta só. Para quando entra na faixa ou quando parou\n   de melhorar — insistir além disso só moeria número.\n\n   Note a ordem: a calibragem é por DIA, porque a tolerância é por dia. */\nfunction calibrar(refeicoes, metaKcal, tolPct) {\n  const dentro = (k) => Math.abs(k - metaKcal) <= metaKcal * tolPct;\n  const totalDe = () => refeicoes.reduce(\n    (t, r) => t + r.itens.reduce((s, it) => s + it.gramasCalc * it.kcalPorGrama, 0), 0);\n\n  let total = totalDe();\n  if (!total || dentro(total)) return;\n\n  let melhorDiferenca = Math.abs(total - metaKcal);\n  for (let volta = 0; volta < 10; volta++) {\n    const fator = metaKcal / total;\n    for (const r of refeicoes) {\n      for (const it of r.itens) {\n        const bruto = it.gramasCalc * fator;\n        const passo = it.passo > 0 ? it.passo : 1;\n        it.gramasCalc = Math.max(it.min, Math.min(it.max, Math.round(bruto / passo) * passo));\n      }\n    }\n    total = totalDe();\n    const diferenca = Math.abs(total - metaKcal);\n    if (dentro(total)) return;\n    /* Parou de melhorar: todos os alimentos no teto ou no piso. */\n    if (diferenca >= melhorDiferenca - 0.5) return;\n    melhorDiferenca = diferenca;\n  }\n}\n\nconst diasCrus = Array.isArray(bruto?.dias) ? bruto.dias : [];\nif (!diasCrus.length) throw new Error('O modelo não devolveu nenhum dia.');\n\nconst dias = diasCrus.map((diaCru, i) => {\n  const refeicoesCruas = Array.isArray(diaCru?.refeicoes) ? diaCru.refeicoes : [];\n\n  const refeicoes = refeicoesCruas\n    .filter((r) => HORARIO[r?.tipo])\n    .sort((a, b) => ORDEM.indexOf(a.tipo) - ORDEM.indexOf(b.tipo))\n    .map((refCrua) => {\n      /* Primeiro só a escolha, com os números que a calibragem usa. O item\n         final é montado depois, já com os gramas calibrados. */\n      const itens = (Array.isArray(refCrua.itens) ? refCrua.itens : [])\n        .map((itemCru) => {\n          const a = porId.get(itemCru?.alimentoId);\n          if (!a) return null;                       /* inventado: fora */\n          const passo = a.passo > 0 ? a.passo : 1;\n          const pedido = Math.round(Number(itemCru.gramas) || 0);\n          const gramas = Math.max(a.min, Math.min(a.max, Math.round(pedido / passo) * passo));\n          if (gramas <= 0) return null;\n          return {\n            a, min: a.min, max: a.max, passo,\n            gramasCalc: gramas,\n            /* kcal por grama derivada dos macros, igual ao servidor. */\n            kcalPorGrama: (a.proteina100 * 4 + a.carbo100 * 4 + a.gordura100 * 9) / 100\n          };\n        })\n        .filter(Boolean);\n\n      if (!itens.length) return null;\n      const [rotulo, horario] = HORARIO[refCrua.tipo];\n      return {\n        tipo: refCrua.tipo,\n        rotulo,\n        horario,\n        titulo: textoSeguro(String(refCrua.titulo || '').slice(0, 120), rotulo),\n        itens,\n        /* Passo que menciona termo proibido sai da lista: o passo some, o\n           plano fica. Melhor uma receita com um passo a menos que nenhum\n           plano para quem pediu. */\n        preparo: (Array.isArray(refCrua.preparo) ? refCrua.preparo : [])\n          .map((p) => String(p).slice(0, 300))\n          .filter((p) => !violaTexto(p))\n          .slice(0, 8)\n      };\n    })\n    .filter(Boolean);\n\n  if (!refeicoes.length) throw new Error(`O dia ${i + 1} ficou sem nenhuma refeição aproveitável.`);\n\n  calibrar(refeicoes, entrada.metas.kcal, entrada.metas.toleranciaKcalPct / 100);\n\n  /* Agora os gramas são finais: fecha item, refeição e dia, sempre com a\n     kcal derivada dos macros. */\n  const fechadas = refeicoes.map((r) => {\n    const itens = r.itens.map((it) => {\n      const f = it.gramasCalc / 100;\n      const macros = {\n        protein: r1(it.a.proteina100 * f), carb: r1(it.a.carbo100 * f), fat: r1(it.a.gordura100 * f)\n      };\n      return {\n        alimentoId: it.a.id,\n        nome: it.a.nome,\n        gramas: it.gramasCalc,\n        porcao: `${it.gramasCalc} g (${it.a.medida})`,\n        kcal: energia(macros),\n        macros\n      };\n    });\n    const macrosRef = somaMacros(itens);\n    return {\n      tipo: r.tipo, rotulo: r.rotulo, horario: r.horario, titulo: r.titulo,\n      kcal: energia(macrosRef), macros: macrosRef, itens, preparo: r.preparo\n    };\n  });\n\n  const macrosDia = somaMacros(fechadas);\n  return {\n    dia: i + 1,\n    data: dataDoDia(i + 1),\n    kcal: energia(macrosDia),\n    macros: macrosDia,\n    refeicoes: fechadas\n  };\n});\n\n/* ---------------------------- lista de compras -------------------------- */\n/* Soma os gramas de todos os dias por alimento, com 10 % de folga: ninguém\n   compra exatamente o que vai comer. O preço sai de centavosPorKg. */\nconst soma = new Map();\nfor (const d of dias) {\n  for (const r of d.refeicoes) {\n    for (const it of r.itens) {\n      soma.set(it.alimentoId, (soma.get(it.alimentoId) || 0) + it.gramas);\n    }\n  }\n}\nconst quantidade = (g) => g >= 1000\n  ? `${(Math.round(g / 100) / 10).toFixed(1).replace('.', ',')} kg`\n  : `${Math.round(g / 10) * 10} g`;\n\nconst items = [...soma.entries()].map(([id, gramas]) => {\n  const a = porId.get(id);\n  const comprar = Math.ceil((gramas * 1.1) / 10) * 10;\n  return {\n    group: a.setor,\n    name: a.nomeDeCompra,\n    qty: quantidade(comprar),\n    cents: Math.round((comprar / 1000) * a.centavosPorKg),\n    done: false\n  };\n}).sort((x, y) => x.group.localeCompare(y.group, 'pt-BR') || x.name.localeCompare(y.name, 'pt-BR'));\n\n/* segunda-feira da semana da dataBase */\nconst d0 = new Date(entrada.dataBase + 'T12:00:00.000Z');\nconst diaSemana = (d0.getUTCDay() + 6) % 7;\nd0.setUTCDate(d0.getUTCDate() - diaSemana);\nconst weekStart = d0.toISOString().slice(0, 10);\n\n/* -------------------------------- resumo -------------------------------- */\nconst kcalMedia = Math.round(dias.reduce((t, d) => t + d.kcal, 0) / dias.length);\nconst macrosMedia = {\n  protein: r1(dias.reduce((t, d) => t + d.macros.protein, 0) / dias.length),\n  carb: r1(dias.reduce((t, d) => t + d.macros.carb, 0) / dias.length),\n  fat: r1(dias.reduce((t, d) => t + d.macros.fat, 0) / dias.length)\n};\n\nreturn [{\n  json: {\n    jobId: entrada.jobId,\n    status: 'concluido',\n    output: {\n      tipo: 'plano_alimentar',\n      versao: 1,\n      titulo: textoSeguro(String(bruto?.titulo || '').slice(0, 160), `Plano de ${dias.length} ${dias.length === 1 ? 'dia' : 'dias'}`),\n      dias,\n      metas: {\n        kcal: entrada.metas.kcal,\n        macros: entrada.metas.macros,\n        aguaMl: entrada.metas.aguaMl,\n        metodo: 'metas do perfil, calculadas pelo app e repassadas ao fluxo',\n        tmb: null,\n        fatorAtividade: 1\n      },\n      resumo: {\n        kcalMeta: entrada.metas.kcal,\n        kcalMedia,\n        macrosMeta: entrada.metas.macros,\n        macrosMedia,\n        desvioKcalPct: entrada.metas.kcal\n          ? Math.round(((kcalMedia - entrada.metas.kcal) / entrada.metas.kcal) * 1000) / 10\n          : 0\n      },\n      contexto: {\n        objetivo: entrada.perfil.objetivo,\n        estiloAlimentar: entrada.perfil.estiloAlimentar || 'tudo',\n        restricoesAplicadas: entrada.restricoes.declaradas,\n        etiquetasBloqueadas: entrada.restricoes.etiquetasBloqueadas,\n        evitados: entrada.restricoes.evitar\n      },\n      listaDeCompras: { weekStart, estimatedCents: items.reduce((s, i) => s + i.cents, 0), items },\n      receitas: [],\n      avisos: [],\n      /* Com nutricionista vinculada o plano nasce rascunho, para ela revisar\n         antes de o paciente ver. Sem ela, nasce ativo e é material\n         educativo, nunca prescrição. */\n      status: entrada.pedido.temNutricionistaVinculada ? 'rascunho' : 'ativo',\n      materialEducativo: !entrada.pedido.temNutricionistaVinculada,\n      gerado: { driver: 'n8n', em: new Date().toISOString(), semente: entrada.semente }\n    },\n    executionId: $execution.id,\n    tokensIn: $('Modelo').first().json?.tokenUsage?.promptTokens ?? null,\n    tokensOut: $('Modelo').first().json?.tokenUsage?.completionTokens ?? null\n  }\n}];"
+      },
+      "id": "montar-plano",
+      "name": "Montar plano",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        440
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Conferir token').first().json.callbackUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-nutrielive-token",
+              "value": "={{ $env.NUTRIELIVE_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "avisar-o-app",
+      "name": "Avisar o app",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        440
+      ],
+      "notes": "O app revalida tudo aqui: restrição, proteína e desvio de calorias. Plano reprovado não é gravado e o motivo aparece em /admin/ia."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Caminho de erro: o app precisa saber que o job morreu, senão ele fica\n   \"processando\" para sempre e a pessoa olha uma tela girando. A mensagem vai\n   em português porque é ela que aparece na tela — e em /admin/ia. */\nconst erro = $input.first().json;\nlet jobId = null;\ntry { jobId = $('Conferir token').first().json.jobId; } catch (e) {}\nif (!jobId) { try { jobId = $('Webhook').first().json.body?.jobId; } catch (e) {} }\n\nreturn [{\n  json: {\n    jobId,\n    status: 'erro',\n    error: 'A geração por IA não terminou: ' + String(erro?.message || erro?.error || 'falha no fluxo do n8n'),\n    executionId: $execution.id\n  }\n}];"
+      },
+      "id": "montar-erro",
+      "name": "Montar erro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Webhook').first().json.body.callbackUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-nutrielive-token",
+              "value": "={{ $env.NUTRIELIVE_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "avisar-o-app-do-erro",
+      "name": "Avisar o app do erro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        680
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Conferir token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conferir token": {
+      "main": [
+        [
+          {
+            "node": "Responder recebi",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Montar prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar prompt": {
+      "main": [
+        [
+          {
+            "node": "Modelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo": {
+      "main": [
+        [
+          {
+            "node": "Ler JSON do modelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler JSON do modelo": {
+      "main": [
+        [
+          {
+            "node": "Montar plano",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar plano": {
+      "main": [
+        [
+          {
+            "node": "Avisar o app",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar erro": {
+      "main": [
+        [
+          {
+            "node": "Avisar o app do erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "tags": [
+    {
+      "name": "nutrielive"
+    }
+  ]
+}

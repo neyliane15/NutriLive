@@ -1,0 +1,308 @@
+{
+  "name": "Nutri&Live — receitas",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nutrielive-receitas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "nutrielive-receitas"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Primeiro nó depois do webhook: confere o segredo compartilhado e segue com\n   o corpo do pedido. O token vai no header e nunca na URL — URL aparece em\n   log de proxy. Sem `NUTRIELIVE_TOKEN` configurado no n8n, o fluxo PARA:\n   aceitar qualquer chamada deixaria qualquer um gravar plano alheio. */\nconst esperado = $env.NUTRIELIVE_TOKEN;\nif (!esperado) throw new Error('NUTRIELIVE_TOKEN não está configurado neste n8n.');\n\nconst recebido = $input.first().json.headers?.['x-nutrielive-token'];\nif (!recebido || recebido !== esperado) throw new Error('Token do webhook inválido.');\n\nreturn [{ json: $input.first().json.body }];"
+      },
+      "id": "conferir-token",
+      "name": "Conferir token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ recebido: true, executionId: $execution.id }) }}",
+        "options": {}
+      },
+      "id": "responder-recebi",
+      "name": "Responder recebi",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        440,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* O pedido vai com a tabela de alimentos permitidos dentro. O modelo\n   escolhe DAQUI em vez de inventar, e o nó seguinte confere de novo. */\nconst e = $input.first().json;\nreturn [{ json: { pedido: [\n  `A pessoa tem em casa: ${e.pedido.ingredientes}.`,\n  e.pedido.maxMinutos ? `Tempo máximo de preparo: ${e.pedido.maxMinutos} minutos.` : 'Sem limite de tempo.',\n  `Objetivo dela: ${e.perfil.objetivo}. Estilo alimentar: ${e.perfil.estiloAlimentar ?? 'sem restrição'}.`,\n  e.restricoes.declaradas.length ? `Restrições já aplicadas na lista: ${e.restricoes.declaradas.join(', ')}.` : 'Sem restrições declaradas.',\n  e.restricoes.termosProibidos.length ? `NUNCA escreva estas palavras em título nem em preparo, nem como sinônimo: ${e.restricoes.termosProibidos.join(', ')}.` : '',\n  e.restricoes.evitar.length ? `Não gosta de (evite): ${e.restricoes.evitar.join(', ')}.` : '',\n  '',\n  'ALIMENTOS PERMITIDOS (use só estes ids):',\n  e.alimentosPermitidos.map((a) => `${a.id} | ${a.nome} | ${a.papel} | ${a.kcal100} kcal/100g | P${a.proteina100} C${a.carbo100} G${a.gordura100} | ${a.min}-${a.max}g`).join('\\n')\n].filter(Boolean).join('\\n') } }];\n"
+      },
+      "id": "montar-prompt",
+      "name": "Montar prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.pedido }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você sugere receitas brasileiras simples. Devolva SOMENTE JSON, sem cercas de código.\n\nREGRA QUE NÃO SE QUEBRA: use apenas `alimentoId` da lista de alimentos permitidos abaixo. Ela já foi filtrada pelas restrições e alergias desta pessoa. Id fora dela é descartado, e o sistema pode recusar todas as receitas.\n\nNÃO calcule calorias nem macros, e NÃO escreva a lista de ingredientes em texto: quem monta as duas coisas é o sistema, a partir dos gramas que você escolher.\n\nPriorize o que a pessoa já tem em casa — é o que está no pedido. Sugira de 3 a 5 receitas, da que melhor aproveita o que ela tem para a que menos aproveita. Receita de casa, panela comum, sem equipamento especial. `steps` com no máximo 6 passos curtos, em português.\n\nFORMATO EXATO:\n{\"receitas\":[{\"title\":\"...\",\"timeMin\":25,\"steps\":[\"...\"],\"itens\":[{\"alimentoId\":\"...\",\"gramas\":120}]}]}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "modelo",
+      "name": "Modelo",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        660,
+        440
+      ],
+      "notes": "Ligue aqui a credencial do seu provedor de LLM. Qualquer modelo serve: a saída é JSON curto."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Modelo às vezes embrulha o JSON em cerca de código, mesmo mandado não\n   fazer. Em vez de falhar o fluxo por causa de três acentos graves,\n   descasca e tenta de novo. */\nconst t = String($input.first().json.text ?? $input.first().json.output ?? '').trim();\nconst limpo = t.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();\ntry { return [{ json: JSON.parse(limpo) }]; }\ncatch (e) { throw new Error('O modelo não devolveu JSON válido: ' + e.message); }\n"
+      },
+      "id": "ler-json-do-modelo",
+      "name": "Ler JSON do modelo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        440
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* =========================================================================\n   Monta a SaidaReceitas a partir do que o modelo escolheu.\n\n   O modelo devolve só escolha e quantidade:\n     { receitas: [ { title, timeMin, steps: [..],\n                     itens: [ { alimentoId, gramas } ] } ],\n       usados: [..], ignorados: [ { termo, motivo } ] }\n\n   kcal e macros saem daqui, da tabela do payload. E `kcal` é SEMPRE derivada\n   dos macros (4P + 4C + 9G): o servidor confere essa igualdade com tolerância\n   de 2 kcal (`validarReceitas`) e descarta TODAS as receitas se uma só não\n   fechar.\n\n   `ingredients` é texto, e é o texto que o servidor varre contra as\n   restrições. Por isso ele é montado a partir do nome do alimento permitido,\n   nunca do texto livre do modelo: uma palavra inventada ali derruba o lote\n   inteiro por \"restricao_violada\".\n   ========================================================================= */\nconst entrada = $('Conferir token').first().json;\nconst bruto = $input.first().json;\n\nconst porId = new Map(entrada.alimentosPermitidos.map((a) => [a.id, a]));\n/* ---------------------- higiene de texto livre --------------------------\n   O servidor varre título, nome de item e passo de preparo contra os termos\n   das restrições, e descarta o PLANO INTEIRO se achar um. O modelo erra\n   justamente aqui: escolhe o alimento certo e escreve \"Iogurte com fruta\"\n   no título de um plano sem lactose. Então o texto é limpo antes de sair.\n   `termosProibidos` é a mesma lista que a validação usa (`termosBloqueados`\n   em seguranca.ts), então não há como as duas discordarem. */\nconst proibidos = (entrada.restricoes.termosProibidos || []).filter(Boolean);\nconst semAcento = (t) => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();\nconst violaTexto = (t) => {\n  const n = semAcento(t);\n  return proibidos.some((p) => new RegExp('(^|[^a-z0-9])' + p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + '([^a-z0-9]|$)').test(n));\n};\nconst textoSeguro = (t, reserva) => (t && !violaTexto(t) ? String(t) : reserva);\n\nconst r1 = (n) => Math.round(n * 10) / 10;\nconst energia = (m) => Math.round(m.protein * 4 + m.carb * 4 + m.fat * 9);\n\nconst cruas = Array.isArray(bruto?.receitas) ? bruto.receitas : [];\nif (!cruas.length) throw new Error('O modelo não devolveu nenhuma receita.');\n\n/* O que a pessoa digitou, para medir o aproveitamento de cada receita. */\nconst pedidos = String(entrada.pedido.ingredientes || '')\n  .split(/[,;\\n]+/).map((s) => s.trim().toLowerCase()).filter(Boolean);\n\nconst receitas = cruas.map((rc) => {\n  const itens = (Array.isArray(rc.itens) ? rc.itens : [])\n    .map((it) => {\n      const a = porId.get(it?.alimentoId);\n      if (!a) return null;                          /* inventado: fora */\n      const gramas = Math.max(a.min, Math.min(a.max, Math.round(Number(it.gramas) || 0)));\n      return gramas > 0 ? { a, gramas } : null;\n    })\n    .filter(Boolean);\n\n  if (!itens.length) return null;\n\n  const macros = itens.reduce((t, { a, gramas }) => {\n    const f = gramas / 100;\n    return {\n      protein: r1(t.protein + a.proteina100 * f),\n      carb: r1(t.carb + a.carbo100 * f),\n      fat: r1(t.fat + a.gordura100 * f)\n    };\n  }, { protein: 0, carb: 0, fat: 0 });\n\n  /* Aproveitamento: quantos dos ingredientes pedidos a receita usa de fato.\n     Sem ingrediente pedido (pessoa só quer ideia), vale 100. */\n  const nomes = itens.map(({ a }) => a.nome.toLowerCase() + ' ' + a.nomeDeCompra.toLowerCase());\n  const usados = pedidos.filter((p) => nomes.some((n) => n.includes(p)));\n  const matchPct = pedidos.length ? Math.round((usados.length / pedidos.length) * 100) : 100;\n\n  return {\n    title: textoSeguro(String(rc.title || '').slice(0, 120), 'Receita de ' + itens[0].a.nome.toLowerCase()),\n    timeMin: Math.max(5, Math.min(180, Math.round(Number(rc.timeMin) || 25))),\n    kcal: energia(macros),\n    macros,\n    ingredients: itens.map(({ a, gramas }) => `${a.nome} — ${gramas} g`),\n    steps: (Array.isArray(rc.steps) ? rc.steps : [])\n      .map((s) => String(s).slice(0, 300))\n      .filter((s) => !violaTexto(s))\n      .slice(0, 10),\n    matchPct\n  };\n}).filter(Boolean);\n\nif (!receitas.length) throw new Error('Nenhuma receita sobrou depois de descartar alimentos fora da lista permitida.');\n\n/* O que a pessoa pediu e a base não tem: dizer isso é melhor que entregar\n   receita sem explicar por que o ingrediente dela não apareceu. */\nconst todosOsNomes = receitas.flatMap((r) => r.ingredients.map((i) => i.toLowerCase()));\nconst ignorados = pedidos\n  .filter((p) => !todosOsNomes.some((n) => n.includes(p)))\n  .map((termo) => ({ termo, motivo: 'não está na nossa base de alimentos ou foi bloqueado pelas suas restrições' }));\n\nreturn [{\n  json: {\n    jobId: entrada.jobId,\n    status: 'concluido',\n    output: {\n      tipo: 'receitas',\n      versao: 1,\n      receitas: receitas.sort((a, b) => b.matchPct - a.matchPct),\n      usados: pedidos.filter((p) => todosOsNomes.some((n) => n.includes(p))),\n      ignorados,\n      avisos: [],\n      gerado: { driver: 'n8n', em: new Date().toISOString(), semente: entrada.semente }\n    },\n    executionId: $execution.id,\n    tokensIn: $('Modelo').first().json?.tokenUsage?.promptTokens ?? null,\n    tokensOut: $('Modelo').first().json?.tokenUsage?.completionTokens ?? null\n  }\n}];"
+      },
+      "id": "montar-receitas",
+      "name": "Montar receitas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        440
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Conferir token').first().json.callbackUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-nutrielive-token",
+              "value": "={{ $env.NUTRIELIVE_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "avisar-o-app",
+      "name": "Avisar o app",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        440
+      ],
+      "notes": "O app revalida: ingrediente contra as restrições e kcal contra os macros. Lote reprovado não é gravado e o motivo aparece em /admin/ia."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Caminho de erro: o app precisa saber que o job morreu, senão ele fica\n   \"processando\" para sempre e a pessoa olha uma tela girando. A mensagem vai\n   em português porque é ela que aparece na tela — e em /admin/ia. */\nconst erro = $input.first().json;\nlet jobId = null;\ntry { jobId = $('Conferir token').first().json.jobId; } catch (e) {}\nif (!jobId) { try { jobId = $('Webhook').first().json.body?.jobId; } catch (e) {} }\n\nreturn [{\n  json: {\n    jobId,\n    status: 'erro',\n    error: 'A geração por IA não terminou: ' + String(erro?.message || erro?.error || 'falha no fluxo do n8n'),\n    executionId: $execution.id\n  }\n}];"
+      },
+      "id": "montar-erro",
+      "name": "Montar erro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        680
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Webhook').first().json.body.callbackUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-nutrielive-token",
+              "value": "={{ $env.NUTRIELIVE_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "avisar-o-app-do-erro",
+      "name": "Avisar o app do erro",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        680
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Conferir token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conferir token": {
+      "main": [
+        [
+          {
+            "node": "Responder recebi",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Montar prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar prompt": {
+      "main": [
+        [
+          {
+            "node": "Modelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Modelo": {
+      "main": [
+        [
+          {
+            "node": "Ler JSON do modelo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler JSON do modelo": {
+      "main": [
+        [
+          {
+            "node": "Montar receitas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar erro": {
+      "main": [
+        [
+          {
+            "node": "Avisar o app do erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar receitas": {
+      "main": [
+        [
+          {
+            "node": "Avisar o app",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "tags": [
+    {
+      "name": "nutrielive"
+    }
+  ]
+}
