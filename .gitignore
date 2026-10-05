@@ -20,3 +20,7 @@ app/drizzle/meta/_journal.json.bak
 Thumbs.db
 .vscode/
 .idea/
+
+# lixo de sondagem de agente: nunca versionar
+.probe/
+**/.probe/
