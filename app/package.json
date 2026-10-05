@@ -13,7 +13,8 @@
     "test": "NODE_ENV=test node --import tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
     "tabelas:extrair": "python3 scripts/extrair-tabelas.py",
-    "db:conferir": "tsx server/db/conferir.ts"
+    "db:conferir": "tsx server/db/conferir.ts",
+    "db:sql-unico": "tsx scripts/gerar-sql-unico.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",

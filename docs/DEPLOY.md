@@ -49,7 +49,30 @@ intermitente, sob carga: não aparece em teste, aparece com usuário.
 
 ## 2. Criar o esquema — e fechar a porta que o Supabase abre sozinho
 
-Da sua máquina, com a string da **porta 5432**:
+Dois caminhos. **Escolha um**, não os dois.
+
+### Caminho A — pelo navegador (não precisa instalar nada)
+
+No painel do Supabase: **SQL Editor → New query**. Cole o conteúdo de
+[`app/drizzle/supabase-tudo.sql`](../app/drizzle/supabase-tudo.sql) e clique
+em **Run**.
+
+Esse arquivo é gerado a partir das migrações (`npm run db:sql-unico`) e faz o
+mesmo que o caminho B — inclusive escreve o registro de controle do Drizzle no
+fim, que é o que permite uma migração futura continuar da 0002 em vez de
+tentar recriar as tabelas.
+
+Conferido num Postgres 16: o banco criado pelos dois caminhos tem o **mesmo
+schema, linha por linha** (524 linhas de `pg_dump`), 21 tabelas, 21 com RLS,
+0 políticas, 0 privilégios para `anon` — e um `npm run db:migrate` depois do
+caminho A não refaz nada.
+
+> Rodou duas vezes sem querer? A segunda para em `type "ai_kind" already
+> exists` e desfaz tudo sozinha (o arquivo é uma transação). Nada duplica.
+
+### Caminho B — pela sua máquina (se você já tem Node e git)
+
+Com a string da **porta 5432**:
 
 ```bash
 git clone https://github.com/neyliane15/NutriLive && cd NutriLive
@@ -58,7 +81,7 @@ DATABASE_URL="postgresql://postgres.xxx:SENHA@aws-0-sa-east-1.pooler.supabase.co
   npm run db:migrate
 ```
 
-Isso aplica duas migrações:
+Os dois caminhos aplicam as mesmas duas migrações:
 
 **`0000`** — 21 tabelas, 13 tipos enumerados, 31 índices.
 

@@ -34,8 +34,20 @@ export async function migrar(): Promise<void> {
   const { migrate } = await import("drizzle-orm/postgres-js/migrator");
   const postgres = (await import("postgres")).default;
 
-  /* Conexão própria, com uma única ligação: migração não divide pool. */
-  const sql = postgres(env.DATABASE_URL, { max: 1 });
+  /* Conexão própria, com uma única ligação: migração não divide pool.
+
+     `onnotice` não é detalhe: a migração 0001 usa RAISE NOTICE para dizer que
+     revogou os privilégios de anon, e o driver, sem isto, despeja o aviso como
+     um objeto com severity/file/line/routine — idêntico a um erro. Quem está
+     subindo o sistema lê aquilo e conclui que quebrou, justamente no passo que
+     fecha o banco. */
+  const sql = postgres(env.DATABASE_URL, {
+    max: 1,
+    onnotice: (aviso: { message?: string }) => {
+      if (aviso.message) log.info(`migração: ${aviso.message}`);
+    },
+    ...(env.DATABASE_URL.includes("supabase.") ? { ssl: "require" as const } : {})
+  });
   try {
     log.info(`migração: aplicando ${PASTA}`);
     await migrate(drizzle(sql), { migrationsFolder: PASTA });
