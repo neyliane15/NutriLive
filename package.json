@@ -1,0 +1,20 @@
+{
+  "name": "nutrielive",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Nutri&Live — landing page e sistema",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "npm run --prefix app dev",
+    "test": "npm run --prefix app test",
+    "typecheck": "npm run --prefix app typecheck",
+    "db:generate": "npm run --prefix app db:generate",
+    "db:migrate": "npm run --prefix app db:migrate",
+    "db:seed": "npm run --prefix app db:seed"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "engines": { "node": ">=20" }
+}

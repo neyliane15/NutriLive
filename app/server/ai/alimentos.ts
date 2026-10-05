@@ -32,7 +32,7 @@
    Atualizar a tabela: trocar o JSON e rodar `npm run tabelas:conferir`.
    Nada neste arquivo muda.
    ========================================================================= */
-import { createRequire } from "node:module";
+import TABELA_TACO from "./dados/taco-4a-edicao.json" with { type: "json" };
 import { CATALOGO } from "./catalogo.js";
 import type { Alimento, FonteNutricional } from "./tipos-alimento.js";
 
@@ -63,13 +63,16 @@ interface LinhaTaco {
   sodio: number | null;
 }
 
-/* JSON lido por `require` para não depender de import assertions, que mudam
-   de forma entre versões do Node e quebrariam a subida. */
-const exigir = createRequire(import.meta.url);
-const TABELA = exigir("./dados/taco-4a-edicao.json") as {
-  fonte: string;
-  alimentos: LinhaTaco[];
-};
+/* Importação ESTÁTICA do JSON, e não `createRequire`.
+
+   `require` resolve no disco em tempo de execução: funciona num servidor
+   comum e some num empacotador, que não tem como saber que o arquivo é
+   necessário. Numa função sem estado, isso quer dizer a tabela nutricional
+   inteira faltando em produção — e a base de alimentos vazia é o tipo de
+   falha que só aparece quando alguém pede um plano.
+
+   Estático, qualquer empacotador inclui o arquivo. */
+const TABELA = TABELA_TACO as unknown as { fonte: string; alimentos: LinhaTaco[] };
 
 export const FONTE_DA_TABELA = TABELA.fonte;
 

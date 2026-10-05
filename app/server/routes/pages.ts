@@ -111,11 +111,13 @@ async function pedirDetalhado<T>(
   }
 }
 
-/* O app completo é importado sob demanda: `index.ts` importa este arquivo,
-   e um `import` no topo fecharia o ciclo. */
+/* O app completo é importado sob demanda: `app.ts` importa este arquivo, e
+   um `import` no topo fecharia o ciclo. É `app.ts` e não `index.ts` de
+   propósito: o segundo abre porta, e numa função sem estado isso subiria um
+   servidor que ninguém usa. */
 let cacheApp: { fetch: (r: Request) => Response | Promise<Response> } | null = null;
 async function appInterno() {
-  if (!cacheApp) cacheApp = (await import("../index.js")).default;
+  if (!cacheApp) cacheApp = (await import("../app.js")).default;
   return cacheApp;
 }
 

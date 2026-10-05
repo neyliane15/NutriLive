@@ -1,0 +1,90 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
+  "installCommand": "npm install && npm install --prefix app",
+  "framework": null,
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30,
+      "includeFiles": "app/server/ai/dados/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/(entrar|esqueci|esqueci-senha|sair|primeiro-acesso|redefinir-senha|redefinir|renovar)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/(hoje|plano|receitas|compras|evolucao|conta)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/(painel|pacientes|alunos|comissoes)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/(pacientes|alunos)/(.*)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/admin",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "/api/index"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/renovacoes",
+      "schedule": "0 12 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/app-assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        }
+      ]
+    }
+  ]
+}

@@ -14,18 +14,18 @@
    ========================================================================= */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createRequire } from "node:module";
-
 import { ALIMENTOS, POR_ID, kcal100, FONTE_DA_TABELA } from "../server/ai/alimentos.js";
 import { CATALOGO } from "../server/ai/catalogo.js";
 
-const exigir = createRequire(import.meta.url);
-const TACO = exigir("../server/ai/dados/taco-4a-edicao.json") as {
+import TACO_JSON from "../server/ai/dados/taco-4a-edicao.json" with { type: "json" };
+import POF_JSON from "../server/ai/dados/pof-medidas-caseiras.json" with { type: "json" };
+
+const TACO = TACO_JSON as unknown as {
   fonte: string;
   alimentos: { numero: number; descricao: string; proteina: number | null;
                carboidrato: number | null; lipideos: number | null; kcal: number | null }[];
 };
-const POF = exigir("../server/ai/dados/pof-medidas-caseiras.json") as {
+const POF = POF_JSON as unknown as {
   medidas: { codigo: number; alimento: string; medida: string; gramas: number }[];
 };
 

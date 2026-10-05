@@ -300,7 +300,7 @@ test("rotas: job de plano é criado, processado e gravado; callback exige token 
   const { db, bancoPronto } = await import("../server/db/index.js");
   const { aiJobs, mealPlans, profiles, sessions, shoppingLists, users } = await import("../server/db/schema.js");
   const { digerir, COOKIE_SESSAO } = await import("../server/auth/sessao.js");
-  const app = (await import("../server/index.js")).default;
+  const app = (await import("../server/app.js")).default;   /* o app, não o que escuta porta */
   await bancoPronto();
 
   /* usuário pessoal, assinatura ativa, restrição a lactose */

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Nutri&Live static site build — assembles pages from src/ into the repo root. */
-import { writeFileSync, readFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
 import { content, order } from "./src/data/segments.mjs";
 import { landing } from "./src/pages/landing.mjs";
 
@@ -42,6 +42,30 @@ const extra = await Promise.all([
 for (const mod of extra) {
   if (mod && typeof mod.pages === "function") {
     for (const [file, html] of Object.entries(mod.pages())) emit(file, html);
+  }
+}
+
+/* ------------------------------------------------------------------------
+   Os arquivos do app viram estáticos na raiz.
+
+   O app pede `/app-assets/app.css` e `/app-assets/islands/*.js`. Num
+   servidor comum o próprio Hono os serve de `app/web/`; na Vercel não existe
+   disco servido por função — e, mesmo existindo, mandar CSS por execução de
+   função é pagar para fazer pior. Copiados para cá, a plataforma os entrega
+   direto do disco, com cache.
+   ------------------------------------------------------------------------ */
+{
+  const de = "app/web";
+  const para = "app-assets";
+  mkdirSync(`${para}/islands`, { recursive: true });
+  const copiar = (origem, destino) => {
+    const conteudo = readFileSync(origem);
+    writeFileSync(destino, conteudo);
+    out.push([destino, conteudo.length]);
+  };
+  copiar(`${de}/app.css`, `${para}/app.css`);
+  for (const f of readdirSync(`${de}/islands`).filter((f) => f.endsWith(".js"))) {
+    copiar(`${de}/islands/${f}`, `${para}/islands/${f}`);
   }
 }
 
