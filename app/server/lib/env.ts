@@ -134,11 +134,18 @@ export function avisosDeProducao(): string[] {
   const avisos: string[] = [];
   if (env.PAY_DRIVER === "simulado" && PAGAMENTO_SIMULADO_LIBERADO) {
     avisos.push(
-      "PAGAMENTO SIMULADO LIGADO EM PRODUÇÃO: qualquer cartão é aprovado e " +
-      "qualquer visitante assina de graça. Isto é para você ver o sistema, " +
+      "MODO DEMONSTRAÇÃO LIGADO EM PRODUÇÃO: qualquer cartão é aprovado e " +
+      "qualquer visitante assina de graça. Isto é para mostrar o sistema, " +
       "não para vender. Preencha MP_ACCESS_TOKEN e remova PAGAMENTO_SIMULADO_OK " +
       "antes de divulgar o endereço."
     );
+    if (env.EMAIL_PROVIDER !== "resend" || !env.RESEND_API_KEY) {
+      avisos.push(
+        "E-mail em modo console: nenhuma mensagem sai do sistema. O link de " +
+        "primeiro acesso aparece no log da Vercel, não na caixa de entrada. " +
+        "Entre com as contas de demonstração (senha Nutri@2025)."
+      );
+    }
   }
   return avisos;
 }
@@ -153,7 +160,14 @@ export function conferirAmbienteDeProducao(): string[] {
     faltas.push("SESSION_SECRET tem menos de 32 caracteres.");
   }
 
-  if (env.EMAIL_PROVIDER !== "resend" || !env.RESEND_API_KEY) {
+  /* A exigência de e-mail existe por UM motivo: o cliente que pagou precisa
+     receber o link de primeiro acesso. Em modo de demonstração não há
+     cliente pagando — o pagamento é simulado e as contas já existem — então
+     a exigência não protege ninguém e só impede a demonstração de subir.
+     O mesmo PAGAMENTO_SIMULADO_OK governa as duas coisas, de propósito:
+     é uma decisão só, tomada uma vez. */
+  const modoDemonstracao = env.PAY_DRIVER === "simulado" && PAGAMENTO_SIMULADO_LIBERADO;
+  if (!modoDemonstracao && (env.EMAIL_PROVIDER !== "resend" || !env.RESEND_API_KEY)) {
     faltas.push(
       'EMAIL_PROVIDER precisa ser "resend" com RESEND_API_KEY preenchida. ' +
       'Com "console" o link de primeiro acesso vai para o log e o cliente que pagou não entra.'

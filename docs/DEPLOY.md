@@ -5,6 +5,59 @@ Landing e sistema no **mesmo projeto da Vercel**, no mesmo domínio. A landing
 
 Tempo: cerca de 40 minutos, quase todo esperando provisionamento.
 
+
+## Atalho: só mostrar o sistema hoje (demonstração)
+
+Para apresentar a sócios, investidor ou equipe — **sem cobrar ninguém** e sem
+precisar de domínio, Resend ou Mercado Pago. Quatro passos, tudo pelo
+navegador:
+
+1. **Supabase → SQL Editor**, cole e rode, nesta ordem:
+   - [`app/drizzle/supabase-tudo.sql`](../app/drizzle/supabase-tudo.sql) — o esquema
+   - [`app/drizzle/supabase-demo.sql`](../app/drizzle/supabase-demo.sql) — 23 contas,
+     3 organizações, planos, prontuários, pagamentos e 30 dias de registros
+2. **Project Settings → Database → Connection string → Transaction pooler**
+   (porta **6543**). Troque `[YOUR-PASSWORD]` pela senha do banco.
+3. **Vercel → Add New → Project**, importe o repositório, Framework **Other**,
+   e configure só estas variáveis:
+
+| Variável | Valor |
+|---|---|
+| `DATABASE_URL` | a string da porta 6543 |
+| `SESSION_SECRET` | 48 caracteres aleatórios (qualquer gerador de senha) |
+| `APP_URL` | a URL que a Vercel te der |
+| `PAGAMENTO_SIMULADO_OK` | `1` |
+| `TRUST_PROXY` | `1` |
+
+4. **Entre** com qualquer e-mail abaixo e a senha `Nutri@2025`:
+
+| Para mostrar | Entre como |
+|---|---|
+| Consultório: carteira, prontuário, plano por IA | `juliana@exemplo.com.br` |
+| Outro consultório (prova o isolamento entre carteiras) | `bia@exemplo.com.br` |
+| Academia: alunos e comissões | `rodrigo@corpoemovimento.com.br` |
+| Pessoa física, que paga a própria assinatura | `camila@exemplo.com.br` |
+| Paciente de consultório (plano feito pela nutricionista) | `mariana.ribeiro@exemplo.com.br` |
+| Área administrativa | `admin@nutrielive.com.br` |
+
+**O que esse modo significa, em uma frase:** qualquer cartão é aprovado e
+qualquer visitante assina de graça, então **não divulgue o endereço**. O log
+da Vercel avisa isso em toda subida. Para vender de verdade, remova
+`PAGAMENTO_SIMULADO_OK`, preencha Mercado Pago e Resend (seções 3 a 5) e
+limpe as contas fictícias:
+
+```sql
+DELETE FROM users WHERE email LIKE '%@exemplo.com.br'
+                      OR email LIKE '%@corpoemovimento.com.br';
+```
+
+**Atenção ao `admin@nutrielive.com.br`.** Ele NÃO é apagado pelo comando
+acima — é a conta administrativa que você vai usar — mas vem com a senha de
+demonstração `Nutri@2025`, que está escrita neste documento. Entre com ela e
+troque em **Conta → Senha** antes de o endereço ser conhecido por qualquer
+pessoa. É a conta com mais poder do sistema: vê todos os usuários, estorna
+pagamento e entra como qualquer cliente.
+
 ---
 
 ## Antes de começar: o que o Supabase é aqui

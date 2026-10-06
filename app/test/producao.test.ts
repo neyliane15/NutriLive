@@ -63,6 +63,28 @@ describe("produção: o que impede a subida", () => {
     assert.match(r.avisos.join(" "), /SIMULADO/);
   });
 
+  it("modo demonstração aceita e-mail em console, e avisa", () => {
+    /* A exigência de Resend existe para o cliente que pagou receber o link.
+       Em demonstração não há cliente pagando, então ela só impedia a
+       demonstração de subir. Um flag só governa as duas coisas. */
+    const demo: Record<string, string> = { ...COMPLETA, PAGAMENTO_SIMULADO_OK: "1" };
+    delete demo.MP_ACCESS_TOKEN;
+    delete demo.MP_WEBHOOK_SECRET;
+    delete demo.RESEND_API_KEY;
+    delete demo.EMAIL_PROVIDER;
+    const r = conferir(demo);
+    assert.deepEqual(r.faltas, [], "a demonstração tinha de subir sem Resend");
+    assert.match(r.avisos.join(" "), /DEMONSTRAÇÃO/);
+    assert.match(r.avisos.join(" "), /console/, "tem de avisar que nenhum e-mail sai");
+  });
+
+  it("FORA da demonstração, e-mail em console continua barrado", () => {
+    /* Aqui a exigência protege de verdade: cliente paga, o link vai para o
+       log e ninguém entra. */
+    const r = conferir({ ...semA("RESEND_API_KEY"), EMAIL_PROVIDER: "console" });
+    assert.match(r.faltas.join(" "), /EMAIL_PROVIDER|RESEND/);
+  });
+
   it("Mercado Pago sem segredo de webhook não sobe", () => {
     /* Falha fechada: o cliente paga e a assinatura nunca ativa, porque a
        notificação é recusada na porta. */
